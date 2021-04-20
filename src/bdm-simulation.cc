@@ -11,6 +11,23 @@
 // regarding copyright ownership.
 //
 // -----------------------------------------------------------------------------
-#include "hiv_malawi.h"
+#include "bdm-simulation.h"
 
-int main(int argc, const char** argv) { return bdm::Simulate(argc, argv); }
+namespace bdm {
+
+int Simulate(int argc, const char** argv) {
+  Simulation simulation(argc, argv);
+
+  // Define initial model - in this example: single cell at origin
+  auto* rm = simulation.GetResourceManager();
+  auto* cell = new Cell(30);
+  rm->AddAgent(cell);
+
+  // Run simulation for one timestep
+  simulation.GetScheduler()->Simulate(1);
+
+  std::cout << "Simulation completed successfully!" << std::endl;
+  return 0;
+}
+
+} // namespace bdm

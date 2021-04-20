@@ -11,28 +11,15 @@
 // regarding copyright ownership.
 //
 // -----------------------------------------------------------------------------
-#ifndef HIV_MALAWI_H_
-#define HIV_MALAWI_H_
+#ifndef BDM_SIMULATYION_H_
+#define BDM_SIMULATYION_H_
 
 #include "biodynamo.h"
 
 namespace bdm {
 
-inline int Simulate(int argc, const char** argv) {
-  Simulation simulation(argc, argv);
-
-  // Define initial model - in this example: single cell at origin
-  auto* rm = simulation.GetResourceManager();
-  auto* cell = new Cell(30);
-  rm->AddAgent(cell);
-
-  // Run simulation for one timestep
-  simulation.GetScheduler()->Simulate(1);
-
-  std::cout << "Simulation completed successfully!" << std::endl;
-  return 0;
-}
+inline int Simulate(int argc, const char** argv);
 
 }  // namespace bdm
 
-#endif  // HIV_MALAWI_H_
+#endif  // BDM_SIMULATYION_H_

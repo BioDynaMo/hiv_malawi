@@ -18,7 +18,7 @@
 
 namespace bdm {
 
-inline int Simulate(int argc, const char** argv);
+int Simulate(int argc, const char** argv);
 
 }  // namespace bdm
 

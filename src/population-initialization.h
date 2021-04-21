@@ -1,6 +1,8 @@
 #ifndef POPULATION_INITIALIZATION_H_
 #define POPULATION_INITIALIZATION_H_
 
+#include "biodynamo.h"
+#include "core/agent/agent_pointer.h"
 #include "core/agent/cell.h"
 
 namespace bdm {
@@ -20,8 +22,11 @@ int compute_sociobehavioural(float rand_num, int age);
 // Compute biomedical-factor; return 0 in 95% of the cases
 int compute_biomedical(float rand_num, int age);
 
+// create a single person
+auto create_person(Random* random_generator);
+
 // Initialize an entire population for the BDM simulation
-void initialize_population(int population_size);
+void initialize_population(Random* random_generator , int population_size);
 
 // This class describes a single person. A person has a specific position in
 // the three dimensional space and one of the three illness states, see above.
@@ -50,9 +55,9 @@ class Person : public Cell {
   // Store the year when the agent got infected
   float year_of_infection_;
   // Stores the ID of the mother
-  int mother_id;
+  AgentPointer<Person> mother_id_;
   // Stores the id of the partner
-  int partner_id_;
+  AgentPointer<Person> partner_id_;
 };
 
 }  // namespace bdm

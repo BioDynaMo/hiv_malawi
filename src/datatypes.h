@@ -17,7 +17,7 @@ struct Population {
 };
 
 // Possible illness states
-enum GemsState { kGems1, kGems2, kGems3 };
+enum GemsState { kHealthy, kGems1, kGems2, kGems3 };
 
 // Possible sex
 enum Sex { kMale, kFemale };

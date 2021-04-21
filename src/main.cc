@@ -10,6 +10,7 @@
 
 #include <vector>
 #include "stdout-utlis.h"
+#include "bdm-simulation.h"
 
 int main(int argc, const char** argv) {
   /*
@@ -49,6 +50,9 @@ int main(int argc, const char** argv) {
   std::cout << "Simulation completed successfully!" << std::endl;
   */
   print_header();
+
+  bdm::Simulate(argc, argv);
+
   print_closing();
   return 0;
 }

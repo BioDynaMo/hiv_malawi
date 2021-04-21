@@ -1,11 +1,13 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+#include <limits>
 
 #include "core/simulation.h"
+#include "biodynamo.h"
+#include "core/agent/agent_pointer.h"
 
 #include "datatypes.h"
-#include "person.h"
 #include "population-initialization.h"
 
 // All hard-coded numbers are taken from Janne's work (Parameters_D1.R)
@@ -84,15 +86,42 @@ int compute_biomedical(float rand_num, int age) {
   }
 }
 
-void initialize_population(int population_size) {
+auto create_person(Random* random_generator) {
+  // Get a new person
+  Person* person = new Person({0.0, 0.0, 0.0});
 
-  auto create_person = [&]() {
-    Person* person = new Person({0.0,0.0,0.0});
-    person->SetDiameter(2.0);
-    // Add the "grow and divide" behavior to each cell
-    //person->AddBehavior(new GrowthDivision());
-    return person;
+  // Get all random numbers for initialization
+  std::vector<double> rand_num{};
+  rand_num.reserve(10);
+  for (int i = 0; i < 10; i++) {
+    rand_num[i] = random_generator->Uniform();
+  }
+
+  // Assign sex
+  person->sex_ = sample_sex(rand_num[0]);
+  // Assign age
+  person->age_ = sample_age(rand_num[1], rand_num[2], person->sex_);
+  // Assign location
+  person->location_ = sample_location(rand_num[3]);
+  // Compute risk factors
+  person->social_behaviour_factor_ =
+      compute_sociobehavioural(rand_num[4], person->age_);
+  person->biomedical_factor_ = compute_biomedical(rand_num[5], person->age_);
+  // Stores the current GemsState of the person.
+  person->state_ = GemsState::kHealthy;
+  // Store the year when the agent got infected
+  person->year_of_infection_ = std::numeric_limits<float>::max();
+  // NOTE: we do not assign a specific mother or partner during the population
+  // initialization. Use nullptr.
+  person->mother_id_ = AgentPointer<Person>();
+  person->partner_id_ = AgentPointer<Person>();
+
+  // Add the "grow and divide" behavior to each cell
+  // person->AddBehavior(new GrowthDivision());
+  return person;
   };
+
+void initialize_population(Random* random_generator, int population_size) {
 
   //#pragma omp parallel
   {
@@ -101,7 +130,7 @@ void initialize_population(int population_size) {
 
     //#pragma omp for
     for (int x = 0; x < population_size; x++) {
-      auto* new_person = create_person();
+      auto* new_person = create_person(random_generator);
       ctxt->AddAgent(new_person);
     }
   }

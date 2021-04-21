@@ -2,7 +2,10 @@
 #include <iostream>
 #include <vector>
 
+#include "core/simulation.h"
+
 #include "datatypes.h"
+#include "person.h"
 #include "population-initialization.h"
 
 // All hard-coded numbers are taken from Janne's work (Parameters_D1.R)
@@ -78,6 +81,29 @@ int compute_biomedical(float rand_num, int age) {
     return 0;
   } else {
     return 1;
+  }
+}
+
+void initialize_population(int population_size) {
+
+  auto create_person = [&]() {
+    Person* person = new Person({0.0,0.0,0.0});
+    person->SetDiameter(2.0);
+    // Add the "grow and divide" behavior to each cell
+    //person->AddBehavior(new GrowthDivision());
+    return person;
+  };
+
+  //#pragma omp parallel
+  {
+    auto* sim = Simulation::GetActive();
+    auto* ctxt = sim->GetExecutionContext();
+
+    //#pragma omp for
+    for (int x = 0; x < population_size; x++) {
+      auto* new_person = create_person();
+      ctxt->AddAgent(new_person);
+    }
   }
 }
 

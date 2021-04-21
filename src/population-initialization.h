@@ -18,8 +18,6 @@ int compute_sociobehavioural(float rand_num, int age);
 // Compute biomedical-factor; return 0 in 95% of the cases
 int compute_biomedical(float rand_num, int age);
 
+}  // namespace bdm
 
-
-} // namespace bdm
-
-#endif // POPULATION_INITIALIZATION_H_
+#endif  // POPULATION_INITIALIZATION_H_

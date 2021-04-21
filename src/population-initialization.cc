@@ -12,7 +12,7 @@ namespace bdm {
 float sample_age(float rand_num_1, float rand_num_2, int sex) {
   // use different age distributions for male and female
   std::vector<float> age_distribution{};
-  //if (sex == Sex::kMale) {
+  // if (sex == Sex::kMale) {
   if (sex == 0) {
     age_distribution = {0.156, 0.312, 0.468, 0.541, 0.614, 0.687,
                         0.76,  0.833, 0.906, 0.979, 0.982, 0.985,
@@ -60,7 +60,7 @@ int sample_sex(float rand_num) {
 }
 
 int compute_sociobehavioural(float rand_num, int age) {
-  if (age <= 15){
+  if (age <= 15) {
     return 0;
   }
   if (rand_num < 0.95) {
@@ -71,7 +71,7 @@ int compute_sociobehavioural(float rand_num, int age) {
 }
 
 int compute_biomedical(float rand_num, int age) {
-  if (age <= 15){
+  if (age <= 15) {
     return 0;
   }
   if (rand_num < 0.95) {

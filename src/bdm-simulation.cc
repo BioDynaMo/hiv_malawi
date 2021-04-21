@@ -30,4 +30,4 @@ int Simulate(int argc, const char** argv) {
   return 0;
 }
 
-} // namespace bdm
+}  // namespace bdm

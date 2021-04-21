@@ -6,9 +6,6 @@
 
 namespace bdm {
 
-/// Possible Person states, either susceptible, infected, or recoverd.
-enum State { kSusceptible, kInfected, kRecovered };
-
 // This class describes a single person. A person has a specific position in
 // the three dimensional space and one of the three illness states, see above.
 class Person : public Cell {
@@ -19,8 +16,28 @@ class Person : public Cell {
   explicit Person(const Double3& position) : Base(position) {}
   virtual ~Person() {}
 
-  /// This data member stores the current state of the person.
-  int state_ = State::kSusceptible;
+  /// Stores the current GemsState of the person.
+  int state_ = GemsState::kGems1;
+  // Stores the id of the agent
+  // int id_; NOT NEEDED
+  // Stores the age of the agent
+  float age_;
+  // Stores the sex of the agent
+  float sex_;
+  // Stores the location as categorical variable
+  int location_;
+  // Stores a factor representing the socio-behavioural risk
+  int social_behaviour_factor_;
+  // Stores a factor representing the biomedical risk
+  int biomedical_factor_;
+  // Stores if an agent is infected or not
+  bool infected_;
+  // Store the year when the agent got infected
+  float year_of_infection_;
+  // Stores the ID of the mother
+  int mother_id;
+  // Stores the id of the partner
+  int partner_id_;
 };
 
 }  // namespace bdm

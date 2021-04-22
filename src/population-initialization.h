@@ -43,7 +43,7 @@ class Person : public Cell {
   // Stores the age of the agent
   float age_;
   // Stores the sex of the agent
-  float sex_;
+  int sex_;
   // Stores the location as categorical variable
   int location_;
   // Stores a factor representing the socio-behavioural risk

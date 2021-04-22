@@ -15,6 +15,7 @@
 #define BDM_SIMULATYION_H_
 
 #include "biodynamo.h"
+#include "datatypes.h"
 
 namespace bdm {
 

@@ -125,18 +125,19 @@ auto create_person(Random* random_generator) {
   person->partner_id_ = AgentPointer<Person>();
 
   // Add the "grow and divide" behavior to each cell
-  // person->AddBehavior(new GrowthDivision());
+  person->AddBehavior(new Infection());
+  person->AddBehavior(new RandomMovement());
   return person;
   };
 
 void initialize_population(Random* random_generator, int population_size) {
 
-  //#pragma omp parallel
+  #pragma omp parallel
   {
     auto* sim = Simulation::GetActive();
     auto* ctxt = sim->GetExecutionContext();
 
-    //#pragma omp for
+    #pragma omp for
     for (int x = 0; x < population_size; x++) {
       auto* new_person = create_person(random_generator);
       ctxt->AddAgent(new_person);

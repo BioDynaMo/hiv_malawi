@@ -21,6 +21,7 @@
 #include "datatypes.h"
 #include "population-initialization.h"
 #include "storage.h"
+#include "visualize.h"
 
 namespace bdm {
 
@@ -74,15 +75,19 @@ int Simulate(int argc, const char** argv) {
   //rm->AddAgent(cell);
 
   // Randomly initialize a population
-  auto random = simulation.GetRandom();
-  random->SetSeed(1234);
-  initialize_population(random, 20000000);
+  {
+    Timing timer_init("RUNTIME POPULATION INITIALIZATION: ");
+    auto random = simulation.GetRandom();
+    random->SetSeed(1234);
+    initialize_population(random, 2000);
+  }
 
+  // DEBUG
   // Test population cout
   // std::cout << sizeof(Population) << std::endl;
   // Population pop;
   // std::cout << pop;
-  std::cout << "person memory " << sizeof(Person) << std::endl;
+  // std::cout << "person memory " << sizeof(Person) << std::endl;
 
   
   // Get population statistics
@@ -96,16 +101,23 @@ int Simulate(int argc, const char** argv) {
   scheduler->UnscheduleOp(scheduler->GetOps("mechanical forces")[0]);
 
   // Run simulation for one timestep
-  simulation.GetScheduler()->Simulate(4);
+  {
+    Timing timer_sim("RUNTIME SIMULATION:                ");
+    simulation.GetScheduler()->Simulate(100);
+  }
 
-  const auto& pop2 = get_statistics_impl->GetResults();
-  std::cout << "no populations: " << pop2.size() << std::endl;
-  std::cout << pop2[0];
-  save_to_disk(pop2);
+  {
+    Timing timer_post("RUNTIME POSTPROCESSING:            ");
+    const auto& sim_result = get_statistics_impl->GetResults();
+    //std::cout << "no populations: " << sim_result.size() << std::endl;
+    //std::cout << sim_result[0];
+    //save_to_disk(sim_result);
+    plot_evolution(sim_result);
+  }
 
   // DEBUG: check number of agents
-  auto* rm = simulation.GetResourceManager();
-  std::cout << "Simulation considers " << rm->GetNumAgents() << " persons.\n";
+  //auto* rm = simulation.GetResourceManager();
+  //std::cout << "Simulation considers " << rm->GetNumAgents() << " persons.\n";
 
   std::cout << "Simulation completed successfully!" << std::endl;
   return 0;

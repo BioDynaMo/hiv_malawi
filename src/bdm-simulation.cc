@@ -20,6 +20,7 @@
 #include "bdm-simulation.h"
 #include "datatypes.h"
 #include "population-initialization.h"
+#include "storage.h"
 
 namespace bdm {
 
@@ -64,37 +65,6 @@ struct add_thread_local_populations : public Functor<Population, const SharedDat
 };
 
 
-/*
-struct CountSIR : public Functor<void, Agent*, Double4*> {
-  void operator()(Agent* agent, Double4* tl_result) {
-    auto* person = bdm_static_cast<Person*>(agent);
-    (*tl_result)[1] += person->state_ == State::kSusceptible;
-    (*tl_result)[2] += person->state_ == State::kInfected;
-    (*tl_result)[3] += person->state_ == State::kRecovered;
-  }
-};
-
-// ---------------------------------------------------------------------------
-// CalcRates inherits from bdm Functor class. It works on a Double4'ish vector,
-// basically computing the percentage of suceptible, infected, and recovered
-// agents. It returns a Double4, containing the number of simulated time steps,
-// and the percentage of suceptible, infected, and recovered agents in its four
-// values.
-struct CalcRates : public Functor<Double4, const SharedData<Double4>&> {
-  Double4 operator()(const SharedData<Double4>& tl_results) override {
-    Double4 result;
-    auto* sim = Simulation::GetActive();
-    for (auto& el : tl_results) {
-      result += el;
-    }
-    // -1 because an additional cell has been added as a workaround
-    auto num_agents = sim->GetResourceManager()->GetNumAgents() - 1;
-    result /= num_agents;
-    result[0] = sim->GetScheduler()->GetSimulatedSteps();
-    return result;
-  }
-};*/
-
 int Simulate(int argc, const char** argv) {
   Simulation simulation(argc, argv);
 
@@ -106,12 +76,13 @@ int Simulate(int argc, const char** argv) {
   // Randomly initialize a population
   auto random = simulation.GetRandom();
   random->SetSeed(1234);
-  initialize_population(random, 50);
+  initialize_population(random, 20000000);
 
   // Test population cout
   // std::cout << sizeof(Population) << std::endl;
   // Population pop;
   // std::cout << pop;
+  std::cout << "person memory " << sizeof(Person) << std::endl;
 
   
   // Get population statistics
@@ -129,9 +100,8 @@ int Simulate(int argc, const char** argv) {
 
   const auto& pop2 = get_statistics_impl->GetResults();
   std::cout << "no populations: " << pop2.size() << std::endl;
-  for (auto& p : pop2){
-    std::cout << p;
-  }
+  std::cout << pop2[0];
+  save_to_disk(pop2);
 
   // DEBUG: check number of agents
   auto* rm = simulation.GetResourceManager();

@@ -87,8 +87,6 @@ int compute_biomedical(float rand_num, int age) {
 }
 
 auto create_person(Random* random_generator) {
-  // Get a new person
-  Person* person = new Person({0.0, 0.0, 0.0});
 
   // Get all random numbers for initialization
   std::vector<double> rand_num{};
@@ -97,6 +95,16 @@ auto create_person(Random* random_generator) {
     rand_num[i] = random_generator->Uniform();
   }
 
+  // Get a new person
+  // Cells are simulated with a spacial uniform grid environment. Typically,
+  // cells don't occur on the very same position and therefore the number of 
+  // cell per grid box is described with a uint16_t. Thus, if we don't asssign 
+  // random positions, we are bounded to a maximum number of 65535 agents.
+  Person* person = new Person({100.0*rand_num[7], 100.0*rand_num[8], 
+                               100.0*rand_num[9]});
+  
+  person->SetDiameter(1.0);
+  
   // Assign sex
   person->sex_ = sample_sex(rand_num[0]);
   // Assign age

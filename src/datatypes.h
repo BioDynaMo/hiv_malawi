@@ -3,7 +3,10 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iomanip>
 #include <vector>
+#include <numeric>
+
 
 namespace bdm {
 

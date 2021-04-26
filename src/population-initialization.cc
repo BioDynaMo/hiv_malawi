@@ -123,11 +123,17 @@ auto create_person(Random* random_generator) {
   person->mother_id_ = AgentPointer<Person>();
   person->partner_id_ = AgentPointer<Person>();
 
-  // Add the "grow and divide" behavior to each cell
+  // Add the behaviours to the person.
   person->AddBehavior(new Infection());
   person->AddBehavior(new RandomMovement());
+  person->AddBehavior(new RandomMigration());
+  // person->AddBehavior(new GetOlder());
+  if (person->sex_ == Sex::kFemale && person->age_ > 15 && person->age_ < 40) {
+    person->AddBehavior(new GiveBirth());
+  }
   return person;
 };
+
 
 void initialize_population(Random* random_generator, int population_size) {
 #pragma omp parallel

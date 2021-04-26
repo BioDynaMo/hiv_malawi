@@ -16,8 +16,38 @@ enum GemsState { kHealthy, kGems1, kGems2, kGems3, kGemsLast };
 // Possible sex
 enum Sex { kMale, kFemale };
 
-// Possible locations
-enum Location { kLoc1, kLoc2, kLoc3 };
+// Possible locations.
+enum Location {
+  kLoc1,
+  kLoc2,
+  kLoc3,
+  kLoc4,
+  kLoc5,
+  kLoc6,
+  kLoc7,
+  kLoc8,
+  kLoc9,
+  kLoc10,
+  kLoc11,
+  kLoc12,
+  kLoc13,
+  kLoc14,
+  kLoc15,
+  kLoc16,
+  kLoc17,
+  kLoc18,
+  kLoc19,
+  kLoc20,
+  kLoc21,
+  kLoc22,
+  kLoc23,
+  kLoc24,
+  kLoc25,
+  kLoc26,
+  kLoc27,
+  kLoc28,
+  kLocLast
+};
 
 // Describes a snapshot of the population in a certain year
 struct Population {

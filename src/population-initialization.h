@@ -26,7 +26,7 @@ int compute_biomedical(float rand_num, int age);
 auto create_person(Random* random_generator);
 
 // Initialize an entire population for the BDM simulation
-void initialize_population(Random* random_generator , int population_size);
+void initialize_population(Random* random_generator, int population_size);
 
 // This class describes a single person. A person has a specific position in
 // the three dimensional space and one of the three illness states, see above.
@@ -75,7 +75,8 @@ struct CheckSurrounding : public Functor<void, Agent*, double> {
     auto* sim = Simulation::GetActive();
     auto* random = sim->GetRandom();
     if (other->state_ == GemsState::kHealthy && random->Uniform() < 0.05) {
-      self_->state_ = static_cast<int>(random->Uniform(1.0,GemsState::kGemsLast));
+      self_->state_ =
+          static_cast<int>(random->Uniform(1.0, GemsState::kGemsLast));
     }
   }
 };
@@ -88,12 +89,12 @@ struct Infection : public Behavior {
   void Run(Agent* a) override {
     auto* sim = Simulation::GetActive();
     auto* random = sim->GetRandom();
-    //auto* param = sim->GetParam();
-    //auto* sparam = param->Get<SimParam>();
+    // auto* param = sim->GetParam();
+    // auto* sparam = param->Get<SimParam>();
 
     auto* person = bdm_static_cast<Person*>(a);
     if (person->state_ == GemsState::kHealthy &&
-        //random->Uniform(0, 1) <= sparam->infection_probablity) {
+        // random->Uniform(0, 1) <= sparam->infection_probablity) {
         random->Uniform(0, 1) <= 0.10) {
       auto* ctxt = sim->GetExecutionContext();
       CheckSurrounding check(person);
@@ -113,11 +114,11 @@ struct RandomMovement : public Behavior {
     auto* sim = Simulation::GetActive();
     auto* random = sim->GetRandom();
     auto* param = sim->GetParam();
-    //auto* sparam = param->Get<SimParam>();
+    // auto* sparam = param->Get<SimParam>();
 
     const auto& position = agent->GetPosition();
     auto rand_movement = random->UniformArray<3>(-1, 1).Normalize();
-    auto new_pos = position + rand_movement;// * sparam->agent_speed;
+    auto new_pos = position + rand_movement;  // * sparam->agent_speed;
     // Implements periodic boundary conditions for position
     for (auto& el : new_pos) {
       // Compute floating-point remainder of division "el/param->max_bound"

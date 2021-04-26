@@ -2,11 +2,10 @@
 #define DATATYPES_H_
 
 #include <algorithm>
-#include <iostream>
 #include <iomanip>
-#include <vector>
+#include <iostream>
 #include <numeric>
-
+#include <vector>
 
 namespace bdm {
 

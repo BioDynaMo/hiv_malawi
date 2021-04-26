@@ -9,8 +9,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <vector>
-#include "stdout-utlis.h"
 #include "bdm-simulation.h"
+#include "stdout-utlis.h"
 
 int main(int argc, const char** argv) {
   /*

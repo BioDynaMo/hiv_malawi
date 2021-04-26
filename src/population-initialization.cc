@@ -1,11 +1,11 @@
 #include <cassert>
 #include <iostream>
-#include <vector>
 #include <limits>
+#include <vector>
 
-#include "core/simulation.h"
 #include "biodynamo.h"
 #include "core/agent/agent_pointer.h"
+#include "core/simulation.h"
 
 #include "datatypes.h"
 #include "population-initialization.h"
@@ -87,7 +87,6 @@ int compute_biomedical(float rand_num, int age) {
 }
 
 auto create_person(Random* random_generator) {
-
   // Get all random numbers for initialization
   std::vector<double> rand_num{};
   rand_num.reserve(10);
@@ -97,14 +96,14 @@ auto create_person(Random* random_generator) {
 
   // Get a new person
   // Cells are simulated with a spacial uniform grid environment. Typically,
-  // cells don't occur on the very same position and therefore the number of 
-  // cell per grid box is described with a uint16_t. Thus, if we don't asssign 
+  // cells don't occur on the very same position and therefore the number of
+  // cell per grid box is described with a uint16_t. Thus, if we don't asssign
   // random positions, we are bounded to a maximum number of 65535 agents.
-  Person* person = new Person({100.0*rand_num[7], 100.0*rand_num[8], 
-                               100.0*rand_num[9]});
-  
+  Person* person = new Person(
+      {100.0 * rand_num[7], 100.0 * rand_num[8], 100.0 * rand_num[9]});
+
   person->SetDiameter(1.0);
-  
+
   // Assign sex
   person->sex_ = sample_sex(rand_num[0]);
   // Assign age
@@ -128,16 +127,15 @@ auto create_person(Random* random_generator) {
   person->AddBehavior(new Infection());
   person->AddBehavior(new RandomMovement());
   return person;
-  };
+};
 
 void initialize_population(Random* random_generator, int population_size) {
-
-  #pragma omp parallel
+#pragma omp parallel
   {
     auto* sim = Simulation::GetActive();
     auto* ctxt = sim->GetExecutionContext();
 
-    #pragma omp for
+#pragma omp for
     for (int x = 0; x < population_size; x++) {
       auto* new_person = create_person(random_generator);
       ctxt->AddAgent(new_person);

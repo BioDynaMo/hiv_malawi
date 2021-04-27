@@ -34,15 +34,16 @@ struct get_thread_local_population_statistics
     // question: what's bdm static cast?
     auto* person = bdm_static_cast<Person*>(agent);
     // Note: possibly rewrite with out if/else and check if it's faster
+    int age = static_cast<int> (person->age_);
     if (person->sex_ == Sex::kMale) {
-      tl_pop->age_male[static_cast<int>(person->age_)] += 1;
+      tl_pop->age_male[age] += 1;
       if (person->state_ == GemsState::kHealthy) {
         tl_pop->healthy_male += 1;
       } else {
         tl_pop->infected_male[person->state_ - 1] += 1;
       }
     } else {
-      tl_pop->age_female[static_cast<int>(person->age_)] += 1;
+      tl_pop->age_female[age] += 1;
       if (person->state_ == GemsState::kHealthy) {
         tl_pop->healthy_female += 1;
       } else {

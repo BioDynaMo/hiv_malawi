@@ -163,69 +163,59 @@ struct RandomMigration : public Behavior {
 };
 
 
-// struct GetOlder : public Behavior {
-//   BDM_BEHAVIOR_HEADER(GetOlder, Behavior, 1);
+struct GetOlder : public Behavior {
+  BDM_BEHAVIOR_HEADER(GetOlder, Behavior, 1);
 
-//   GetOlder() {}
+  GetOlder() {}
 
-//   void Run(Agent* agent) override {
-//     auto* sim = Simulation::GetActive();
-//     auto* random = sim->GetRandom();
-//     auto* person = bdm_static_cast<Person*>(agent);
+  void Run(Agent* agent) override {
+    auto* sim = Simulation::GetActive();
+    auto* random = sim->GetRandom();
+    auto* person = bdm_static_cast<Person*>(agent);
 
-//     // when turning 15, assign risk factors
-//     if (person->age_ < 15 && person->age_ + 1 > 15) {
-//       // This would possibly make it more efficient but introduces mutal 
-//       // dependencies.
-//       // if (person->sex_ == Sex::kFemale) {
-//       //   person->AddBehavior(new GiveBirth());
-//       // }
-//       // update risk factors stochastically like in initialization
-//       if (random->Uniform() > 0.95){
-//         person->social_behaviour_factor_ = 1;
-//       }
-//       if (random->Uniform() > 0.95){
-//         person->biomedical_factor_ = 1;
-//       }
-//     }
-//     // This would possibly make it more efficient but introduces mutal 
-//     // dependencies
-//     // when turning 40, stop being fertile
-//     // if (person->age_ < 40 && person->age_ + 1 > 40 &&
-//     //     person->sex_ == Sex::kFemale) {
-//     //   // Question: is that how it works?
-//     //   person->RemoveBehavior(new GiveBirth());
-//     // }
+    // when turning 15, assign risk factors
+    if (person->age_ < 15 && person->age_ + 1 > 15) {
+      // update risk factors stochastically like in initialization
+      if (random->Uniform() > 0.95){
+        person->social_behaviour_factor_ = 1;
+      }
+      if (random->Uniform() > 0.95){
+        person->biomedical_factor_ = 1;
+      }
+    }
 
-//     // possibly die - if not, just get older
-//     bool stay_alive {true};
-//     // Let's assume a linear increase of the death probability per year for 
-//     // healty agents starting from 45 to 120.
-//     if (person->state_ == GemsState::kHealthy){
-//       if (random->Uniform() < (person->age_ - 45.)/(75.*8.)){
-//         stay_alive = false;
-//       }
-//     }
-//     // Let's assume a linear increase of the death probability per year for 
-//     // non-healty agents starting from 5 to 50.
-//     if (person->state_ == GemsState::kHealthy){
-//       if (random->Uniform() < (person->age_ - 5.)/(45.*8.)){
-//         stay_alive = false;
-//       }
-//     }
-//     //std::cout << person->age_ << std::endl;
-//     person->age_+=1.0;
-//     // if (!stay_alive){
-//     //   // Person dies, i.e. is removed from simulation.
-//     //   person->RemoveFromSimulation();
-//     // }
-//     // else {
-//     //   // increase age
-//     //   person-> age_ += 1;
-//     // }
-//     //person->age_ += 1.0;
-//   }
-// };
+    // possibly die - if not, just get older
+    bool stay_alive {true};
+    // Let's assume a linear increase of the death probability per year for 
+    // healty agents starting from 45 to 120.
+    if (person->state_ == GemsState::kHealthy){
+      if (random->Uniform() < (person->age_ - 45.)/(75.*8.)){
+        stay_alive = false;
+      }
+    }
+    // Let's assume a linear increase of the death probability per year for 
+    // non-healty agents starting from 5 to 50.
+    if (person->state_ != GemsState::kHealthy){
+      if (random->Uniform() < (person->age_ - 5.)/(45.*8.)){
+        stay_alive = false;
+      }
+    }
+    // hard cut at 120
+    if (person->age_ >= 90.0 ){
+      // std::cout << "max age kill planned for " << person->GetUid() << std::endl;
+      stay_alive = false;
+    }
+    if (!stay_alive){
+      // Person dies, i.e. is removed from simulation.
+      // std::cout << "kill person " << person->GetUid() << " of age " << person->age_ << std::endl;
+      person->RemoveFromSimulation();
+    }
+    else {
+      // increase age
+      person->age_ += 1;
+    }
+  }
+};
 
 struct GiveBirth : public Behavior {
   BDM_BEHAVIOR_HEADER(GiveBirth, Behavior, 1);

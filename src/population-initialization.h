@@ -269,10 +269,10 @@ struct GiveBirth : public Behavior {
     // Add the "grow and divide" behavior to each cell
     child->AddBehavior(new Infection());
     child->AddBehavior(new RandomMovement());
-    // child->AddBehavior(new GetOlder());
-    // if (child->sex_ == Sex::kFemale){
-    //   child->AddBehavior(new GiveBirth());
-    // }
+    child->AddBehavior(new GetOlder());
+    if (child->sex_ == Sex::kFemale){
+      child->AddBehavior(new GiveBirth());
+    }
     return child;
   }
 

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "version.h"
+#include "bdm_version.h"
 
 void print_header() {
   std::string header{

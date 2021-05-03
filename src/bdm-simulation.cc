@@ -18,6 +18,7 @@
 #include "core/operation/reduction_op.h"
 
 #include "bdm-simulation.h"
+#include "categorical-environment.h"
 #include "datatypes.h"
 #include "population-initialization.h"
 #include "storage.h"
@@ -28,6 +29,7 @@ namespace bdm {
 BDM_REGISTER_TEMPLATE_OP(ReductionOp, Population, "ReductionOpPopulation",
                          kCpu);
 
+// Functor to accumulate the information into the population struct.
 struct get_thread_local_population_statistics
     : public Functor<void, Agent*, Population*> {
   void operator()(Agent* agent, Population* tl_pop) {
@@ -53,6 +55,8 @@ struct get_thread_local_population_statistics
   }
 };
 
+
+// Functor to summarize thread local population into one population struct
 struct add_thread_local_populations
     : public Functor<Population, const SharedData<Population>&> {
   Population operator()(const SharedData<Population>& tl_populations) override {
@@ -65,30 +69,24 @@ struct add_thread_local_populations
   }
 };
 
+// BioDynaMo's main simulation
 int Simulate(int argc, const char** argv) {
   Simulation simulation(argc, argv);
-
-  // Define initial model - in this example: single cell at origin
-  // auto* rm = simulation.GetResourceManager();
-  // auto* cell = new Cell(30);
-  // rm->AddAgent(cell);
 
   // Randomly initialize a population
   {
     Timing timer_init("RUNTIME POPULATION INITIALIZATION: ");
     auto random = simulation.GetRandom();
+    // Use custom environment for simulation. The command SetEnvironment is 
+    // currently not implemented in the master, it needs to set in BioDynaMo 
+    // in simulation.h / simulation.cc
+    auto* env = new CategoricalEnvironment();
+    simulation.SetEnvironement(env);
     random->SetSeed(1234);
     initialize_population(random, 2000);
   }
 
-  // DEBUG
-  // Test population cout
-  // std::cout << sizeof(Population) << std::endl;
-  // Population pop;
-  // std::cout << pop;
-  // std::cout << "person memory " << sizeof(Person) << std::endl;
-
-  // Get population statistics
+  // Get population statistics, i.e. extract data from simulation
   auto* get_statistics = NewOperation("ReductionOpPopulation");
   auto* get_statistics_impl =
       get_statistics->GetImplementation<ReductionOp<Population>>();
@@ -99,6 +97,8 @@ int Simulate(int argc, const char** argv) {
 
   // Don't compute forces
   scheduler->UnscheduleOp(scheduler->GetOps("mechanical forces")[0]);
+  // Don't run load balancing, not working with custom environment.
+  scheduler->UnscheduleOp(scheduler->GetOps("load balancing")[0]);
 
   // Run simulation for one timestep
   {
@@ -114,11 +114,6 @@ int Simulate(int argc, const char** argv) {
     // save_to_disk(sim_result);
     plot_evolution(sim_result);
   }
-
-  // DEBUG: check number of agents
-  // auto* rm = simulation.GetResourceManager();
-  // std::cout << "Simulation considers " << rm->GetNumAgents() << "
-  // persons.\n";
 
   std::cout << "Simulation completed successfully!" << std::endl;
   return 0;

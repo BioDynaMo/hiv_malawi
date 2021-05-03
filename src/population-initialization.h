@@ -2,9 +2,9 @@
 #define POPULATION_INITIALIZATION_H_
 
 #include "biodynamo.h"
-#include "datatypes.h"
 #include "core/agent/agent_pointer.h"
 #include "core/agent/cell.h"
+#include "datatypes.h"
 
 #include <iostream>
 namespace bdm {
@@ -33,7 +33,6 @@ auto create_person(Random* random_generator);
 
 // Initialize an entire population for the BDM simulation
 void initialize_population(Random* random_generator, int population_size);
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's Agent / Individual
@@ -92,54 +91,56 @@ struct CheckSurrounding : public Functor<void, Agent*, double> {
   }
 };
 
-struct Infection : public Behavior {
-  BDM_BEHAVIOR_HEADER(Infection, Behavior, 1);
+// // Dummy Behaviour
+// struct Infection : public Behavior {
+//   BDM_BEHAVIOR_HEADER(Infection, Behavior, 1);
 
-  Infection() {}
+//   Infection() {}
 
-  void Run(Agent* a) override {
-    auto* sim = Simulation::GetActive();
-    auto* random = sim->GetRandom();
-    // auto* param = sim->GetParam();
-    // auto* sparam = param->Get<SimParam>();
+//   void Run(Agent* a) override {
+//     auto* sim = Simulation::GetActive();
+//     auto* random = sim->GetRandom();
+//     // auto* param = sim->GetParam();
+//     // auto* sparam = param->Get<SimParam>();
 
-    auto* person = bdm_static_cast<Person*>(a);
-    if (person->state_ == GemsState::kHealthy &&
-        // random->Uniform(0, 1) <= sparam->infection_probablity) {
-        random->Uniform(0, 1) <= 0.10) {
-      auto* ctxt = sim->GetExecutionContext();
-      CheckSurrounding check(person);
-      // ForEachNeighbor executes "check" for all neighbors in
-      // sqrt(infection_radius)
-      ctxt->ForEachNeighbor(check, *person, 2.0);
-    }
-  }
-};
+//     auto* person = bdm_static_cast<Person*>(a);
+//     if (person->state_ == GemsState::kHealthy &&
+//         // random->Uniform(0, 1) <= sparam->infection_probablity) {
+//         random->Uniform(0, 1) <= 0.10) {
+//       auto* ctxt = sim->GetExecutionContext();
+//       CheckSurrounding check(person);
+//       // ForEachNeighbor executes "check" for all neighbors in
+//       // sqrt(infection_radius)
+//       ctxt->ForEachNeighbor(check, *person, 1.0);
+//     }
+//   }
+// };
 
-struct RandomMovement : public Behavior {
-  BDM_BEHAVIOR_HEADER(RandomMovement, Behavior, 1);
+// // Dummy behaviour
+// struct RandomMovement : public Behavior {
+//   BDM_BEHAVIOR_HEADER(RandomMovement, Behavior, 1);
 
-  RandomMovement() {}
+//   RandomMovement() {}
 
-  void Run(Agent* agent) override {
-    auto* sim = Simulation::GetActive();
-    auto* random = sim->GetRandom();
-    auto* param = sim->GetParam();
-    // auto* sparam = param->Get<SimParam>();
+//   void Run(Agent* agent) override {
+//     auto* sim = Simulation::GetActive();
+//     auto* random = sim->GetRandom();
+//     auto* param = sim->GetParam();
+//     // auto* sparam = param->Get<SimParam>();
 
-    const auto& position = agent->GetPosition();
-    auto rand_movement = random->UniformArray<3>(-1, 1).Normalize();
-    auto new_pos = position + rand_movement;  // * sparam->agent_speed;
-    // Implements periodic boundary conditions for position
-    for (auto& el : new_pos) {
-      // Compute floating-point remainder of division "el/param->max_bound"
-      el = std::fmod(el, param->max_bound);
-      // Put "el" into valid boudaries.
-      el = el < 0 ? param->max_bound + el : el;
-    }
-    agent->SetPosition(new_pos);
-  }
-};
+//     const auto& position = agent->GetPosition();
+//     auto rand_movement = random->UniformArray<3>(-1, 1).Normalize();
+//     auto new_pos = position + rand_movement;  // * sparam->agent_speed;
+//     // Implements periodic boundary conditions for position
+//     for (auto& el : new_pos) {
+//       // Compute floating-point remainder of division "el/param->max_bound"
+//       el = std::fmod(el, param->max_bound);
+//       // Put "el" into valid boudaries.
+//       el = el < 0 ? param->max_bound + el : el;
+//     }
+//     agent->SetPosition(new_pos);
+//   }
+// };
 
 struct RandomMigration : public Behavior {
   BDM_BEHAVIOR_HEADER(RandomMigration, Behavior, 1);
@@ -162,7 +163,6 @@ struct RandomMigration : public Behavior {
   }
 };
 
-
 struct GetOlder : public Behavior {
   BDM_BEHAVIOR_HEADER(GetOlder, Behavior, 1);
 
@@ -176,41 +176,42 @@ struct GetOlder : public Behavior {
     // when turning 15, assign risk factors
     if (person->age_ < 15 && person->age_ + 1 > 15) {
       // update risk factors stochastically like in initialization
-      if (random->Uniform() > 0.95){
+      if (random->Uniform() > 0.95) {
         person->social_behaviour_factor_ = 1;
       }
-      if (random->Uniform() > 0.95){
+      if (random->Uniform() > 0.95) {
         person->biomedical_factor_ = 1;
       }
     }
 
     // possibly die - if not, just get older
-    bool stay_alive {true};
-    // Let's assume a linear increase of the death probability per year for 
+    bool stay_alive{true};
+    // Let's assume a linear increase of the death probability per year for
     // healty agents starting from 45 to 120.
-    if (person->state_ == GemsState::kHealthy){
-      if (random->Uniform() < (person->age_ - 45.)/(75.*8.)){
+    if (person->state_ == GemsState::kHealthy) {
+      if (random->Uniform() < (person->age_ - 45.) / (75. * 8.)) {
         stay_alive = false;
       }
     }
-    // Let's assume a linear increase of the death probability per year for 
+    // Let's assume a linear increase of the death probability per year for
     // non-healty agents starting from 5 to 50.
-    if (person->state_ != GemsState::kHealthy){
-      if (random->Uniform() < (person->age_ - 5.)/(45.*8.)){
+    if (person->state_ != GemsState::kHealthy) {
+      if (random->Uniform() < (person->age_ - 5.) / (45. * 8.)) {
         stay_alive = false;
       }
     }
     // hard cut at 120
-    if (person->age_ >= 90.0 ){
-      // std::cout << "max age kill planned for " << person->GetUid() << std::endl;
+    if (person->age_ >= 90.0) {
+      // std::cout << "max age kill planned for " << person->GetUid() <<
+      // std::endl;
       stay_alive = false;
     }
-    if (!stay_alive){
+    if (!stay_alive) {
       // Person dies, i.e. is removed from simulation.
-      // std::cout << "kill person " << person->GetUid() << " of age " << person->age_ << std::endl;
+      // std::cout << "kill person " << person->GetUid() << " of age " <<
+      // person->age_ << std::endl;
       person->RemoveFromSimulation();
-    }
-    else {
+    } else {
       // increase age
       person->age_ += 1;
     }
@@ -223,7 +224,7 @@ struct GiveBirth : public Behavior {
   GiveBirth() {}
 
   // create a single child
-  Person* create_child(Random* random_generator, Person* mother){
+  Person* create_child(Random* random_generator, Person* mother) {
     // Get all random numbers for initialization
     std::vector<double> rand_num{};
     rand_num.reserve(10);
@@ -249,26 +250,27 @@ struct GiveBirth : public Behavior {
     child->social_behaviour_factor_ = 0;
     child->biomedical_factor_ = 0;
     // Stores the current GemsState of the child.
-    if (mother->state_ == GemsState::kHealthy){
+    if (mother->state_ == GemsState::kHealthy) {
       child->state_ = GemsState::kHealthy;
       // Store the year when the agent got infected
       child->year_of_infection_ = std::numeric_limits<float>::max();
     }
-    // let's assume that if a mother is HIV positive, in 80 % of the cases the 
+    // let's assume that if a mother is HIV positive, in 80 % of the cases the
     // child will be hiv positive, too.
-    else if (rand_num[2] < 0.8 ) {
+    else if (rand_num[2] < 0.8) {
       child->state_ = GemsState::kGems1;
       // year of infection to present year, Question: Ask Lukas how to get iter
-      child -> year_of_infection_ = 2000;
+      child->year_of_infection_ = 2000;
     }
-    // NOTE: we do not assign a specific mother or partner at the moment. Use 
+    // NOTE: we do not assign a specific mother or partner at the moment. Use
     // nullptr instead.
     child->mother_id_ = AgentPointer<Person>();
     child->partner_id_ = AgentPointer<Person>();
 
     // Add the "grow and divide" behavior to each cell
-    child->AddBehavior(new Infection());
-    child->AddBehavior(new RandomMovement());
+    // child->AddBehavior(new Infection());
+    // child->AddBehavior(new RandomMovement());
+    child->AddBehavior(new RandomMigration());
     child->AddBehavior(new GetOlder());
     if (child->sex_ == Sex::kFemale){
       child->AddBehavior(new GiveBirth());
@@ -276,14 +278,13 @@ struct GiveBirth : public Behavior {
     return child;
   }
 
-
   void Run(Agent* agent) override {
     auto* sim = Simulation::GetActive();
     auto* ctxt = sim->GetExecutionContext();
     auto* random = sim->GetRandom();
     auto* mother = bdm_static_cast<Person*>(agent);
-    // Parameter 0.24 is chosen because our GiveBirth Behaviour is based on a 
-    // Bernoulli experiment. A binomial distribuition peaks at around 6 for 25 
+    // Parameter 0.24 is chosen because our GiveBirth Behaviour is based on a
+    // Bernoulli experiment. A binomial distribuition peaks at around 6 for 25
     // tries and a birth probability of 0.24.
     if (random->Uniform(0.0, 1.0) < 0.24 && mother->age_ <= 40 &&
         mother->age_ >= 15) {
@@ -292,7 +293,6 @@ struct GiveBirth : public Behavior {
     }
   }
 };
-
 
 }  // namespace bdm
 

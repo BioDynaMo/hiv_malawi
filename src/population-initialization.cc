@@ -102,7 +102,7 @@ auto create_person(Random* random_generator) {
   Person* person = new Person(
       {100.0 * rand_num[7], 100.0 * rand_num[8], 100.0 * rand_num[9]});
 
-  person->SetDiameter(1.0);
+  person->SetDiameter(.1);
 
   // Assign sex
   person->sex_ = sample_sex(rand_num[0]);
@@ -124,8 +124,8 @@ auto create_person(Random* random_generator) {
   person->partner_id_ = AgentPointer<Person>();
 
   // Add the behaviours to the person.
-  person->AddBehavior(new Infection());
-  person->AddBehavior(new RandomMovement());
+  // person->AddBehavior(new Infection());
+  // person->AddBehavior(new RandomMovement());
   person->AddBehavior(new RandomMigration());
   person->AddBehavior(new GetOlder());
   if (person->sex_ == Sex::kFemale && person->age_ > 15 && person->age_ < 40) {

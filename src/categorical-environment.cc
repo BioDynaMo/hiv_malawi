@@ -52,12 +52,17 @@ AgentPointer<Person> AgentVector::GetRandomAgent() {
   return agents_[iter++];
 }
 
-void AgentVector::AddAgent(AgentPointer<Person> agent) { agents_.push_back(agent); }
+void AgentVector::AddAgent(AgentPointer<Person> agent) {
+  agents_.push_back(agent);
+  // try {
+  //   agents_.push_back(agent);
+  // } catch (const std::exception& e) {
+  //   Log::Fatal("AgentVector::AddAgent()", "Exception:", e.what(),
+  //              "| Agent: ", agent, "| agents_.size(): ", agents_.size());
+  // }
+}
 
 void AgentVector::Clear() {
-  // for (auto& ptr : agents_) {
-  //   delete ptr;
-  // }
   shuffled_ = false;
   agents_.clear();
   agents_.reserve(10000);
@@ -75,9 +80,8 @@ void CategoricalEnvironment::SetMinAge(int min_age) {
   if (min_age >= 0 && min_age <= 120) {
     min_age_ = min_age;
   } else {
-    Log::Fatal(
-      "CategoricalEnvironment::SetMinAge()",
-      "SetMinAge ignored, min_age must be in [0,120].");
+    Log::Fatal("CategoricalEnvironment::SetMinAge()",
+               "SetMinAge ignored, min_age must be in [0,120].");
   }
 }
 
@@ -85,9 +89,8 @@ void CategoricalEnvironment::SetMaxAge(int max_age) {
   if (max_age >= 0 && max_age <= 120) {
     max_age_ = max_age;
   } else {
-    Log::Fatal(
-      "CategoricalEnvironment::SetMaxAge()",
-      "SetMinAge ignored, max_age must be in [0,120].");
+    Log::Fatal("CategoricalEnvironment::SetMaxAge()",
+               "SetMinAge ignored, max_age must be in [0,120].");
   }
 }
 
@@ -109,15 +112,31 @@ const std::array<int32_t, 2>& CategoricalEnvironment::GetDimensionThresholds()
 };
 
 LoadBalanceInfo* CategoricalEnvironment::GetLoadBalanceInfo() {
-  Log::Fatal(
-      "CategoricalEnvironment::GetLoadBalanceInfo()",
-      "LoadBalancing not supported for this environment.");
+  Log::Fatal("CategoricalEnvironment::GetLoadBalanceInfo()",
+             "LoadBalancing not supported for this environment.");
   return nullptr;
 };
 
 Environment::NeighborMutexBuilder*
 CategoricalEnvironment::GetNeighborMutexBuilder() {
   return nullptr;
+};
+
+// Function for Debug - prints number of females per location.
+void CategoricalEnvironment::DescribePopulation() {
+  size_t cntr{0};
+  size_t sum{0};
+  std::cout << "[ ";
+  for (auto loc : female_agents_) {
+    std::cout << loc.GetNumAgents() << " " << loc.IsShuffled() << " (" << cntr
+              << ")  ";
+    sum += loc.GetNumAgents();
+    if (cntr % 5 == 0) {
+      std::cout << "\n  ";
+    }
+    cntr++;
+  }
+  std::cout << " ]\nsum = " << sum << std::endl;
 };
 
 }  // namespace bdm

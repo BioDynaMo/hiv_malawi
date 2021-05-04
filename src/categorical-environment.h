@@ -30,29 +30,6 @@ class AgentVector {
   void shuffle_();
 
  public:
-  // // default constructor
-  // AgentVector();
-  // // destructor
-  // ~AgentVector();
-  // // copy constructor
-  // AgentVector(const AgentVector& other);
-  // // copy assignment
-  // AgentVector& operator=(const AgentVector& other);
-  // // NO move operations
-  // AgentVector(AgentVector&&) = default;
-  // AgentVector& operator=(AgentVector&&) = default;
-  // default constructor
-  AgentVector() = default;
-  // destructor
-  ~AgentVector() = default;
-  // copy constructor
-  AgentVector(const AgentVector& other) = default;
-  // copy assignment
-  AgentVector& operator=(const AgentVector& other);
-  // NO move operations
-  AgentVector(AgentVector&&) = default;
-  AgentVector& operator=(AgentVector&&) = default;
-
   // Get the number of agents in the vector
   size_t GetNumAgents() { return agents_.size(); }
 

@@ -109,13 +109,10 @@ int Simulate(int argc, const char** argv) {
   {
     Timing timer_post("RUNTIME POSTPROCESSING:            ");
     const auto& sim_result = get_statistics_impl->GetResults();
-    // std::cout << "no populations: " << sim_result.size() << std::endl;
-    // std::cout << sim_result[0];
     // save_to_disk(sim_result);
     plot_evolution(sim_result);
   }
 
-  std::cout << "Simulation completed successfully!" << std::endl;
   return 0;
 }
 

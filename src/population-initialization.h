@@ -200,16 +200,12 @@ struct GetOlder : public Behavior {
         stay_alive = false;
       }
     }
-    // hard cut at 120
+    // hard cut at 90
     if (person->age_ >= 90.0) {
-      // std::cout << "max age kill planned for " << person->GetUid() <<
-      // std::endl;
       stay_alive = false;
     }
     if (!stay_alive) {
       // Person dies, i.e. is removed from simulation.
-      // std::cout << "kill person " << person->GetUid() << " of age " <<
-      // person->age_ << std::endl;
       person->RemoveFromSimulation();
     } else {
       // increase age

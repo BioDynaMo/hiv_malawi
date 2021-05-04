@@ -6,6 +6,7 @@
 #include "biodynamo.h"
 #include "core/agent/agent_pointer.h"
 #include "core/simulation.h"
+#include "core/util/log.h"
 
 #include "datatypes.h"
 #include "population-initialization.h"
@@ -22,10 +23,13 @@ float sample_age(float rand_num_1, float rand_num_2, int sex) {
     age_distribution = {0.156, 0.312, 0.468, 0.541, 0.614, 0.687,
                         0.76,  0.833, 0.906, 0.979, 0.982, 0.985,
                         0.988, 0.991, 0.994, 0.997, 1};
-  } else {
+  } else if (sex == 1) {
     age_distribution = {0.156, 0.312, 0.468, 0.54,  0.612, 0.684,
                         0.756, 0.828, 0.9,   0.972, 0.976, 0.98,
                         0.984, 0.988, 0.992, 0.996, 1};
+  } else {
+    Log::Fatal("sample_age()",
+               "Received sex that is neither male (0) nor female (1): ", sex);
   }
   for (int i = 0; i < age_distribution.size(); i++) {
     if (rand_num_1 <= age_distribution[i]) {
@@ -34,8 +38,9 @@ float sample_age(float rand_num_1, float rand_num_2, int sex) {
       continue;
     }
   }
-  std::cout << "Warning: sample_age could not sampe the age. \n"
-            << "Received rand_num number: " << rand_num_1 << std::endl;
+  Log::Warning("sample_age()",
+               "Could not sample the age. Recieved inputs:", rand_num_1, ", ",
+               rand_num_2, ", ", sex, ". Use age 0.");
   return 0;
 }
 
@@ -51,8 +56,9 @@ int sample_location(float rand_num) {
       continue;
     }
   }
-  std::cout << "Warning: sample_location could not find location \n"
-            << "Received rand_num number: " << rand_num << std::endl;
+  Log::Warning("sample_location()",
+               "Could not sample the location. Recieved inputs: ", rand_num,
+               ". Use location 0.");
   return 0;
 }
 
@@ -133,7 +139,6 @@ auto create_person(Random* random_generator) {
   }
   return person;
 };
-
 
 void initialize_population(Random* random_generator, int population_size) {
 #pragma omp parallel

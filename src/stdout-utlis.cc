@@ -21,6 +21,7 @@ void print_header() {
 
 void print_closing() {
   std::string closing{
+      "\nSimulation completed successfully!\n"
       "\n"
       "========================================================================"
       "\n"};

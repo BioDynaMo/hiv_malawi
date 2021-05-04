@@ -47,7 +47,6 @@ int main(int argc, const char** argv) {
     bdm::ExperimentFitSimulation(&clo, seeds);
   }
 
-  std::cout << "Simulation completed successfully!" << std::endl;
   */
   print_header();
 

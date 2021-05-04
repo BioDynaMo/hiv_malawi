@@ -4,7 +4,9 @@
 #include "biodynamo.h"
 #include "core/agent/agent_pointer.h"
 #include "core/agent/cell.h"
+#include "categorical-environment.h"
 #include "datatypes.h"
+#include "person.h"
 
 #include <iostream>
 namespace bdm {
@@ -37,41 +39,6 @@ auto create_person(Random* random_generator);
 // Initialize an entire population for the BDM simulation
 void initialize_population(Random* random_generator, int population_size);
 
-////////////////////////////////////////////////////////////////////////////////
-// BioDynaMo's Agent / Individual
-////////////////////////////////////////////////////////////////////////////////
-
-// This class describes a single person. A person has a specific position in
-// the three dimensional space and one of the three illness states, see above.
-class Person : public Cell {
-  BDM_AGENT_HEADER(Person, Cell, 1);
-
- public:
-  Person() {}
-  explicit Person(const Double3& position) : Base(position) {}
-  virtual ~Person() {}
-
-  /// Stores the current GemsState of the person.
-  int state_;
-  // Stores the age of the agent
-  float age_;
-  // Stores the sex of the agent
-  int sex_;
-  // Stores the location as categorical variable
-  int location_;
-  // Stores a factor representing the socio-behavioural risk
-  int social_behaviour_factor_;
-  // Stores a factor representing the biomedical risk
-  int biomedical_factor_;
-  // Stores if an agent is infected or not
-  bool infected_;
-  // Store the year when the agent got infected
-  float year_of_infection_;
-  // Stores the ID of the mother
-  AgentPointer<Person> mother_id_;
-  // Stores the id of the partner
-  AgentPointer<Person> partner_id_;
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's Agent / Individual Behaviours
@@ -162,6 +129,50 @@ struct RandomMigration : public Behavior {
       person->location_ += migration_direction - Location::kLocLast;
     } else {
       person->location_ += migration_direction;
+    }
+  }
+};
+
+struct MatingBehaviour : public Behavior {
+  BDM_BEHAVIOR_HEADER(MatingBehaviour, Behavior, 1);
+
+  MatingBehaviour() {}
+
+  void Run(Agent* agent) override {
+    auto* sim = Simulation::GetActive();
+    auto* env = bdm_static_cast<CategoricalEnvironment*>(
+          Simulation::GetActive()->GetEnvironment());
+    //auto* env = bdm_static_cast<CategoricalEnvironment*>(sim->GetEnvironment());
+    auto* random = sim->GetRandom();
+    auto* person = bdm_static_cast<Person*>(agent);
+
+    // Randomly determine the number of mates
+    int no_mates = static_cast<int>(random->Gaus(3.0, 1.0));
+    // Probability to get infected if mating with infected individual
+    float infection_probability{0.7};
+
+    // This part is only executed for male persons, since the infection goes 
+    // into both directions.
+    if (no_mates > 0 && person->sex_ == Sex::kMale) {
+      for (size_t i = 0; i < no_mates; i++) {
+        // choose a random female mate at the location
+        AgentPointer<Person> mate =
+            env->GetRamdomAgentAtLocation(person->location_);
+        // Scenario healthy male has intercourse with infected female
+        if (mate->state_ != GemsState::kHealthy &&
+            person->state_ == GemsState::kHealthy &&
+            random->Uniform() < infection_probability) {
+          person->state_ = GemsState::kGems1;
+        } 
+        // Scenario infected male has intercourse with healthy female
+        else if (mate->state_ == GemsState::kHealthy &&
+                   person->state_ != GemsState::kHealthy &&
+                   random->Uniform() < infection_probability) {
+          mate->state_ = GemsState::kGems1;
+        } else {
+          ;  // if both are infected or both are healthy, do nothing
+        }
+      }
     }
   }
 };

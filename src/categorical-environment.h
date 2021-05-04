@@ -1,9 +1,12 @@
+#ifndef CATEGORICAL_ENVIRONMENT_H_
+#define CATEGORICAL_ENVIRONMENT_H_
+
 #include "core/environment/environment.h"
 #include "core/resource_manager.h"
 #include "core/agent/agent_pointer.h"
 
 #include "datatypes.h"
-#include "population-initialization.h"
+#include "person.h"
 
 #include <random>
 #include <iostream>
@@ -140,3 +143,5 @@ class CategoricalEnvironment : public Environment {
 };
 
 }  // namespace bdm
+
+#endif // CATEGORICAL_ENVIRONMENT_H_

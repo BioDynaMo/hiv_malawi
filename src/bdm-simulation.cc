@@ -20,6 +20,7 @@
 #include "bdm-simulation.h"
 #include "categorical-environment.h"
 #include "datatypes.h"
+#include "person.h"
 #include "population-initialization.h"
 #include "storage.h"
 #include "visualize.h"
@@ -110,6 +111,7 @@ int Simulate(int argc, const char** argv) {
     Timing timer_post("RUNTIME POSTPROCESSING:            ");
     const auto& sim_result = get_statistics_impl->GetResults();
     // save_to_disk(sim_result);
+    //std::cout << sim_result[0] << std::endl;
     plot_evolution(sim_result);
   }
 

@@ -14,34 +14,12 @@ void AgentVector::shuffle_() {
   shuffled_ = true;
 }
 
-// AgentVector::AgentVector() : agents_(0), shuffled_(false) {
-//   agents_.reserve(10000);
-// }
-
-// AgentVector::~AgentVector() {
-//   for (auto& ptr : agents_) {
-//     delete ptr;
-//   }
-//   agents_.resize(0);
-// };
-
-// AgentVector::AgentVector(const AgentVector& other)
-//     : agents_(other.agents_.size()), shuffled_(other.shuffled_) {
-//   for (auto ptr : other.agents_) {
-//     agents_.push_back(ptr);
-//   }
-// };
-
-// AgentVector& AgentVector::operator=(const AgentVector& other) {
-//   agents_.resize(other.agents_.size());
-//   shuffled_ = other.shuffled_;
-//   for (auto ptr : other.agents_) {
-//     agents_.push_back(ptr);
-//   }
-//   return *this;
-// };
-
 AgentPointer<Person> AgentVector::GetRandomAgent() {
+  if (agents_.size() == 0) {
+    Log::Fatal("AgentVector::GetRandomAgent()",
+               "There are no females available for mating in one of your "
+               "regions. Consider increasing the number of Agents.");
+  }
   if (!shuffled_) {
     shuffle_();
   }

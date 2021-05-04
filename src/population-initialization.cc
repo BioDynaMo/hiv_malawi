@@ -139,8 +139,9 @@ auto create_person(Random* random_generator) {
   // Add the behaviours to the person.
   // person->AddBehavior(new Infection());
   // person->AddBehavior(new RandomMovement());
-  person->AddBehavior(new RandomMigration());
+  // person->AddBehavior(new RandomMigration());
   person->AddBehavior(new GetOlder());
+  person->AddBehavior(new MatingBehaviour());
   if (person->sex_ == Sex::kFemale && person->age_ > 15 && person->age_ < 40) {
     person->AddBehavior(new GiveBirth());
   }

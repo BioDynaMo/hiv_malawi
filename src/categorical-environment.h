@@ -54,21 +54,21 @@ class CategoricalEnvironment : public Environment {
       : min_age_(min_age), max_age_(max_age), female_agents_(n_loc) {}
 
   void Update() override {
-    // Debug
-    uint64_t iter =
-        Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
-    if (iter < 4) {
-      std::cout << "Iteration: " << iter << std::endl;
-      std::cout << "Before clearing section" << std::endl;
-      DescribePopulation();
-    }
+    // // Debug
+    // uint64_t iter =
+    //     Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
+    // if (iter < 4) {
+    //   std::cout << "Iteration: " << iter << std::endl;
+    //   std::cout << "Before clearing section" << std::endl;
+    //   DescribePopulation();
+    // }
     female_agents_.clear();
     female_agents_.resize(Location::kLocLast);
-    // DEBUG
-    if (iter < 4) {
-      std::cout << "After clearing section" << std::endl;
-      DescribePopulation();
-    }
+    // // DEBUG
+    // if (iter < 4) {
+    //   std::cout << "After clearing section" << std::endl;
+    //   DescribePopulation();
+    // }
 
     auto* rm = Simulation::GetActive()->GetResourceManager();
     rm->ForEachAgent([](Agent* agent) {
@@ -103,13 +103,18 @@ class CategoricalEnvironment : public Environment {
                  "female_agents_.size(): ", female_agents_.size());
     }
     female_agents_[loc].AddAgent(agent);
-  }
+  };
 
   void DescribePopulation();
 
   AgentPointer<Person> GetRamdomAgentAtLocation(size_t loc) {
+    if (female_agents_.size() <= loc) {
+      Log::Fatal("CategoricalEnvironment::AddAgentToLocation()",
+                 "Location index is out of bounds. Received loc: ", loc,
+                 "female_agents_.size(): ", female_agents_.size());
+    }
     return female_agents_[loc].GetRandomAgent();
-  }
+  };
 
   void Clear() override { ; };
 

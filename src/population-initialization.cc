@@ -18,12 +18,11 @@ namespace bdm {
 float sample_age(float rand_num_1, float rand_num_2, int sex) {
   // use different age distributions for male and female
   std::vector<float> age_distribution{};
-  // if (sex == Sex::kMale) {
-  if (sex == 0) {
+  if (sex == Sex::kMale) {
     age_distribution = {0.156, 0.312, 0.468, 0.541, 0.614, 0.687,
                         0.76,  0.833, 0.906, 0.979, 0.982, 0.985,
                         0.988, 0.991, 0.994, 0.997, 1};
-  } else if (sex == 1) {
+  } else if (sex == Sex::kFemale) {
     age_distribution = {0.156, 0.312, 0.468, 0.54,  0.612, 0.684,
                         0.756, 0.828, 0.9,   0.972, 0.976, 0.98,
                         0.984, 0.988, 0.992, 0.996, 1};
@@ -67,6 +66,14 @@ int sample_sex(float rand_num) {
     return Sex::kMale;
   } else {
     return Sex::kFemale;
+  }
+}
+
+int sample_state(float rand_num) {
+  if (rand_num <= 0.97) {
+    return GemsState::kHealthy;
+  } else {
+    return GemsState::kGems1;
   }
 }
 
@@ -116,12 +123,12 @@ auto create_person(Random* random_generator) {
   person->age_ = sample_age(rand_num[1], rand_num[2], person->sex_);
   // Assign location
   person->location_ = sample_location(rand_num[3]);
+  // Assign the GemsState of the person.
+  person->state_ = sample_state(rand_num[4]);
   // Compute risk factors
   person->social_behaviour_factor_ =
-      compute_sociobehavioural(rand_num[4], person->age_);
-  person->biomedical_factor_ = compute_biomedical(rand_num[5], person->age_);
-  // Stores the current GemsState of the person.
-  person->state_ = GemsState::kHealthy;
+      compute_sociobehavioural(rand_num[5], person->age_);
+  person->biomedical_factor_ = compute_biomedical(rand_num[6], person->age_);
   // Store the year when the agent got infected
   person->year_of_infection_ = std::numeric_limits<float>::max();
   // NOTE: we do not assign a specific mother or partner during the population

@@ -14,34 +14,34 @@ void AgentVector::shuffle_() {
   shuffled_ = true;
 }
 
-AgentVector::AgentVector() : agents_(0), shuffled_(false) {
-  agents_.reserve(10000);
-}
+// AgentVector::AgentVector() : agents_(0), shuffled_(false) {
+//   agents_.reserve(10000);
+// }
 
-AgentVector::~AgentVector() {
-  for (auto& ptr : agents_) {
-    delete ptr;
-  }
-  agents_.resize(0);
-};
+// AgentVector::~AgentVector() {
+//   for (auto& ptr : agents_) {
+//     delete ptr;
+//   }
+//   agents_.resize(0);
+// };
 
-AgentVector::AgentVector(const AgentVector& other)
-    : agents_(other.agents_.size()), shuffled_(other.shuffled_) {
-  for (auto ptr : other.agents_) {
-    agents_.push_back(ptr);
-  }
-};
+// AgentVector::AgentVector(const AgentVector& other)
+//     : agents_(other.agents_.size()), shuffled_(other.shuffled_) {
+//   for (auto ptr : other.agents_) {
+//     agents_.push_back(ptr);
+//   }
+// };
 
-AgentVector& AgentVector::operator=(const AgentVector& other) {
-  agents_.resize(other.agents_.size());
-  shuffled_ = other.shuffled_;
-  for (auto ptr : other.agents_) {
-    agents_.push_back(ptr);
-  }
-  return *this;
-};
+// AgentVector& AgentVector::operator=(const AgentVector& other) {
+//   agents_.resize(other.agents_.size());
+//   shuffled_ = other.shuffled_;
+//   for (auto ptr : other.agents_) {
+//     agents_.push_back(ptr);
+//   }
+//   return *this;
+// };
 
-Agent* AgentVector::GetRandomAgent() {
+AgentPointer<Person> AgentVector::GetRandomAgent() {
   if (!shuffled_) {
     shuffle_();
   }
@@ -52,13 +52,14 @@ Agent* AgentVector::GetRandomAgent() {
   return agents_[iter++];
 }
 
-void AgentVector::AddAgent(Agent* agent) { agents_.push_back(agent); }
+void AgentVector::AddAgent(AgentPointer<Person> agent) { agents_.push_back(agent); }
 
 void AgentVector::Clear() {
-  for (auto& ptr : agents_) {
-    delete ptr;
-  }
-  agents_.resize(0);
+  // for (auto& ptr : agents_) {
+  //   delete ptr;
+  // }
+  shuffled_ = false;
+  agents_.clear();
   agents_.reserve(10000);
 }
 

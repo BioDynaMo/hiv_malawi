@@ -1,10 +1,12 @@
 #include "core/environment/environment.h"
 #include "core/resource_manager.h"
+#include "core/agent/agent_pointer.h"
 
 #include "datatypes.h"
 #include "population-initialization.h"
 
 #include <random>
+#include <iostream>
 
 namespace bdm {
 
@@ -14,7 +16,7 @@ namespace bdm {
 class AgentVector {
  private:
   // vector of AgentPointers
-  std::vector<Agent*> agents_;
+  std::vector<AgentPointer<Person>> agents_;
   // Has the vector been shuffled or not
   bool shuffled_;
   // Iter to go through vector and obtain random Agents
@@ -24,12 +26,23 @@ class AgentVector {
   void shuffle_();
 
  public:
+  // // default constructor
+  // AgentVector();
+  // // destructor
+  // ~AgentVector();
+  // // copy constructor
+  // AgentVector(const AgentVector& other);
+  // // copy assignment
+  // AgentVector& operator=(const AgentVector& other);
+  // // NO move operations
+  // AgentVector(AgentVector&&) = default;
+  // AgentVector& operator=(AgentVector&&) = default;
   // default constructor
-  AgentVector();
+  AgentVector() = default;
   // destructor
-  ~AgentVector();
+  ~AgentVector() = default;
   // copy constructor
-  AgentVector(const AgentVector& other);
+  AgentVector(const AgentVector& other) =default;
   // copy assignment
   AgentVector& operator=(const AgentVector& other);
   // NO move operations
@@ -40,10 +53,10 @@ class AgentVector {
   size_t GetNumAgents() { return agents_.size(); }
 
   // Get a radom agent from the vector agents_
-  Agent* GetRandomAgent();
+  AgentPointer<Person> GetRandomAgent();
 
   // Add an AgentPointer to the vector agents_
-  void AddAgent(Agent* agent);
+  void AddAgent(AgentPointer<Person> agent);
 
   // Delete vector entries and resize vector to 0
   void Clear();
@@ -56,27 +69,38 @@ class CategoricalEnvironment : public Environment {
       : min_age_(min_age), max_age_(max_age), female_agents_(n_loc) {}
 
   void Update() override {
-    // for (auto FemalesAtLoc : female_agents_) {
-    //   FemalesAtLoc.Clear();
-    // }
-    // auto* rm = Simulation::GetActive()->GetResourceManager();
-    // rm->ForEachAgent([](Agent* agent) {
-    //   auto* person = bdm_static_cast<Person*>(agent);
+    // int sum {0};
+    for (auto FemalesAtLoc : female_agents_) {
+      // std::cout <<FemalesAtLoc.GetNumAgents() << "\n";
+      // sum += FemalesAtLoc.GetNumAgents();
+      FemalesAtLoc.Clear();
+    }
+    // std::cout << "sum:" << sum << std::endl;
 
-    //   // if (person->sex_ == Sex::kFemale){
-    //   //   female_agents_[person->location_].AddAgent(person->GetAgentPtr());
-    //   // }
-    //   // else {
-    //   //   ;
-    //   // }
-    // });
+    auto* rm = Simulation::GetActive()->GetResourceManager();
+    rm->ForEachAgent([](Agent* agent) {
+      auto* env = bdm_static_cast<CategoricalEnvironment*>(
+          Simulation::GetActive()->GetEnvironment());
+      auto* person = bdm_static_cast<Person*>(agent);
+
+      if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge() &&
+          person->age_ <= env->GetMaxAge()) {
+        AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
+        // Memory leak
+        // This potentially causes a memory leak, check how to handle & delete
+        // AgentPointers
+        env->AddAgentToLocation(person->location_, person_ptr);
+      } else {
+        ;
+      };
+    });
   };
 
-  void AddAgentToLocation(size_t loc, Agent* agent) {
+  void AddAgentToLocation(size_t loc, AgentPointer<Person> agent) {
     female_agents_[loc].AddAgent(agent);
   }
 
-  Agent* GetRamdomAgentAtLocation(size_t loc) {
+  AgentPointer<Person> GetRamdomAgentAtLocation(size_t loc) {
     return female_agents_[loc].GetRandomAgent();
   }
 

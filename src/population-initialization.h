@@ -22,6 +22,9 @@ int sample_location(float rand_num);
 // Gives stochastic sex based on probability
 int sample_sex(float rand_num);
 
+// Sample HIV healt state; returns GemsState::kHealthy in 97% of the cases
+int sample_state(float rand_num);
+
 // Compute sociobehavioural-factor; return 0 in 95% of the cases
 int compute_sociobehavioural(float rand_num, int age);
 

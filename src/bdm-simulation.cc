@@ -97,7 +97,7 @@ int Simulate(int argc, const char** argv) {
     // Use custom environment for simulation. The command SetEnvironment is 
     // currently not implemented in the master, it needs to set in BioDynaMo 
     // in simulation.h / simulation.cc
-    auto* env = new CategoricalEnvironment();
+    auto* env = new CategoricalEnvironment(sparam->min_age,sparam->max_age);
     simulation.SetEnvironement(env);
     // random->SetSeed(sparam->random_seed);
     initialize_population();

@@ -138,8 +138,6 @@ auto create_person(Random* random_generator) {
   person->partner_id_ = AgentPointer<Person>();
 
   // Add the behaviours to the person.
-  // person->AddBehavior(new Infection());
-  // person->AddBehavior(new RandomMovement());
   person->AddBehavior(new RandomMigration());
   person->AddBehavior(new GetOlder());
   person->AddBehavior(new MatingBehaviour());

@@ -4,6 +4,7 @@
 #include "biodynamo.h"
 #include "core/agent/agent_pointer.h"
 #include "core/agent/cell.h"
+#include "core/util/log.h"
 #include "categorical-environment.h"
 #include "datatypes.h"
 #include "person.h"
@@ -43,23 +44,23 @@ void initialize_population(Random* random_generator, int population_size);
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's Agent / Individual Behaviours
 ////////////////////////////////////////////////////////////////////////////////
-struct CheckSurrounding : public Functor<void, Agent*, double> {
-  Person* self_;
+// struct CheckSurrounding : public Functor<void, Agent*, double> {
+//   Person* self_;
 
-  CheckSurrounding(Person* self) : self_(self) {}
+//   CheckSurrounding(Person* self) : self_(self) {}
 
-  // This function operator will be called for every other person within
-  // `infection_radius`
-  void operator()(Agent* neighbor, double squared_distance) override {
-    auto* other = bdm_static_cast<const Person*>(neighbor);
-    auto* sim = Simulation::GetActive();
-    auto* random = sim->GetRandom();
-    if (other->state_ == GemsState::kHealthy && random->Uniform() < 0.05) {
-      self_->state_ =
-          static_cast<int>(random->Uniform(1.0, GemsState::kGemsLast));
-    }
-  }
-};
+//   // This function operator will be called for every other person within
+//   // `infection_radius`
+//   void operator()(Agent* neighbor, double squared_distance) override {
+//     auto* other = bdm_static_cast<const Person*>(neighbor);
+//     auto* sim = Simulation::GetActive();
+//     auto* random = sim->GetRandom();
+//     if (other->state_ == GemsState::kHealthy && random->Uniform() < 0.05) {
+//       self_->state_ =
+//           static_cast<int>(random->Uniform(1.0, GemsState::kGemsLast));
+//     }
+//   }
+// };
 
 // // Dummy Behaviour
 // struct Infection : public Behavior {
@@ -125,7 +126,7 @@ struct RandomMigration : public Behavior {
     int migration_direction = static_cast<int>(random->Gaus(0.0, 2.0));
     if (person->location_ + migration_direction < 0) {
       person->location_ += Location::kLocLast + migration_direction;
-    } else if (person->location_ + migration_direction > Location::kLocLast) {
+    } else if (person->location_ + migration_direction >= Location::kLocLast) {
       person->location_ += migration_direction - Location::kLocLast;
     } else {
       person->location_ += migration_direction;
@@ -140,9 +141,7 @@ struct MatingBehaviour : public Behavior {
 
   void Run(Agent* agent) override {
     auto* sim = Simulation::GetActive();
-    auto* env = bdm_static_cast<CategoricalEnvironment*>(
-          Simulation::GetActive()->GetEnvironment());
-    //auto* env = bdm_static_cast<CategoricalEnvironment*>(sim->GetEnvironment());
+    auto* env = bdm_static_cast<CategoricalEnvironment*>(sim->GetEnvironment());
     auto* random = sim->GetRandom();
     auto* person = bdm_static_cast<Person*>(agent);
 
@@ -151,23 +150,28 @@ struct MatingBehaviour : public Behavior {
     // Probability to get infected if mating with infected individual
     float infection_probability{0.7};
 
-    // This part is only executed for male persons, since the infection goes 
-    // into both directions.
-    if (no_mates > 0 && person->sex_ == Sex::kMale) {
+    // This part is only executed for male persons in a certain age group, since
+    // the infection goes into both directions.
+    if (no_mates > 0 && person->sex_ == Sex::kMale &&
+        person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
       for (size_t i = 0; i < no_mates; i++) {
         // choose a random female mate at the location
         AgentPointer<Person> mate =
             env->GetRamdomAgentAtLocation(person->location_);
+        if (mate == nullptr) {
+          Log::Fatal("MatingBehaviour()",
+                     "Received nullptr as AgentPointer mate.");
+        }
         // Scenario healthy male has intercourse with infected female
         if (mate->state_ != GemsState::kHealthy &&
             person->state_ == GemsState::kHealthy &&
             random->Uniform() < infection_probability) {
           person->state_ = GemsState::kGems1;
-        } 
+        }
         // Scenario infected male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
-                   person->state_ != GemsState::kHealthy &&
-                   random->Uniform() < infection_probability) {
+                 person->state_ != GemsState::kHealthy &&
+                 random->Uniform() < infection_probability) {
           mate->state_ = GemsState::kGems1;
         } else {
           ;  // if both are infected or both are healthy, do nothing
@@ -281,6 +285,7 @@ struct GiveBirth : public Behavior {
     // child->AddBehavior(new Infection());
     // child->AddBehavior(new RandomMovement());
     child->AddBehavior(new RandomMigration());
+    child->AddBehavior(new MatingBehaviour());
     child->AddBehavior(new GetOlder());
     if (child->sex_ == Sex::kFemale){
       child->AddBehavior(new GiveBirth());

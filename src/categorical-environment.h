@@ -1,15 +1,16 @@
 #ifndef CATEGORICAL_ENVIRONMENT_H_
 #define CATEGORICAL_ENVIRONMENT_H_
 
+#include "core/agent/agent_pointer.h"
 #include "core/environment/environment.h"
 #include "core/resource_manager.h"
-#include "core/agent/agent_pointer.h"
+#include "core/util/log.h"
 
 #include "datatypes.h"
 #include "person.h"
 
-#include <random>
 #include <iostream>
+#include <random>
 
 namespace bdm {
 
@@ -29,31 +30,11 @@ class AgentVector {
   void shuffle_();
 
  public:
-  // // default constructor
-  // AgentVector();
-  // // destructor
-  // ~AgentVector();
-  // // copy constructor
-  // AgentVector(const AgentVector& other);
-  // // copy assignment
-  // AgentVector& operator=(const AgentVector& other);
-  // // NO move operations
-  // AgentVector(AgentVector&&) = default;
-  // AgentVector& operator=(AgentVector&&) = default;
-  // default constructor
-  AgentVector() = default;
-  // destructor
-  ~AgentVector() = default;
-  // copy constructor
-  AgentVector(const AgentVector& other) =default;
-  // copy assignment
-  AgentVector& operator=(const AgentVector& other);
-  // NO move operations
-  AgentVector(AgentVector&&) = default;
-  AgentVector& operator=(AgentVector&&) = default;
-
   // Get the number of agents in the vector
   size_t GetNumAgents() { return agents_.size(); }
+
+  // Return if vector is suffled or not
+  bool IsShuffled() { return shuffled_; };
 
   // Get a radom agent from the vector agents_
   AgentPointer<Person> GetRandomAgent();
@@ -68,27 +49,43 @@ class AgentVector {
 class CategoricalEnvironment : public Environment {
  public:
   // Default constructor
-  CategoricalEnvironment(int min_age = 15, int max_age = 40, size_t n_loc = 28)
+  CategoricalEnvironment(int min_age = 15, int max_age = 40,
+                         size_t n_loc = Location::kLocLast)
       : min_age_(min_age), max_age_(max_age), female_agents_(n_loc) {}
 
   void Update() override {
-    // int sum {0};
-    for (auto FemalesAtLoc : female_agents_) {
-      // std::cout <<FemalesAtLoc.GetNumAgents() << "\n";
-      // sum += FemalesAtLoc.GetNumAgents();
-      FemalesAtLoc.Clear();
-    }
-    // std::cout << "sum:" << sum << std::endl;
+    // // Debug
+    // uint64_t iter =
+    //     Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
+    // if (iter < 4) {
+    //   std::cout << "Iteration: " << iter << std::endl;
+    //   std::cout << "Before clearing section" << std::endl;
+    //   DescribePopulation();
+    // }
+    female_agents_.clear();
+    female_agents_.resize(Location::kLocLast);
+    // // DEBUG
+    // if (iter < 4) {
+    //   std::cout << "After clearing section" << std::endl;
+    //   DescribePopulation();
+    // }
 
     auto* rm = Simulation::GetActive()->GetResourceManager();
     rm->ForEachAgent([](Agent* agent) {
       auto* env = bdm_static_cast<CategoricalEnvironment*>(
           Simulation::GetActive()->GetEnvironment());
       auto* person = bdm_static_cast<Person*>(agent);
+      if (person == nullptr) {
+        Log::Fatal("CategoricalEnvironment::Update()", "person is nullptr");
+      }
 
       if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge() &&
           person->age_ <= env->GetMaxAge()) {
         AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
+        if (person_ptr == nullptr) {
+          Log::Fatal("CategoricalEnvironment::Update()",
+                     "person_ptr is nullptr");
+        }
         // Memory leak
         // This potentially causes a memory leak, check how to handle & delete
         // AgentPointers
@@ -100,12 +97,24 @@ class CategoricalEnvironment : public Environment {
   };
 
   void AddAgentToLocation(size_t loc, AgentPointer<Person> agent) {
+    if (female_agents_.size() <= loc) {
+      Log::Fatal("CategoricalEnvironment::AddAgentToLocation()",
+                 "Location index is out of bounds. Received loc: ", loc,
+                 "female_agents_.size(): ", female_agents_.size());
+    }
     female_agents_[loc].AddAgent(agent);
-  }
+  };
+
+  void DescribePopulation();
 
   AgentPointer<Person> GetRamdomAgentAtLocation(size_t loc) {
+    if (female_agents_.size() <= loc) {
+      Log::Fatal("CategoricalEnvironment::AddAgentToLocation()",
+                 "Location index is out of bounds. Received loc: ", loc,
+                 "female_agents_.size(): ", female_agents_.size());
+    }
     return female_agents_[loc].GetRandomAgent();
-  }
+  };
 
   void Clear() override { ; };
 
@@ -124,13 +133,13 @@ class CategoricalEnvironment : public Environment {
   void ForEachNeighbor(Functor<void, Agent*, double>& lambda,
                        const Agent& query, double squared_radius) override;
 
-  const std::array<int32_t, 6>& GetDimensions() const override ;
+  const std::array<int32_t, 6>& GetDimensions() const override;
 
-  const std::array<int32_t, 2>& GetDimensionThresholds() const override ;
+  const std::array<int32_t, 2>& GetDimensionThresholds() const override;
 
   LoadBalanceInfo* GetLoadBalanceInfo() override;
 
-  Environment::NeighborMutexBuilder* GetNeighborMutexBuilder() override ;
+  Environment::NeighborMutexBuilder* GetNeighborMutexBuilder() override;
 
  private:
   // minimal age for sexual interaction
@@ -144,4 +153,4 @@ class CategoricalEnvironment : public Environment {
 
 }  // namespace bdm
 
-#endif // CATEGORICAL_ENVIRONMENT_H_
+#endif  // CATEGORICAL_ENVIRONMENT_H_

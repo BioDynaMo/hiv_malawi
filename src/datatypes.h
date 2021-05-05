@@ -46,6 +46,8 @@ enum Location {
   kLoc26,
   kLoc27,
   kLoc28,
+  // This is not an actual location, it needs to be on the last position of the
+  // enum to determine it's length and use in other functions.
   kLocLast
 };
 

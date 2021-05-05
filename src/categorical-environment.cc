@@ -1,5 +1,4 @@
 #include "categorical-environment.h"
-#include "core/util/log.h"
 
 namespace bdm {
 

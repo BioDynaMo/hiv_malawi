@@ -1,14 +1,10 @@
-#include <cassert>
-#include <iostream>
 #include <limits>
 #include <vector>
 
 #include "biodynamo.h"
-#include "core/agent/agent_pointer.h"
-#include "core/simulation.h"
-#include "core/util/log.h"
 
 #include "datatypes.h"
+#include "person-behavior.h"
 #include "population-initialization.h"
 
 // All hard-coded numbers are taken from Janne's work (Parameters_D1.R)
@@ -138,8 +134,6 @@ auto create_person(Random* random_generator) {
   person->partner_id_ = AgentPointer<Person>();
 
   // Add the behaviours to the person.
-  // person->AddBehavior(new Infection());
-  // person->AddBehavior(new RandomMovement());
   person->AddBehavior(new RandomMigration());
   person->AddBehavior(new GetOlder());
   person->AddBehavior(new MatingBehaviour());

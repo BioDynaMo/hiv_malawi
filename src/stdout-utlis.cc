@@ -14,9 +14,7 @@ void print_header() {
       "This is a BioDynaMo runtime to simulate the spread of HIV in Malawi.\n"
       "You are using BioDynaMo "};
   bdm::Version ver{};
-  std::cout << header << ver.String() << " ." << std::endl;
-
-  std::cout << "\nFor the simulation, we consider the following parameters:\n";
+  std::cout << header << ver.String() << " .\n" << std::endl;
 }
 
 void print_closing() {

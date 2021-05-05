@@ -1,9 +1,9 @@
 #ifndef PERSON_BEHAVIOR_H_
 #define PERSON_BEHAVIOR_H_
 
-#include "person.h"
-#include "datatypes.h"
 #include "categorical-environment.h"
+#include "datatypes.h"
+#include "person.h"
 #include "population-initialization.h"
 
 namespace bdm {
@@ -137,7 +137,8 @@ struct GiveBirth : public Behavior {
   GiveBirth() {}
 
   // create a single child
-  Person* create_child(Random* random_generator, Person* mother) {
+  Person* create_child(Random* random_generator, Person* mother,
+                       const SimParam* sparam) {
     // Get all random numbers for initialization
     std::vector<double> rand_num{};
     rand_num.reserve(10);
@@ -154,7 +155,7 @@ struct GiveBirth : public Behavior {
         {100.0 * rand_num[7], 100.0 * rand_num[8], 100.0 * rand_num[9]});
 
     // Assign sex
-    child->sex_ = sample_sex(rand_num[0]);
+    child->sex_ = sample_sex(rand_num[0], sparam->probability_male);
     // Assign age - possibly -1 ?
     child->age_ = rand_num[1];
     // Assign location
@@ -168,9 +169,9 @@ struct GiveBirth : public Behavior {
       // Store the year when the agent got infected
       child->year_of_infection_ = std::numeric_limits<float>::max();
     }
-    // let's assume that if a mother is HIV positive, in 80 % of the cases the
-    // child will be hiv positive, too.
-    else if (rand_num[2] < 0.8) {
+    // let's assume that if a mother is HIV positive, the child will be HIV 
+    // positive, too. (with a certain probability)
+    else if (rand_num[2] < sparam->birth_infection_probability) {
       child->state_ = GemsState::kGems1;
       // year of infection to present year, Question: Ask Lukas how to get iter
       child->year_of_infection_ = 2000;
@@ -182,10 +183,11 @@ struct GiveBirth : public Behavior {
 
     // Add the "grow and divide" behavior to each cell
     child->AddBehavior(new RandomMigration());
-    child->AddBehavior(new MatingBehaviour());
     child->AddBehavior(new GetOlder());
-    if (child->sex_ == Sex::kFemale){
+    if (child->sex_ == Sex::kFemale) {
       child->AddBehavior(new GiveBirth());
+    } else {
+      child->AddBehavior(new MatingBehaviour());
     }
     return child;
   }
@@ -194,13 +196,15 @@ struct GiveBirth : public Behavior {
     auto* sim = Simulation::GetActive();
     auto* ctxt = sim->GetExecutionContext();
     auto* random = sim->GetRandom();
+    auto* param = sim->GetParam();
+    const auto* sparam = param->Get<SimParam>();
     auto* mother = bdm_static_cast<Person*>(agent);
     // Parameter 0.24 is chosen because our GiveBirth Behaviour is based on a
     // Bernoulli experiment. A binomial distribuition peaks at around 6 for 25
     // tries and a birth probability of 0.24.
-    if (random->Uniform(0.0, 1.0) < 0.24 && mother->age_ <= 40 &&
-        mother->age_ >= 15) {
-      auto* new_child = create_child(random, mother);
+    if (random->Uniform(0.0, 1.0) < sparam->give_birth_probability &&
+        mother->age_ <= sparam->max_age && mother->age_ >= sparam->min_age) {
+      auto* new_child = create_child(random, mother, sparam);
       ctxt->AddAgent(new_child);
     }
   }

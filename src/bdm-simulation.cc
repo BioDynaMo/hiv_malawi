@@ -17,6 +17,7 @@
 #include "core/operation/operation_registry.h"
 #include "core/operation/reduction_op.h"
 
+#include "sim-param.h"
 #include "bdm-simulation.h"
 #include "categorical-environment.h"
 #include "population-initialization.h"
@@ -25,6 +26,11 @@
 
 namespace bdm {
 
+// Initialize parameter group Uid, part of the BioDynaMo API, needs to be part 
+// of a cc file, depends on #include "sim-param.h"
+const ParamGroupUid SimParam::kUid = ParamGroupUidGenerator::Get()->NewUid();
+
+// Register custom reduction operation
 BDM_REGISTER_TEMPLATE_OP(ReductionOp, Population, "ReductionOpPopulation",
                          kCpu);
 
@@ -70,19 +76,31 @@ struct add_thread_local_populations
 
 // BioDynaMo's main simulation
 int Simulate(int argc, const char** argv) {
+
+  // Register the Siulation parameter
+  Param::RegisterParamGroup(new SimParam());
+
+  // Initialize the Simulation
   Simulation simulation(argc, argv);
+
+  // Get a pointer to the param object
+  auto* param = simulation.GetParam();
+  // Get a pointer to an instance of SimParam
+  auto* sparam = param->Get<SimParam>();
+
+  // ToDo: print simulation parameter
 
   // Randomly initialize a population
   {
     Timing timer_init("RUNTIME POPULATION INITIALIZATION: ");
-    auto random = simulation.GetRandom();
+    // auto random = simulation.GetRandom();
     // Use custom environment for simulation. The command SetEnvironment is 
     // currently not implemented in the master, it needs to set in BioDynaMo 
     // in simulation.h / simulation.cc
     auto* env = new CategoricalEnvironment();
     simulation.SetEnvironement(env);
-    random->SetSeed(1234);
-    initialize_population(random, 40000);
+    // random->SetSeed(sparam->random_seed);
+    initialize_population();
   }
 
   // Get population statistics, i.e. extract data from simulation
@@ -102,7 +120,7 @@ int Simulate(int argc, const char** argv) {
   // Run simulation for one timestep
   {
     Timing timer_sim("RUNTIME SIMULATION:                ");
-    simulation.GetScheduler()->Simulate(100);
+    simulation.GetScheduler()->Simulate(sparam->number_of_iterations);
   }
 
   {

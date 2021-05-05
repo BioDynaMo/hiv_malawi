@@ -44,6 +44,7 @@ float sample_age(float rand_num_1, float rand_num_2, int sex) {
 }
 
 int sample_location(float rand_num) {
+  // The current vector leads to locactions ranging from 0 to 27
   std::vector<float> location_distribution{
       0.012, 0.03,  0.031, 0.088, 0.104, 0.116, 0.175, 0.228, 0.273, 0.4,
       0.431, 0.453, 0.498, 0.517, 0.54,  0.569, 0.645, 0.679, 0.701, 0.736,
@@ -139,7 +140,7 @@ auto create_person(Random* random_generator) {
   // Add the behaviours to the person.
   // person->AddBehavior(new Infection());
   // person->AddBehavior(new RandomMovement());
-  // person->AddBehavior(new RandomMigration());
+  person->AddBehavior(new RandomMigration());
   person->AddBehavior(new GetOlder());
   person->AddBehavior(new MatingBehaviour());
   if (person->sex_ == Sex::kFemale && person->age_ > 15 && person->age_ < 40) {

@@ -126,7 +126,7 @@ struct RandomMigration : public Behavior {
     int migration_direction = static_cast<int>(random->Gaus(0.0, 2.0));
     if (person->location_ + migration_direction < 0) {
       person->location_ += Location::kLocLast + migration_direction;
-    } else if (person->location_ + migration_direction > Location::kLocLast) {
+    } else if (person->location_ + migration_direction >= Location::kLocLast) {
       person->location_ += migration_direction - Location::kLocLast;
     } else {
       person->location_ += migration_direction;
@@ -284,7 +284,7 @@ struct GiveBirth : public Behavior {
     // Add the "grow and divide" behavior to each cell
     // child->AddBehavior(new Infection());
     // child->AddBehavior(new RandomMovement());
-    // child->AddBehavior(new RandomMigration());
+    child->AddBehavior(new RandomMigration());
     child->AddBehavior(new MatingBehaviour());
     child->AddBehavior(new GetOlder());
     if (child->sex_ == Sex::kFemale){

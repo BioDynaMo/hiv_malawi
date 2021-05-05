@@ -84,7 +84,7 @@ int Simulate(int argc, const char** argv) {
     auto* env = new CategoricalEnvironment();
     simulation.SetEnvironement(env);
     random->SetSeed(1234);
-    initialize_population(random, 200000);
+    initialize_population(random, 40000);
   }
 
   // Get population statistics, i.e. extract data from simulation

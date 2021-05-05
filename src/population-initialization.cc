@@ -1,14 +1,10 @@
-#include <cassert>
-#include <iostream>
 #include <limits>
 #include <vector>
 
 #include "biodynamo.h"
-#include "core/agent/agent_pointer.h"
-#include "core/simulation.h"
-#include "core/util/log.h"
 
 #include "datatypes.h"
+#include "person-behavior.h"
 #include "population-initialization.h"
 
 // All hard-coded numbers are taken from Janne's work (Parameters_D1.R)

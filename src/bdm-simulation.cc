@@ -19,8 +19,6 @@
 
 #include "bdm-simulation.h"
 #include "categorical-environment.h"
-#include "datatypes.h"
-#include "person.h"
 #include "population-initialization.h"
 #include "storage.h"
 #include "visualize.h"

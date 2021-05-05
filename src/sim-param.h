@@ -27,17 +27,19 @@ struct SimParam : public ParamGroup {
   // different parameters.
   float min_healthy = 45.;
   float delta_healthy = 75.;
-  float alpha_health = 8.;
-  float min_hiv = 45.;
-  float delta_hiv = 75.;
+  float alpha_healthy = 8.;
+  float min_hiv = 5.;
+  float delta_hiv = 45.;
   float alpha_hiv = 8.;
+  // Probability of getting infected when having intercourse with infected agent
+  float infection_probability = 0.7;
+  // Probability for agent to be infected at beginning of simulation
+  float initial_infection_probability = 0.03;
   // Parameter 0.24 is chosen because our GiveBirth Behaviour is based on a
   // Bernoulli experiment. A binomial distribuition peaks at around 6 for 25
   // tries (=40-15) and a birth probability of 0.24. This corresponds to the
   // typical birth rate in the region.
   float give_birth_probability = 0.24;
-  // Probability for agent to be infected at beginning of simulation
-  float initial_infection_probability = 0.03;
   // Probability for agent to be infected at birth (if mother is infected)
   float birth_infection_probability = 0.8;
   // Probability of creating a male agent, used in population initialization and

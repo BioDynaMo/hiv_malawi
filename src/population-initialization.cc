@@ -1,3 +1,18 @@
+// -----------------------------------------------------------------------------
+//
+// Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
+// Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+//
+// See the LICENSE file distributed with this work for details.
+// See the NOTICE file distributed with this work for additional information
+// regarding copyright ownership.
+//
+// -----------------------------------------------------------------------------
+
 #include <limits>
 #include <vector>
 
@@ -20,6 +35,7 @@ float sample_age(float rand_num_1, float rand_num_2, int sex,
       continue;
     }
   }
+  // This line of code should never be reached
   Log::Warning("sample_age()",
                "Could not sample the age. Recieved inputs:", rand_num_1, ", ",
                rand_num_2, ", ", sex, ". Use age 0.");
@@ -35,6 +51,7 @@ int sample_location(float rand_num,
       continue;
     }
   }
+  // This line of code should never be reached
   Log::Warning("sample_location()",
                "Could not sample the location. Recieved inputs: ", rand_num,
                ". Use location 0.");
@@ -62,7 +79,7 @@ int compute_sociobehavioural(float rand_num, int age,
   if (age <= 15) {
     return 0;
   }
-  if (rand_num < sociobehavioural_risk_probability) {
+  if (rand_num > sociobehavioural_risk_probability) {
     return 0;
   } else {
     return 1;
@@ -74,7 +91,7 @@ int compute_biomedical(float rand_num, int age,
   if (age <= 15) {
     return 0;
   }
-  if (rand_num < biomedical_risk_probability) {
+  if (rand_num > biomedical_risk_probability) {
     return 0;
   } else {
     return 1;
@@ -112,19 +129,23 @@ auto create_person(Random* random_generator, const SimParam* sparam) {
       rand_num[5], person->age_, sparam->sociobehavioural_risk_probability);
   person->biomedical_factor_ = compute_biomedical(
       rand_num[6], person->age_, sparam->biomedical_risk_probability);
-  // Store the year when the agent got infected
-  person->year_of_infection_ = std::numeric_limits<float>::max();
-  // NOTE: we do not assign a specific mother or partner during the population
-  // initialization. Use nullptr.
-  person->mother_id_ = AgentPointer<Person>();
-  person->partner_id_ = AgentPointer<Person>();
 
-  // Add the behaviours to the person.
+  ///! The aguments below are currently either not used or repetitive.
+  // // Store the year when the agent got infected
+  // person->year_of_infection_ = std::numeric_limits<float>::max();
+  // // NOTE: we do not assign a specific mother or partner during the
+  // population
+  // // initialization. Use nullptr.
+  // person->mother_id_ = AgentPointer<Person>();
+  // person->partner_id_ = AgentPointer<Person>();
+
+  // BioDynaMo API: Add the behaviors to the Agent
   person->AddBehavior(new RandomMigration());
   person->AddBehavior(new GetOlder());
-  person->AddBehavior(new MatingBehaviour());
   if (person->sex_ == Sex::kFemale) {
     person->AddBehavior(new GiveBirth());
+  } else {
+    person->AddBehavior(new MatingBehaviour());
   }
   return person;
 };
@@ -140,7 +161,9 @@ void initialize_population() {
 
 #pragma omp for
     for (int x = 0; x < sparam->initial_population_size; x++) {
+      // Create a person
       auto* new_person = create_person(random_generator, sparam);
+      // BioDynaMo API: Add agent (person) to simulation
       ctxt->AddAgent(new_person);
     }
   }

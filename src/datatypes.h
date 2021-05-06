@@ -1,3 +1,18 @@
+// -----------------------------------------------------------------------------
+//
+// Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
+// Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+//
+// See the LICENSE file distributed with this work for details.
+// See the NOTICE file distributed with this work for additional information
+// regarding copyright ownership.
+//
+// -----------------------------------------------------------------------------
+
 #ifndef DATATYPES_H_
 #define DATATYPES_H_
 
@@ -10,7 +25,8 @@
 namespace bdm {
 
 // Possible illness states. If you adjust this enum, make sure to put the last
-// element into the definition of struct Population below.
+// element into the definition of struct Population below. Even better, just
+// leave the kGemsLast at the End.
 enum GemsState { kHealthy, kGems1, kGems2, kGems3, kGemsLast };
 
 // Possible sex
@@ -51,7 +67,8 @@ enum Location {
   kLocLast
 };
 
-// Describes a snapshot of the population in a certain year
+// For each year / simulation step, we describe the population with the struct
+// Population.
 struct Population {
   // Constructor to obtain correct size of zero-initialized vectors.
   Population()
@@ -62,15 +79,23 @@ struct Population {
         age_female(120, 0),
         age_male(120, 0) {}
 
-  // member variables
+  // Number of healthy females
   int healthy_female;
+  // Number of healthy males
   int healthy_male;
+  // Number of infected females, we count different GemsStates separately in
+  // the vector components.
   std::vector<int> infected_female;
+  // Number of infected males, we count different GemsStates separately in
+  // the vector components.
   std::vector<int> infected_male;
+  // Age distribution for the female population
   std::vector<int> age_female;
+  // Age distribution for the male population
   std::vector<int> age_male;
 
-  // Define inplace add for Population
+  // Define inplace add for Population. This is necessary to extract the
+  // Population in parallel from the set of agents.
   Population& operator+=(const Population& other_population) {
     // add vectors for age_male
     std::transform(this->age_male.begin(), this->age_male.end(),
@@ -96,6 +121,8 @@ struct Population {
     return *this;
   }
 
+  // This is a helper function such that a Population "pop" object can be
+  // printed as: std::cout << pop << std::endl;
   friend std::ostream& operator<<(std::ostream& out,
                                   const Population& population) {
     out << "Population Information: \n";

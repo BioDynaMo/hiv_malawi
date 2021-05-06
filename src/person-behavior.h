@@ -1,3 +1,18 @@
+// -----------------------------------------------------------------------------
+//
+// Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
+// Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+//
+// See the LICENSE file distributed with this work for details.
+// See the NOTICE file distributed with this work for additional information
+// regarding copyright ownership.
+//
+// -----------------------------------------------------------------------------
+
 #ifndef PERSON_BEHAVIOR_H_
 #define PERSON_BEHAVIOR_H_
 
@@ -9,9 +24,11 @@
 namespace bdm {
 
 ////////////////////////////////////////////////////////////////////////////////
-// BioDynaMo's Agent / Individual Behaviours
+// BioDynaMo's Agent / Individual Behaviors
 ////////////////////////////////////////////////////////////////////////////////
 
+// A behavior that allows agents to randomly migrate between the categorical
+// loactions. It uses a gausion random process to determine the next location.
 struct RandomMigration : public Behavior {
   BDM_BEHAVIOR_HEADER(RandomMigration, Behavior, 1);
 
@@ -36,6 +53,12 @@ struct RandomMigration : public Behavior {
   }
 };
 
+// This is the mating and therefore also the infection behaviour. The Behavior
+// is only executed by male agents. For each male agent, we determine the
+// number of sex partners with a gaussian random process and randomly select
+// from all available females at his location. For each contact, HIV (if
+// present) can be transmitted from the infected to the healthy individual with
+// a certain probability.
 struct MatingBehaviour : public Behavior {
   BDM_BEHAVIOR_HEADER(MatingBehaviour, Behavior, 1);
 
@@ -84,6 +107,8 @@ struct MatingBehaviour : public Behavior {
   }
 };
 
+// The GetOlder behavior describes all things that happen to an agent while
+// getting older such as for instance having a greater chance to die.
 struct GetOlder : public Behavior {
   BDM_BEHAVIOR_HEADER(GetOlder, Behavior, 1);
 
@@ -98,7 +123,7 @@ struct GetOlder : public Behavior {
 
     // If between min_age and max_age, reassign risk factors
     if (person->age_ >= sparam->min_age && sparam->min_age <= sparam->max_age) {
-      // update risk factors stochastically like in initialization
+      // Update risk factors stochastically like in initialization
       if (random->Uniform() < sparam->sociobehavioural_risk_probability) {
         person->social_behaviour_factor_ = 0;
       } else {
@@ -114,7 +139,7 @@ struct GetOlder : public Behavior {
       person->biomedical_factor_ = 0;
     }
 
-    // possibly die - if not, just get older
+    // Possibly die - if not, just get older
     bool stay_alive{true};
     // Let's assume a linear increase of the death probability per year for
     // healty agents.
@@ -147,12 +172,16 @@ struct GetOlder : public Behavior {
   }
 };
 
+// The GiveBirth behavior is assigned to all female agents. If a female is in a
+// certain age range, she can give birth to a child that is located at the same
+// place. If she is HIV positive, there is a certain chance to infect the child
+// while giving birth.
 struct GiveBirth : public Behavior {
   BDM_BEHAVIOR_HEADER(GiveBirth, Behavior, 1);
 
   GiveBirth() {}
 
-  // create a single child
+  // Helper function to create a single child
   Person* create_child(Random* random_generator, Person* mother,
                        const SimParam* sparam) {
     // Create new child
@@ -170,23 +199,29 @@ struct GiveBirth : public Behavior {
     // Stores the current GemsState of the child.
     if (mother->state_ == GemsState::kHealthy) {
       child->state_ = GemsState::kHealthy;
-      // Store the year when the agent got infected
-      child->year_of_infection_ = std::numeric_limits<float>::max();
+
+      ///! The aguments below are currently either not used or repetitive.
+      // // Store the year when the agent got infected
+      // child->year_of_infection_ = std::numeric_limits<float>::max();
     }
     // let's assume that if a mother is HIV positive, the child will be HIV
     // positive, too. (with a certain probability)
     else if (random_generator->Uniform() <
              sparam->birth_infection_probability) {
       child->state_ = GemsState::kGems1;
-      // year of infection to present year, Question: Ask Lukas how to get iter
-      child->year_of_infection_ = 2000;
-    }
-    // NOTE: we do not assign a specific mother or partner at the moment. Use
-    // nullptr instead.
-    child->mother_id_ = AgentPointer<Person>();
-    child->partner_id_ = AgentPointer<Person>();
 
-    // Add the "grow and divide" behavior to each cell
+      ///! The aguments below are currently either not used or repetitive.
+      // // year of infection to present year, Question: Ask Lukas how to get
+      // iter child->year_of_infection_ = 2000;
+    }
+
+    ///! The aguments below are currently either not used or repetitive.
+    // // NOTE: we do not assign a specific mother or partner at the moment. Use
+    // // nullptr instead.
+    // child->mother_id_ = AgentPointer<Person>();
+    // child->partner_id_ = AgentPointer<Person>();
+
+    // BioDynaMo API: Add the behaviors to the Agent
     child->AddBehavior(new RandomMigration());
     child->AddBehavior(new GetOlder());
     if (child->sex_ == Sex::kFemale) {
@@ -207,7 +242,9 @@ struct GiveBirth : public Behavior {
     // Each potential mother gives birth with a certain probability.
     if (random->Uniform() < sparam->give_birth_probability &&
         mother->age_ <= sparam->max_age && mother->age_ >= sparam->min_age) {
+      // Create a child
       auto* new_child = create_child(random, mother, sparam);
+      // BioDynaMo API: Add agent (child) to simulation
       ctxt->AddAgent(new_child);
     }
   }

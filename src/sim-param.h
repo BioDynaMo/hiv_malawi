@@ -11,15 +11,15 @@ namespace bdm {
 struct SimParam : public ParamGroup {
   BDM_PARAM_GROUP_HEADER(SimParam, 1);
 
-  uint64_t number_of_iterations = 100; // (1960-2060)
-  uint64_t initial_population_size = 40000;
+  uint64_t number_of_iterations = 60; // (1960-2060)
+  uint64_t initial_population_size = 3600000;
   uint64_t random_seed = 1234;
   int min_age = 15;
   int max_age = 40;
   int age_of_death = 90;
   float migration_mean = 0.0;
   float migration_sigma = 2.0;
-  float no_mates_mean = 3.0;
+  float no_mates_mean = 2.0;
   float no_mates_sigma = 1.0;
   // Death is modeled by a random process. We generate a random number r in
   // [0,1] and check if: r< (age - min) \ (delta * alpha). If that evaluates to
@@ -32,16 +32,16 @@ struct SimParam : public ParamGroup {
   float delta_hiv = 45.;
   float alpha_hiv = 8.;
   // Probability of getting infected when having intercourse with infected agent
-  float infection_probability = 0.7;
+  float infection_probability = 0.1;
   // Probability for agent to be infected at beginning of simulation
-  float initial_infection_probability = 0.03;
+  float initial_infection_probability = 0.01;
   // Parameter 0.24 is chosen because our GiveBirth Behaviour is based on a
   // Bernoulli experiment. A binomial distribuition peaks at around 6 for 25
   // tries (=40-15) and a birth probability of 0.24. This corresponds to the
   // typical birth rate in the region.
-  float give_birth_probability = 0.24;
+  float give_birth_probability = 0.18;
   // Probability for agent to be infected at birth (if mother is infected)
-  float birth_infection_probability = 0.8;
+  float birth_infection_probability = 0.1;
   // Probability of creating a male agent, used in population initialization and
   // giving birth
   float probability_male = 0.499;

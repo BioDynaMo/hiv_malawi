@@ -123,8 +123,7 @@ auto create_person(Random* random_generator, const SimParam* sparam) {
   person->AddBehavior(new RandomMigration());
   person->AddBehavior(new GetOlder());
   person->AddBehavior(new MatingBehaviour());
-  if (person->sex_ == Sex::kFemale && person->age_ > sparam->min_age &&
-      person->age_ < sparam->max_age) {
+  if (person->sex_ == Sex::kFemale) {
     person->AddBehavior(new GiveBirth());
   }
   return person;

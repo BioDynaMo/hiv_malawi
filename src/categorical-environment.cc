@@ -31,12 +31,6 @@ AgentPointer<Person> AgentVector::GetRandomAgent() {
 
 void AgentVector::AddAgent(AgentPointer<Person> agent) {
   agents_.push_back(agent);
-  // try {
-  //   agents_.push_back(agent);
-  // } catch (const std::exception& e) {
-  //   Log::Fatal("AgentVector::AddAgent()", "Exception:", e.what(),
-  //              "| Agent: ", agent, "| agents_.size(): ", agents_.size());
-  // }
 }
 
 void AgentVector::Clear() {

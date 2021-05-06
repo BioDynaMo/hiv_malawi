@@ -14,9 +14,9 @@
 
 namespace bdm {
 
-// DataType to store all agents at a certain location. Usa as
-// AgentsAtLocation agents; agents[location][some_number]
-// For our purposes, our
+// This is a small helper class that wraps a vector of Agent pointers. It's a 
+// building block of the CategoricalEnvironment because we store a vector of 
+// AgentPointer for each of the categorical locations.
 class AgentVector {
  private:
   // vector of AgentPointers
@@ -46,6 +46,9 @@ class AgentVector {
   void Clear();
 };
 
+// This is our customn BioDynaMo environment to describe the female population 
+// at all locations. By knowing the all females at a location, it's easy to 
+// select suitable mates during the MatingBehavior.
 class CategoricalEnvironment : public Environment {
  public:
   // Default constructor
@@ -53,6 +56,9 @@ class CategoricalEnvironment : public Environment {
                          size_t n_loc = Location::kLocLast)
       : min_age_(min_age), max_age_(max_age), female_agents_(n_loc) {}
 
+  // This is the update function, the is called automatically by BioDynaMo for 
+  // every simulation step. We delete the previous information and store a 
+  // vector of AgentPointers for each location.
   void Update() override {
     // // Debug
     // uint64_t iter =
@@ -86,9 +92,6 @@ class CategoricalEnvironment : public Environment {
           Log::Fatal("CategoricalEnvironment::Update()",
                      "person_ptr is nullptr");
         }
-        // Memory leak
-        // This potentially causes a memory leak, check how to handle & delete
-        // AgentPointers
         env->AddAgentToLocation(person->location_, person_ptr);
       } else {
         ;
@@ -96,6 +99,7 @@ class CategoricalEnvironment : public Environment {
     });
   };
 
+  // Add an agent pointer to a certain location
   void AddAgentToLocation(size_t loc, AgentPointer<Person> agent) {
     if (female_agents_.size() <= loc) {
       Log::Fatal("CategoricalEnvironment::AddAgentToLocation()",
@@ -105,8 +109,10 @@ class CategoricalEnvironment : public Environment {
     female_agents_[loc].AddAgent(agent);
   };
 
+  // Prints how many females are at a certain location
   void DescribePopulation();
 
+  // Returns a random AgentPointer at a specific location
   AgentPointer<Person> GetRamdomAgentAtLocation(size_t loc) {
     if (female_agents_.size() <= loc) {
       Log::Fatal("CategoricalEnvironment::AddAgentToLocation()",
@@ -116,7 +122,6 @@ class CategoricalEnvironment : public Environment {
     return female_agents_[loc].GetRandomAgent();
   };
 
-  void Clear() override { ; };
 
   // Setter functions to access private member variables
   void SetNumLocations(size_t num_locations);
@@ -130,6 +135,7 @@ class CategoricalEnvironment : public Environment {
 
   // The remaining public functinos are inherited from Environment but not
   // needed here.
+  void Clear() override { ; };
   void ForEachNeighbor(Functor<void, Agent*, double>& lambda,
                        const Agent& query, double squared_radius) override;
 

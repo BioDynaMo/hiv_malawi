@@ -6,7 +6,10 @@
 
 namespace bdm {
 
-int save_to_disk(std::vector<Population> populations);
+// This function is currently not implemented. If necessary, this function can 
+// be filled with code to save the Population-s at different stages of the 
+// simulation to disk. Consider using ROOT files.
+int save_to_disk(const std::vector<Population>& populations);
 
 }  // namespace bdm
 

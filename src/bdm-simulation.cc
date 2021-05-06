@@ -27,14 +27,17 @@
 namespace bdm {
 
 // Initialize parameter group Uid, part of the BioDynaMo API, needs to be part 
-// of a cc file, depends on #include "sim-param.h"
+// of a cc file, depends on #include "sim-param.h". With this, we can access the
+// simulation parameters anywhere in the simulation.
 const ParamGroupUid SimParam::kUid = ParamGroupUidGenerator::Get()->NewUid();
 
-// Register custom reduction operation
+// Register custom reduction operation to extract population information at each
+// timestep.
 BDM_REGISTER_TEMPLATE_OP(ReductionOp, Population, "ReductionOpPopulation",
                          kCpu);
 
-// Functor to accumulate the information into the population struct.
+// Functor to determine entries of the Populatoin struct from a set of agents. 
+// Is executed by each thread and will result in OMP_NUM_THREADS Population-s.
 struct get_thread_local_population_statistics
     : public Functor<void, Agent*, Population*> {
   void operator()(Agent* agent, Population* tl_pop) {
@@ -61,7 +64,7 @@ struct get_thread_local_population_statistics
 };
 
 
-// Functor to summarize thread local population into one population struct
+// Functor to summarize thread local Population-s into one Population struct
 struct add_thread_local_populations
     : public Functor<Population, const SharedData<Population>&> {
   Population operator()(const SharedData<Population>& tl_populations) override {
@@ -74,7 +77,9 @@ struct add_thread_local_populations
   }
 };
 
+////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's main simulation
+////////////////////////////////////////////////////////////////////////////////
 int Simulate(int argc, const char** argv) {
 
   // Register the Siulation parameter
@@ -88,18 +93,17 @@ int Simulate(int argc, const char** argv) {
   // Get a pointer to an instance of SimParam
   auto* sparam = param->Get<SimParam>();
 
+  // Use custom environment for simulation. The command SetEnvironment is 
+  // currently not implemented in the master, it needs to set in BioDynaMo 
+  // in simulation.h / simulation.cc (see README.md)
+  auto* env = new CategoricalEnvironment(sparam->min_age,sparam->max_age);
+  simulation.SetEnvironement(env);
+
   // ToDo: print simulation parameter
 
   // Randomly initialize a population
   {
     Timing timer_init("RUNTIME POPULATION INITIALIZATION: ");
-    // auto random = simulation.GetRandom();
-    // Use custom environment for simulation. The command SetEnvironment is 
-    // currently not implemented in the master, it needs to set in BioDynaMo 
-    // in simulation.h / simulation.cc
-    auto* env = new CategoricalEnvironment(sparam->min_age,sparam->max_age);
-    simulation.SetEnvironement(env);
-    // random->SetSeed(sparam->random_seed);
     initialize_population();
   }
 
@@ -117,7 +121,7 @@ int Simulate(int argc, const char** argv) {
   // Don't run load balancing, not working with custom environment.
   scheduler->UnscheduleOp(scheduler->GetOps("load balancing")[0]);
 
-  // Run simulation for one timestep
+  // Run simulation for <number_of_iterations> timesteps
   {
     Timing timer_sim("RUNTIME SIMULATION:                ");
     simulation.GetScheduler()->Simulate(sparam->number_of_iterations);
@@ -126,8 +130,15 @@ int Simulate(int argc, const char** argv) {
   {
     Timing timer_post("RUNTIME POSTPROCESSING:            ");
     const auto& sim_result = get_statistics_impl->GetResults();
+
+    // // Write simulatoin data to disk for further external investigations
     // save_to_disk(sim_result);
-    //std::cout << sim_result[0] << std::endl;
+
+    // // Print population at time step 0 to shell
+    // std::cout << sim_result[0] << std::endl;
+    
+    // Generate ROOT plot to visualize the number of healthy and infected 
+    // individuals over time.
     plot_evolution(sim_result);
   }
 

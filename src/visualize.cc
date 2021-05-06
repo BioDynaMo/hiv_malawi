@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 // Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights 
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
 // Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@
 
 namespace bdm {
 
-int plot_evolution(const std::vector<Population>& populations) {
+int plot_evolution(const std::vector<Population> &populations) {
   // Extract infromation from populations
   std::vector<double> healthy(populations.size());
   std::vector<double> infected(populations.size());

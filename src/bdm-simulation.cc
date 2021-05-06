@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 // Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights 
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
 // Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,16 +18,16 @@
 #include "core/operation/operation_registry.h"
 #include "core/operation/reduction_op.h"
 
-#include "sim-param.h"
 #include "bdm-simulation.h"
 #include "categorical-environment.h"
 #include "population-initialization.h"
+#include "sim-param.h"
 #include "storage.h"
 #include "visualize.h"
 
 namespace bdm {
 
-// Initialize parameter group Uid, part of the BioDynaMo API, needs to be part 
+// Initialize parameter group Uid, part of the BioDynaMo API, needs to be part
 // of a cc file, depends on #include "sim-param.h". With this, we can access the
 // simulation parameters anywhere in the simulation.
 const ParamGroupUid SimParam::kUid = ParamGroupUidGenerator::Get()->NewUid();
@@ -37,7 +37,7 @@ const ParamGroupUid SimParam::kUid = ParamGroupUidGenerator::Get()->NewUid();
 BDM_REGISTER_TEMPLATE_OP(ReductionOp, Population, "ReductionOpPopulation",
                          kCpu);
 
-// Functor to determine entries of the Populatoin struct from a set of agents. 
+// Functor to determine entries of the Populatoin struct from a set of agents.
 // Is executed by each thread and will result in OMP_NUM_THREADS Population-s.
 struct get_thread_local_population_statistics
     : public Functor<void, Agent*, Population*> {
@@ -45,7 +45,7 @@ struct get_thread_local_population_statistics
     // question: what's bdm static cast?
     auto* person = bdm_static_cast<Person*>(agent);
     // Note: possibly rewrite with out if/else and check if it's faster
-    int age = static_cast<int> (person->age_);
+    int age = static_cast<int>(person->age_);
     if (person->sex_ == Sex::kMale) {
       tl_pop->age_male[age] += 1;
       if (person->state_ == GemsState::kHealthy) {
@@ -64,7 +64,6 @@ struct get_thread_local_population_statistics
   }
 };
 
-
 // Functor to summarize thread local Population-s into one Population struct
 struct add_thread_local_populations
     : public Functor<Population, const SharedData<Population>&> {
@@ -82,7 +81,6 @@ struct add_thread_local_populations
 // BioDynaMo's main simulation
 ////////////////////////////////////////////////////////////////////////////////
 int Simulate(int argc, const char** argv) {
-
   // Register the Siulation parameter
   Param::RegisterParamGroup(new SimParam());
 
@@ -94,10 +92,10 @@ int Simulate(int argc, const char** argv) {
   // Get a pointer to an instance of SimParam
   auto* sparam = param->Get<SimParam>();
 
-  // Use custom environment for simulation. The command SetEnvironment is 
-  // currently not implemented in the master, it needs to set in BioDynaMo 
+  // Use custom environment for simulation. The command SetEnvironment is
+  // currently not implemented in the master, it needs to set in BioDynaMo
   // in simulation.h / simulation.cc (see README.md)
-  auto* env = new CategoricalEnvironment(sparam->min_age,sparam->max_age);
+  auto* env = new CategoricalEnvironment(sparam->min_age, sparam->max_age);
   simulation.SetEnvironement(env);
 
   // ToDo: print simulation parameter
@@ -137,8 +135,8 @@ int Simulate(int argc, const char** argv) {
 
     // // Print population at time step 0 to shell
     // std::cout << sim_result[0] << std::endl;
-    
-    // Generate ROOT plot to visualize the number of healthy and infected 
+
+    // Generate ROOT plot to visualize the number of healthy and infected
     // individuals over time.
     plot_evolution(sim_result);
   }

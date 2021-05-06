@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 // Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights 
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
 // Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -129,11 +129,12 @@ auto create_person(Random* random_generator, const SimParam* sparam) {
       rand_num[5], person->age_, sparam->sociobehavioural_risk_probability);
   person->biomedical_factor_ = compute_biomedical(
       rand_num[6], person->age_, sparam->biomedical_risk_probability);
-  
+
   ///! The aguments below are currently either not used or repetitive.
   // // Store the year when the agent got infected
   // person->year_of_infection_ = std::numeric_limits<float>::max();
-  // // NOTE: we do not assign a specific mother or partner during the population
+  // // NOTE: we do not assign a specific mother or partner during the
+  // population
   // // initialization. Use nullptr.
   // person->mother_id_ = AgentPointer<Person>();
   // person->partner_id_ = AgentPointer<Person>();

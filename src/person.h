@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 // Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights 
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
 // Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 
 #include "biodynamo.h"
 
-namespace bdm{
+namespace bdm {
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's Agent / Individual
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +56,6 @@ class Person : public Cell {
   // AgentPointer<Person> partner_id_;
 };
 
-} // namespace bdm
+}  // namespace bdm
 
-#endif // PERSON_H_
+#endif  // PERSON_H_

@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 // Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights 
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
 // Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,8 @@
 
 namespace bdm {
 
-// This function is currently not implemented. If necessary, this function can 
-// be filled with code to save the Population-s at different stages of the 
+// This function is currently not implemented. If necessary, this function can
+// be filled with code to save the Population-s at different stages of the
 // simulation to disk. Consider using ROOT files.
 int save_to_disk(const std::vector<Population>& populations);
 

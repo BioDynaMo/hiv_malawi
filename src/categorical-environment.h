@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 // Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights 
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
 // Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,8 +29,8 @@
 
 namespace bdm {
 
-// This is a small helper class that wraps a vector of Agent pointers. It's a 
-// building block of the CategoricalEnvironment because we store a vector of 
+// This is a small helper class that wraps a vector of Agent pointers. It's a
+// building block of the CategoricalEnvironment because we store a vector of
 // AgentPointer for each of the categorical locations.
 class AgentVector {
  private:
@@ -61,8 +61,8 @@ class AgentVector {
   void Clear();
 };
 
-// This is our customn BioDynaMo environment to describe the female population 
-// at all locations. By knowing the all females at a location, it's easy to 
+// This is our customn BioDynaMo environment to describe the female population
+// at all locations. By knowing the all females at a location, it's easy to
 // select suitable mates during the MatingBehavior.
 class CategoricalEnvironment : public Environment {
  public:
@@ -71,8 +71,8 @@ class CategoricalEnvironment : public Environment {
                          size_t n_loc = Location::kLocLast)
       : min_age_(min_age), max_age_(max_age), female_agents_(n_loc) {}
 
-  // This is the update function, the is called automatically by BioDynaMo for 
-  // every simulation step. We delete the previous information and store a 
+  // This is the update function, the is called automatically by BioDynaMo for
+  // every simulation step. We delete the previous information and store a
   // vector of AgentPointers for each location.
   void Update() override {
     // // Debug
@@ -136,7 +136,6 @@ class CategoricalEnvironment : public Environment {
     }
     return female_agents_[loc].GetRandomAgent();
   };
-
 
   // Setter functions to access private member variables
   void SetNumLocations(size_t num_locations);

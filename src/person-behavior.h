@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 // Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights 
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
 // Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ namespace bdm {
 // BioDynaMo's Agent / Individual Behaviors
 ////////////////////////////////////////////////////////////////////////////////
 
-// A behavior that allows agents to randomly migrate between the categorical 
+// A behavior that allows agents to randomly migrate between the categorical
 // loactions. It uses a gausion random process to determine the next location.
 struct RandomMigration : public Behavior {
   BDM_BEHAVIOR_HEADER(RandomMigration, Behavior, 1);
@@ -53,11 +53,11 @@ struct RandomMigration : public Behavior {
   }
 };
 
-// This is the mating and therefore also the infection behaviour. The Behavior 
+// This is the mating and therefore also the infection behaviour. The Behavior
 // is only executed by male agents. For each male agent, we determine the
-// number of sex partners with a gaussian random process and randomly select 
-// from all available females at his location. For each contact, HIV (if 
-// present) can be transmitted from the infected to the healthy individual with 
+// number of sex partners with a gaussian random process and randomly select
+// from all available females at his location. For each contact, HIV (if
+// present) can be transmitted from the infected to the healthy individual with
 // a certain probability.
 struct MatingBehaviour : public Behavior {
   BDM_BEHAVIOR_HEADER(MatingBehaviour, Behavior, 1);
@@ -107,9 +107,8 @@ struct MatingBehaviour : public Behavior {
   }
 };
 
-
-// The GetOlder behavior describes all things that happen to an agent while 
-// getting older such as for instance having a greater chance to die. 
+// The GetOlder behavior describes all things that happen to an agent while
+// getting older such as for instance having a greater chance to die.
 struct GetOlder : public Behavior {
   BDM_BEHAVIOR_HEADER(GetOlder, Behavior, 1);
 
@@ -173,8 +172,8 @@ struct GetOlder : public Behavior {
   }
 };
 
-// The GiveBirth behavior is assigned to all female agents. If a female is in a 
-// certain age range, she can give birth to a child that is located at the same 
+// The GiveBirth behavior is assigned to all female agents. If a female is in a
+// certain age range, she can give birth to a child that is located at the same
 // place. If she is HIV positive, there is a certain chance to infect the child
 // while giving birth.
 struct GiveBirth : public Behavior {
@@ -210,10 +209,10 @@ struct GiveBirth : public Behavior {
     else if (random_generator->Uniform() <
              sparam->birth_infection_probability) {
       child->state_ = GemsState::kGems1;
-      
+
       ///! The aguments below are currently either not used or repetitive.
-      // // year of infection to present year, Question: Ask Lukas how to get iter
-      // child->year_of_infection_ = 2000;
+      // // year of infection to present year, Question: Ask Lukas how to get
+      // iter child->year_of_infection_ = 2000;
     }
 
     ///! The aguments below are currently either not used or repetitive.

@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 // Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights 
+// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
 // Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +37,7 @@ int sample_location(float rand_num,
 // Gives stochastic sex based on probability
 int sample_sex(float rand_num, float probability_male);
 
-// Sample HIV healt state; returns GemsState::kHealthy in 1-initial_inf... of 
+// Sample HIV healt state; returns GemsState::kHealthy in 1-initial_inf... of
 // the cases
 int sample_state(float rand_num, float initial_infection_probability);
 

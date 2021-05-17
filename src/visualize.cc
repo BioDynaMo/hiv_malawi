@@ -25,7 +25,7 @@
 
 namespace bdm {
 
-int plot_evolution(const std::vector<Population> &populations) {
+int PlotEvolution(const std::vector<Population> &populations) {
   // Extract infromation from populations
   std::vector<double> healthy(populations.size());
   std::vector<double> infected(populations.size());

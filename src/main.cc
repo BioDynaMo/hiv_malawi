@@ -28,10 +28,10 @@
 #include "stdout-utlis.h"
 
 int main(int argc, const char** argv) {
-  print_header();
+  PrintHeader();
 
   bdm::Simulate(argc, argv);
 
-  print_closing();
+  PrintClosing();
   return 0;
 }

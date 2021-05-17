@@ -182,13 +182,13 @@ struct GiveBirth : public Behavior {
   GiveBirth() {}
 
   // Helper function to create a single child
-  Person* create_child(Random* random_generator, Person* mother,
+  Person* CreateChild(Random* random_generator, Person* mother,
                        const SimParam* sparam) {
     // Create new child
     Person* child = new Person();
     // Assign sex
     child->sex_ =
-        sample_sex(random_generator->Uniform(), sparam->probability_male);
+        SampleSex(random_generator->Uniform(), sparam->probability_male);
     // Assign age - possibly -1 ?
     child->age_ = random_generator->Uniform();
     // Assign location
@@ -243,7 +243,7 @@ struct GiveBirth : public Behavior {
     if (random->Uniform() < sparam->give_birth_probability &&
         mother->age_ <= sparam->max_age && mother->age_ >= sparam->min_age) {
       // Create a child
-      auto* new_child = create_child(random, mother, sparam);
+      auto* new_child = CreateChild(random, mother, sparam);
       // BioDynaMo API: Add agent (child) to simulation
       ctxt->AddAgent(new_child);
     }

@@ -39,7 +39,7 @@ BDM_REGISTER_TEMPLATE_OP(ReductionOp, Population, "ReductionOpPopulation",
 
 // Functor to determine entries of the Populatoin struct from a set of agents.
 // Is executed by each thread and will result in OMP_NUM_THREADS Population-s.
-struct get_thread_local_population_statistics
+struct GetThreadLocalPopulationStatistics
     : public Functor<void, Agent*, Population*> {
   void operator()(Agent* agent, Population* tl_pop) {
     // question: what's bdm static cast?
@@ -65,7 +65,7 @@ struct get_thread_local_population_statistics
 };
 
 // Functor to summarize thread local Population-s into one Population struct
-struct add_thread_local_populations
+struct AddThreadLocalPopulations
     : public Functor<Population, const SharedData<Population>&> {
   Population operator()(const SharedData<Population>& tl_populations) override {
     // Get object for total population
@@ -103,15 +103,15 @@ int Simulate(int argc, const char** argv) {
   // Randomly initialize a population
   {
     Timing timer_init("RUNTIME POPULATION INITIALIZATION: ");
-    initialize_population();
+    InitializePopulation();
   }
 
   // Get population statistics, i.e. extract data from simulation
   auto* get_statistics = NewOperation("ReductionOpPopulation");
   auto* get_statistics_impl =
       get_statistics->GetImplementation<ReductionOp<Population>>();
-  get_statistics_impl->Initialize(new get_thread_local_population_statistics(),
-                                  new add_thread_local_populations());
+  get_statistics_impl->Initialize(new GetThreadLocalPopulationStatistics(),
+                                  new AddThreadLocalPopulations());
   auto* scheduler = simulation.GetScheduler();
   scheduler->ScheduleOp(get_statistics);
 
@@ -131,14 +131,14 @@ int Simulate(int argc, const char** argv) {
     const auto& sim_result = get_statistics_impl->GetResults();
 
     // // Write simulatoin data to disk for further external investigations
-    // save_to_disk(sim_result);
+    // SaveToDisk(sim_result);
 
     // // Print population at time step 0 to shell
     // std::cout << sim_result[0] << std::endl;
 
     // Generate ROOT plot to visualize the number of healthy and infected
     // individuals over time.
-    plot_evolution(sim_result);
+    PlotEvolution(sim_result);
   }
 
   return 0;

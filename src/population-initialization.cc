@@ -26,7 +26,7 @@
 
 namespace bdm {
 
-float sample_age(float rand_num_1, float rand_num_2, int sex,
+float SampleAge(float rand_num_1, float rand_num_2, int sex,
                  const std::vector<float>& age_distribution) {
   for (int i = 0; i < age_distribution.size(); i++) {
     if (rand_num_1 <= age_distribution[i]) {
@@ -36,13 +36,13 @@ float sample_age(float rand_num_1, float rand_num_2, int sex,
     }
   }
   // This line of code should never be reached
-  Log::Warning("sample_age()",
+  Log::Warning("SampleAge()",
                "Could not sample the age. Recieved inputs:", rand_num_1, ", ",
                rand_num_2, ", ", sex, ". Use age 0.");
   return 0;
 }
 
-int sample_location(float rand_num,
+int SampleLocation(float rand_num,
                     const std::vector<float>& location_distribution) {
   for (int i = 0; i < location_distribution.size(); i++) {
     if (rand_num <= location_distribution[i]) {
@@ -52,13 +52,13 @@ int sample_location(float rand_num,
     }
   }
   // This line of code should never be reached
-  Log::Warning("sample_location()",
+  Log::Warning("SampleLocation()",
                "Could not sample the location. Recieved inputs: ", rand_num,
                ". Use location 0.");
   return 0;
 }
 
-int sample_sex(float rand_num, float probability_male) {
+int SampleSex(float rand_num, float probability_male) {
   if (rand_num <= probability_male) {
     return Sex::kMale;
   } else {
@@ -66,7 +66,7 @@ int sample_sex(float rand_num, float probability_male) {
   }
 }
 
-int sample_state(float rand_num, float initial_infection_probability) {
+int SampleState(float rand_num, float initial_infection_probability) {
   if (rand_num <= initial_infection_probability) {
     return GemsState::kGems1;
   } else {
@@ -74,7 +74,7 @@ int sample_state(float rand_num, float initial_infection_probability) {
   }
 }
 
-int compute_sociobehavioural(float rand_num, int age,
+int ComputeSociobehavioural(float rand_num, int age,
                              float sociobehavioural_risk_probability) {
   if (age <= 15) {
     return 0;
@@ -86,7 +86,7 @@ int compute_sociobehavioural(float rand_num, int age,
   }
 }
 
-int compute_biomedical(float rand_num, int age,
+int ComputeBiomedical(float rand_num, int age,
                        float biomedical_risk_probability) {
   if (age <= 15) {
     return 0;
@@ -98,7 +98,7 @@ int compute_biomedical(float rand_num, int age,
   }
 }
 
-auto create_person(Random* random_generator, const SimParam* sparam) {
+auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   // Get all random numbers for initialization
   std::vector<float> rand_num{};
   rand_num.reserve(10);
@@ -109,25 +109,25 @@ auto create_person(Random* random_generator, const SimParam* sparam) {
   // Create new person
   Person* person = new Person();
   // Assign sex
-  person->sex_ = sample_sex(rand_num[0], sparam->probability_male);
+  person->sex_ = SampleSex(rand_num[0], sparam->probability_male);
   // Assign age
   if (person->sex_ == Sex::kMale) {
-    person->age_ = sample_age(rand_num[1], rand_num[2], person->sex_,
+    person->age_ = SampleAge(rand_num[1], rand_num[2], person->sex_,
                               sparam->male_age_distribution);
   } else {
-    person->age_ = sample_age(rand_num[1], rand_num[2], person->sex_,
+    person->age_ = SampleAge(rand_num[1], rand_num[2], person->sex_,
                               sparam->female_age_distribution);
   }
   // Assign location
   person->location_ =
-      sample_location(rand_num[3], sparam->location_distribution);
+      SampleLocation(rand_num[3], sparam->location_distribution);
   // Assign the GemsState of the person.
   person->state_ =
-      sample_state(rand_num[4], sparam->initial_infection_probability);
+      SampleState(rand_num[4], sparam->initial_infection_probability);
   // Compute risk factors
-  person->social_behaviour_factor_ = compute_sociobehavioural(
+  person->social_behaviour_factor_ = ComputeSociobehavioural(
       rand_num[5], person->age_, sparam->sociobehavioural_risk_probability);
-  person->biomedical_factor_ = compute_biomedical(
+  person->biomedical_factor_ = ComputeBiomedical(
       rand_num[6], person->age_, sparam->biomedical_risk_probability);
 
   ///! The aguments below are currently either not used or repetitive.
@@ -150,7 +150,7 @@ auto create_person(Random* random_generator, const SimParam* sparam) {
   return person;
 };
 
-void initialize_population() {
+void InitializePopulation() {
 #pragma omp parallel
   {
     auto* sim = Simulation::GetActive();
@@ -162,7 +162,7 @@ void initialize_population() {
 #pragma omp for
     for (int x = 0; x < sparam->initial_population_size; x++) {
       // Create a person
-      auto* new_person = create_person(random_generator, sparam);
+      auto* new_person = CreatePerson(random_generator, sparam);
       // BioDynaMo API: Add agent (person) to simulation
       ctxt->AddAgent(new_person);
     }

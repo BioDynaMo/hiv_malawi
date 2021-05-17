@@ -39,10 +39,10 @@ class AgentVector {
   // Has the vector been shuffled or not
   bool shuffled_;
   // Iter to go through vector and obtain random Agents
-  size_t iter;
+  size_t iter_;
 
   // Shuffle the vector agents_
-  void shuffle_();
+  void Shuffle();
 
  public:
   // Get the number of agents in the vector

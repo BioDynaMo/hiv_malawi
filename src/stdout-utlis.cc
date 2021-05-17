@@ -17,7 +17,7 @@
 #include <string>
 #include "bdm_version.h"
 
-void print_header() {
+void PrintHeader() {
   std::string header{
       "\n"
       "========================================================================"
@@ -32,7 +32,7 @@ void print_header() {
   std::cout << header << ver.String() << " .\n" << std::endl;
 }
 
-void print_closing() {
+void PrintClosing() {
   std::string closing{
       "\nSimulation completed successfully!\n"
       "\n"

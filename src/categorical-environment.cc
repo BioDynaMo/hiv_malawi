@@ -21,7 +21,7 @@ namespace bdm {
 // AgentVector
 ////////////////////////////////////////////////////////////////////////////////
 
-void AgentVector::shuffle_() {
+void AgentVector::Shuffle() {
   std::random_device rd;
   std::mt19937 g(rd());
   std::shuffle(agents_.begin(), agents_.end(), g);
@@ -35,13 +35,13 @@ AgentPointer<Person> AgentVector::GetRandomAgent() {
                "regions. Consider increasing the number of Agents.");
   }
   if (!shuffled_) {
-    shuffle_();
+    Shuffle();
   }
-  if (iter == agents_.size()) {
-    shuffle_();
-    iter = 0;
+  if (iter_ == agents_.size()) {
+    Shuffle();
+    iter_ = 0;
   }
-  return agents_[iter++];
+  return agents_[iter_++];
 }
 
 void AgentVector::AddAgent(AgentPointer<Person> agent) {

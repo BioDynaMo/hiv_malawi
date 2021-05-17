@@ -96,7 +96,7 @@ int Simulate(int argc, const char** argv) {
   // currently not implemented in the master, it needs to set in BioDynaMo
   // in simulation.h / simulation.cc (see README.md)
   auto* env = new CategoricalEnvironment(sparam->min_age, sparam->max_age);
-  simulation.SetEnvironement(env);
+  simulation.SetEnvironment(env);
 
   // ToDo: print simulation parameter
 

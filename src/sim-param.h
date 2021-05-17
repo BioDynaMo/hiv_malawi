@@ -26,7 +26,7 @@ struct SimParam : public ParamGroup {
   BDM_PARAM_GROUP_HEADER(SimParam, 1);
 
   // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-  uint64_t number_of_iterations = 60;  // (1960-2060)
+  uint64_t number_of_iterations = 60;  // (1960-2020)
 
   // Number of agents that are present at the first iteration of the simulation
   uint64_t initial_population_size = 3600000;

@@ -81,17 +81,16 @@ void CategoricalEnvironment::SetMaxAge(int max_age) {
 }
 
 void CategoricalEnvironment::ForEachNeighbor(
-    Functor<void, Agent*, double>& lambda, const Agent& query,
-    double squared_radius) {
+    Functor<void, Agent*, double>& lambda, const Agent& query, void* criteria) {
   ;
 };
 
-const std::array<int32_t, 6>& CategoricalEnvironment::GetDimensions() const {
+std::array<int32_t, 6> CategoricalEnvironment::GetDimensions() const {
   static std::array<int32_t, 6> arr;
   return arr;
 };
 
-const std::array<int32_t, 2>& CategoricalEnvironment::GetDimensionThresholds()
+std::array<int32_t, 2> CategoricalEnvironment::GetDimensionThresholds()
     const {
   static std::array<int32_t, 2> arr;
   return arr;

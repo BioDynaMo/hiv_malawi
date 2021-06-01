@@ -22,7 +22,6 @@
 #include "categorical-environment.h"
 #include "population-initialization.h"
 #include "sim-param.h"
-#include "storage.h"
 #include "visualize.h"
 
 namespace bdm {
@@ -32,50 +31,6 @@ namespace bdm {
 // simulation parameters anywhere in the simulation.
 const ParamGroupUid SimParam::kUid = ParamGroupUidGenerator::Get()->NewUid();
 
-// Register custom reduction operation to extract population information at each
-// timestep.
-BDM_REGISTER_TEMPLATE_OP(ReductionOp, Population, "ReductionOpPopulation",
-                         kCpu);
-
-// Functor to determine entries of the Populatoin struct from a set of agents.
-// Is executed by each thread and will result in OMP_NUM_THREADS Population-s.
-struct GetThreadLocalPopulationStatistics
-    : public Functor<void, Agent*, Population*> {
-  void operator()(Agent* agent, Population* tl_pop) {
-    // question: what's bdm static cast?
-    auto* person = bdm_static_cast<Person*>(agent);
-    // Note: possibly rewrite with out if/else and check if it's faster
-    int age = static_cast<int>(person->age_);
-    if (person->sex_ == Sex::kMale) {
-      tl_pop->age_male[age] += 1;
-      if (person->state_ == GemsState::kHealthy) {
-        tl_pop->healthy_male += 1;
-      } else {
-        tl_pop->infected_male[person->state_ - 1] += 1;
-      }
-    } else {
-      tl_pop->age_female[age] += 1;
-      if (person->state_ == GemsState::kHealthy) {
-        tl_pop->healthy_female += 1;
-      } else {
-        tl_pop->infected_female[person->state_ - 1] += 1;
-      }
-    }
-  }
-};
-
-// Functor to summarize thread local Population-s into one Population struct
-struct AddThreadLocalPopulations
-    : public Functor<Population, const SharedData<Population>&> {
-  Population operator()(const SharedData<Population>& tl_populations) override {
-    // Get object for total population
-    Population total_pop;
-    for (Population tl_population : tl_populations) {
-      total_pop += tl_population;
-    }
-    return total_pop;
-  }
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's main simulation
@@ -98,8 +53,6 @@ int Simulate(int argc, const char** argv) {
   auto* env = new CategoricalEnvironment(sparam->min_age, sparam->max_age);
   simulation.SetEnvironment(env);
 
-  // ToDo: print simulation parameter
-
   // Randomly initialize a population
   {
     Timing timer_init("RUNTIME POPULATION INITIALIZATION: ");
@@ -107,14 +60,36 @@ int Simulate(int argc, const char** argv) {
   }
 
   // Get population statistics, i.e. extract data from simulation
-  auto* get_statistics = NewOperation("ReductionOpPopulation");
-  auto* get_statistics_impl =
-      get_statistics->GetImplementation<ReductionOp<Population>>();
-  get_statistics_impl->Initialize(new GetThreadLocalPopulationStatistics(),
-                                  new AddThreadLocalPopulations());
-  auto* scheduler = simulation.GetScheduler();
-  scheduler->ScheduleOp(get_statistics);
+  // Get the pointer to the TimeSeries
+  auto* ts = simulation.GetTimeSeries();
+  // Define how to count the healthy individuals
+  auto count_healthy = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is healhy.
+    auto cond = L2F([](Agent* a){ 
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->IsHealthy(); 
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  };
+  // Define how to count the infected individuals
+  auto count_infected = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond = L2F([](Agent* a){ 
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()); 
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  };
+  // Define how to get the time values of the TimeSeries
+  auto get_year = [](Simulation* sim) {
+    return static_cast<double>(1960 + sim->GetScheduler()->GetSimulatedSteps());
+  };
+  ts->AddCollector("healthy_agents", count_healthy, get_year);
+  ts->AddCollector("infected_agents", count_infected, get_year);
+  
 
+  // Unschedule some default operations
+  auto* scheduler = simulation.GetScheduler();
   // Don't compute forces
   scheduler->UnscheduleOp(scheduler->GetOps("mechanical forces")[0]);
   // Don't run load balancing, not working with custom environment.
@@ -128,17 +103,10 @@ int Simulate(int argc, const char** argv) {
 
   {
     Timing timer_post("RUNTIME POSTPROCESSING:            ");
-    const auto& sim_result = get_statistics_impl->GetResults();
-
-    // // Write simulatoin data to disk for further external investigations
-    // SaveToDisk(sim_result);
-
-    // // Print population at time step 0 to shell
-    // std::cout << sim_result[0] << std::endl;
 
     // Generate ROOT plot to visualize the number of healthy and infected
     // individuals over time.
-    PlotEvolution(sim_result);
+    PlotAndSaveTimeseries();
   }
 
   return 0;

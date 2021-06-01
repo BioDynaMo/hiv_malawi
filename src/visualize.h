@@ -21,9 +21,9 @@
 
 namespace bdm {
 
-// This functions takes a vector of Population-s and visualizes the number of
-// healthy and infected agents over the course of the simulation period.
-int PlotEvolution(const std::vector<Population>& populations);
+// This functions retrieves the collected time series from the active 
+// simulation, saves the results as a JSON file, and plots the results.
+int PlotAndSaveTimeseries();
 
 }  // namespace bdm
 

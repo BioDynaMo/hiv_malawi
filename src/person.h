@@ -17,6 +17,7 @@
 #define PERSON_H_
 
 #include "biodynamo.h"
+#include "datatypes.h"
 
 namespace bdm {
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,6 +55,9 @@ class Person : public Cell {
   // AgentPointer<Person> mother_id_;
   // // Stores the id of the partner
   // AgentPointer<Person> partner_id_;
+
+  // Returns True if the agent is healthy
+  bool IsHealthy(){return state_ == GemsState::kHealthy;}
 };
 
 }  // namespace bdm

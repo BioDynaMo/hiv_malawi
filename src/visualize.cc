@@ -13,6 +13,7 @@
 //
 // -----------------------------------------------------------------------------
 
+#include <ctime>
 #include <iostream>
 #include <numeric>
 #include <vector>
@@ -20,47 +21,53 @@
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TMultiGraph.h"
+#include "TSystem.h"
 
 #include "datatypes.h"
 
+#include "biodynamo.h"
+#include "core/util/log.h"
+
 namespace bdm {
 
-int PlotEvolution(const std::vector<Population> &populations) {
-  // Extract infromation from populations
-  std::vector<double> healthy(populations.size());
-  std::vector<double> infected(populations.size());
-  std::vector<double> sim_step(
-      populations.size());  // double for ROOT compatib.
-  for (int i = 0; i < populations.size(); i++) {
-    healthy[i] = populations[i].healthy_male + populations[i].healthy_female;
-    infected[i] = std::accumulate(populations[i].infected_male.begin(),
-                                  populations[i].infected_male.end(), 0) +
-                  std::accumulate(populations[i].infected_female.begin(),
-                                  populations[i].infected_female.end(), 0);
-    sim_step[i] = i;
-  }
-  // Define canvas, see ROOT documentation for details. Note that ROOT is fully
-  // included in BioDynaMo and can be used to analyze the simulation data.
-  TCanvas canvas;
-  canvas.SetCanvasSize(600, 250);
-  canvas.SetGrid();
-  // Define Multigraph, see ROOT documentation
-  TMultiGraph multigraph;
-  multigraph.SetTitle("HIV in Malawi;simulation steps;number of people");
-  // Define Graph (ROOT) for healthy people and add to multi graph
-  TGraph *THealthy = new TGraph(sim_step.size(), &(sim_step[0]), &(healthy[0]));
-  THealthy->SetLineColor(kBlue);
-  THealthy->SetMarkerColor(kBlue);
-  multigraph.Add(THealthy, "AC");
-  // Define Graph (ROOT) for infected people and add to multi graph
-  TGraph *TInfected =
-      new TGraph(sim_step.size(), &(sim_step[0]), &(infected[0]));
-  TInfected->SetLineColor(kRed);
-  TInfected->SetMarkerColor(kRed);
-  multigraph.Add(TInfected, "AC");
-  // Draw and save output
-  multigraph.Draw("A");
-  canvas.SaveAs("simulation_hiv.svg");
+int PlotAndSaveTimeseries() {
+  // Get pointers for simulation and TimeSeries data
+  auto sim = Simulation::GetActive();
+  auto *ts = sim->GetTimeSeries();
+
+  // Create a new folder (build/)output/<data_time> to store the results of
+  // the specific simulation run.
+  time_t rawtime;
+  struct tm *timeinfo;
+  char buffer[80];
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(buffer, sizeof(buffer), "%Y-%m-%d-%H:%M:%S", timeinfo);
+  std::string time_stamp(buffer);
+  // Define create_folder command for ROOT
+  std::string create_folder =
+      Concat("mkdir ", sim->GetOutputDir(), "/", time_stamp);
+  // Create folder with ROOT
+  gSystem->Exec(&create_folder[0]);
+
+  // Save the TimeSeries Data as JSON to the folder <date_time>
+  ts->SaveJson(Concat(sim->GetOutputDir(), "/", time_stamp, "/data.json"));
+
+  // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g(ts, "my result", "Time", "Number of agents",
+                                 true);
+  g.Add("healthy_agents", "Healthy", "L", kBlue, 1.0);
+  g.Add("infected_agents", "HIV", "L", kRed, 1.0);
+  g.Draw();
+  g.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp, "/simulation_hiv"),
+           {".svg", ".png"});
+
+  // Print info for user to let him/her know where to find simulation results
+  std::string info =
+      Concat("<PlotAndSaveTimeseries> ", "Results of simulation were saved to ",
+             sim->GetOutputDir(), "/", time_stamp, "/");
+  std::cout << "Info: " << info << std::endl;
+
   return 0;
 }
 

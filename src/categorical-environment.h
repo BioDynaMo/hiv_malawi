@@ -151,7 +151,7 @@ class CategoricalEnvironment : public Environment {
   // needed here.
   void Clear() override { ; };
   void ForEachNeighbor(Functor<void, Agent*, double>& lambda,
-                       const Agent& query, void* criteria) override;
+                       const Agent& query, double squared_radius) override;
 
   std::array<int32_t, 6> GetDimensions() const override;
 

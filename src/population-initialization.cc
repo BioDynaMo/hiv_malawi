@@ -28,7 +28,7 @@ namespace bdm {
 
 float SampleAge(float rand_num_1, float rand_num_2, int sex,
                  const std::vector<float>& age_distribution) {
-  for (int i = 0; i < age_distribution.size(); i++) {
+  for (size_t i = 0; i < age_distribution.size(); i++) {
     if (rand_num_1 <= age_distribution[i]) {
       return 5 * (i + rand_num_2);
     } else {
@@ -44,7 +44,7 @@ float SampleAge(float rand_num_1, float rand_num_2, int sex,
 
 int SampleLocation(float rand_num,
                     const std::vector<float>& location_distribution) {
-  for (int i = 0; i < location_distribution.size(); i++) {
+  for (size_t i = 0; i < location_distribution.size(); i++) {
     if (rand_num <= location_distribution[i]) {
       return i;
     } else {
@@ -160,7 +160,7 @@ void InitializePopulation() {
     const auto* sparam = param->Get<SimParam>();
 
 #pragma omp for
-    for (int x = 0; x < sparam->initial_population_size; x++) {
+    for (uint64_t x = 0; x < sparam->initial_population_size; x++) {
       // Create a person
       auto* new_person = CreatePerson(random_generator, sparam);
       // BioDynaMo API: Add agent (person) to simulation

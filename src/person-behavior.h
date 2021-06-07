@@ -80,7 +80,7 @@ struct MatingBehaviour : public Behavior {
     // the infection goes into both directions.
     if (no_mates > 0 && person->sex_ == Sex::kMale &&
         person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
-      for (size_t i = 0; i < no_mates; i++) {
+      for (int i = 0; i < no_mates; i++) {
         // choose a random female mate at the location
         AgentPointer<Person> mate =
             env->GetRamdomAgentAtLocation(person->location_);

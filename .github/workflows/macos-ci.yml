@@ -51,7 +51,7 @@ jobs:
 
     - name: Build hiv_malawi and run small simulation
       run: |
-        sed -i 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' src/sim-param.h
+        sed -i '' 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' src/sim-param.h
         . ../biodynamo/build/bin/thisbdm.sh
         cmake -G Ninja -B build
         cmake --build build --parallel --config Release

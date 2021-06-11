@@ -1,6 +1,9 @@
 name: macos-ci
 
 on:
+  schedule:
+    # Every day at 3 am
+    - cron: '0 3 * * *'
   push:
   pull_request:
     branches: [ master ]

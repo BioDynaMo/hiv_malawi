@@ -23,7 +23,7 @@ jobs:
         mkdir $HOME/bdm
         
     - name: Install BioDynaMo
-      working-directory: ./bdm
+      # working-directory: ./bdm
       run: |
         if [ ! -f "$HOME/.pyenv/bin/pyenv" ]; then
           curl https://pyenv.run | bash
@@ -41,10 +41,10 @@ jobs:
         cmake --build build --parallel --config Release
         . build/bin/thisbdm.sh
 
-    # - name: Build HIV_malawi repository
-    #   run: |
-    #     sed -i '' 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' \
-    #       src/sim-param.h
-    #     cmake -G Ninja -B build
-    #     cmake --build build --parallel --config Release
-    #     ./build/hiv-malawi
+    - name: Build HIV_malawi repository
+      run: |
+        sed -i '' 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' \
+          src/sim-param.h
+        cmake -G Ninja -B build
+        cmake --build build --parallel --config Release
+        ./build/hiv-malawi

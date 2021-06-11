@@ -5,10 +5,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,29 +21,29 @@ jobs:
         chmod +x cmake-3.19.3-Linux-x86_64.sh
         sudo ./cmake-3.19.3-Linux-x86_64.sh --skip-license --prefix=/usr/local
         
-    - name: Install BioDynaMo
-      working-directory: ./bdm
-      run: |
-        if [ ! -f "$HOME/.pyenv/bin/pyenv" ]; then
-          curl https://pyenv.run | bash
-        fi
-        export PATH="$HOME/.pyenv/bin:$PATH"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
-        pyenv shell 3.9.1
-        git clone https://github.com/BioDynaMo/biodynamo.git
-        cd biodynamo
-        cmake -G Ninja \
-          -Dparaview=off \
-          -DCMAKE_BUILD_TYPE=Release \
-          -B build
-        cmake --build build --parallel --config Release
-        . build/bin/thisbdm.sh
+    # - name: Install BioDynaMo
+    #   working-directory: ./bdm
+    #   run: |
+    #     if [ ! -f "$HOME/.pyenv/bin/pyenv" ]; then
+    #       curl https://pyenv.run | bash
+    #     fi
+    #     export PATH="$HOME/.pyenv/bin:$PATH"
+    #     eval "$(pyenv init --path)"
+    #     eval "$(pyenv init -)"
+    #     pyenv shell 3.9.1
+    #     git clone https://github.com/BioDynaMo/biodynamo.git
+    #     cd biodynamo
+    #     cmake -G Ninja \
+    #       -Dparaview=off \
+    #       -DCMAKE_BUILD_TYPE=Release \
+    #       -B build
+    #     cmake --build build --parallel --config Release
+    #     . build/bin/thisbdm.sh
 
-    - name: Build HIV_malawi repository
-      run: |
-        sed -i '' 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' \
-          src/sim-param.h
-        cmake -G Ninja -B build
-        cmake --build build --parallel --config Release
-        ./build/hiv-malawi
+    # - name: Build HIV_malawi repository
+    #   run: |
+    #     sed -i '' 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' \
+    #       src/sim-param.h
+    #     cmake -G Ninja -B build
+    #     cmake --build build --parallel --config Release
+    #     ./build/hiv-malawi

@@ -36,21 +36,16 @@ jobs:
         cd ..
         git clone https://github.com/BioDynaMo/biodynamo.git
         cd biodynamo
-        pwd
         cmake -G Ninja \
           -Dparaview=off \
           -DCMAKE_BUILD_TYPE=Release \
           -B build
         cmake --build build --parallel --config Release
 
-
-    # cannot find BDM
-    - name: Build HIV_malawi repository
+    - name: Build hiv_malawi and run small simulation
       run: |
         sed -i 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' src/sim-param.h
-        ls -a
-        pwd
         . ../biodynamo/build/bin/thisbdm.sh
         cmake -G Ninja -B build
         cmake --build build --parallel --config Release
-        ./build/hiv-malawi
+        ./build/hiv_malawi

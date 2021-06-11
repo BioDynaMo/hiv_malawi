@@ -31,6 +31,7 @@ jobs:
         export PATH="$HOME/.pyenv/bin:$PATH"
         eval "$(pyenv init --path)"
         eval "$(pyenv init -)"
+        PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.9.1
         pyenv shell 3.9.1
         git clone https://github.com/BioDynaMo/biodynamo.git
         cd biodynamo

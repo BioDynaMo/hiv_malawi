@@ -21,7 +21,7 @@ jobs:
         sudo ./cmake-3.19.3-Linux-x86_64.sh --skip-license --prefix=/usr/local
    
     - name: Install BioDynaMo
-      working-directory: ./app
+      # working-directory: ./app
       run: |
         if [ ! -f "$HOME/.pyenv/bin/pyenv" ]; then
           curl https://pyenv.run | bash
@@ -41,14 +41,15 @@ jobs:
     #     cmake --build build --parallel --config Release
     #     . build/bin/thisbdm.sh
 
-    # - name: Checkout HIV_malawi repository
-    #   uses: actions/checkout@v2
+    - name: Checkout HIV_malawi repository
+      uses: actions/checkout@v2
 
-    # cannot find BDM
-    # - name: Build HIV_malawi repository
-    #   run: |
-    #     sed -i 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' src/sim-param.h
-    #     ls -a
+    cannot find BDM
+    - name: Build HIV_malawi repository
+      run: |
+        sed -i 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' src/sim-param.h
+        ls -a
+        pwd
     #     cmake -G Ninja -B build
     #     cmake --build build --parallel --config Release
     #     ./build/hiv-malawi

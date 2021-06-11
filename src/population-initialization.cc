@@ -1,15 +1,12 @@
 // -----------------------------------------------------------------------------
 //
-// Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
-// Reserved.
+// Copyright (C) 2021 CERN and the University of Geneva for the benefit of the
+// BioDynaMo collaboration. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 //
 // See the LICENSE file distributed with this work for details.
-// See the NOTICE file distributed with this work for additional information
-// regarding copyright ownership.
 //
 // -----------------------------------------------------------------------------
 
@@ -27,7 +24,7 @@
 namespace bdm {
 
 float SampleAge(float rand_num_1, float rand_num_2, int sex,
-                 const std::vector<float>& age_distribution) {
+                const std::vector<float>& age_distribution) {
   for (size_t i = 0; i < age_distribution.size(); i++) {
     if (rand_num_1 <= age_distribution[i]) {
       return 5 * (i + rand_num_2);
@@ -43,7 +40,7 @@ float SampleAge(float rand_num_1, float rand_num_2, int sex,
 }
 
 int SampleLocation(float rand_num,
-                    const std::vector<float>& location_distribution) {
+                   const std::vector<float>& location_distribution) {
   for (size_t i = 0; i < location_distribution.size(); i++) {
     if (rand_num <= location_distribution[i]) {
       return i;
@@ -75,7 +72,7 @@ int SampleState(float rand_num, float initial_infection_probability) {
 }
 
 int ComputeSociobehavioural(float rand_num, int age,
-                             float sociobehavioural_risk_probability) {
+                            float sociobehavioural_risk_probability) {
   if (age <= 15) {
     return 0;
   }
@@ -87,7 +84,7 @@ int ComputeSociobehavioural(float rand_num, int age,
 }
 
 int ComputeBiomedical(float rand_num, int age,
-                       float biomedical_risk_probability) {
+                      float biomedical_risk_probability) {
   if (age <= 15) {
     return 0;
   }
@@ -113,10 +110,10 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   // Assign age
   if (person->sex_ == Sex::kMale) {
     person->age_ = SampleAge(rand_num[1], rand_num[2], person->sex_,
-                              sparam->male_age_distribution);
+                             sparam->male_age_distribution);
   } else {
     person->age_ = SampleAge(rand_num[1], rand_num[2], person->sex_,
-                              sparam->female_age_distribution);
+                             sparam->female_age_distribution);
   }
   // Assign location
   person->location_ =

@@ -119,7 +119,7 @@ struct GetOlder : public Behavior {
     auto* person = bdm_static_cast<Person*>(agent);
 
     // If between min_age and max_age, reassign risk factors
-    if (person->age_ >= sparam->min_age && sparam->min_age <= sparam->max_age) {
+    if (person->age_ >= sparam->min_age && person->age_ <= sparam->max_age) {
       // Update risk factors stochastically like in initialization
       if (random->Uniform() < sparam->sociobehavioural_risk_probability) {
         person->social_behaviour_factor_ = 0;

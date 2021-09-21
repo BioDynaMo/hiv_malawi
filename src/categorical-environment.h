@@ -23,6 +23,7 @@
 
 #include "datatypes.h"
 #include "person.h"
+#include "sim-param.h" // AM: Added to get location_mixing_matrix to update mate_location_distribution_
 
 #include <iostream>
 #include <random>
@@ -61,6 +62,38 @@ class AgentVector {
   void Clear();
 };
 
+// This class wraps a vector of vector of Agent pointers.
+// We store a vector of
+// AgentVector for each of the categorical location and age category.
+class AgentVectorTwo {
+ private:
+  // vector of AgentVectors
+  std::vector<AgentVector> agents_sb_;
+
+ public:
+  // Get the number of agents in the vector
+  size_t GetNumAgents();
+
+  // Delete vector entries and resize vector to 0
+  void Clear();
+};
+
+// This class wraps a vector of vector of Agent pointers.
+// We store a vector of
+// AgentVectorTwo for each of the categorical location.
+class AgentVectorThree{
+ private:
+  // vector of AgentVectors
+  std::vector<AgentVectorTwo> agents_ag_;
+
+ public:
+  // Get the number of agents in the vector
+  size_t GetNumAgents();
+
+  // Delete vector entries and resize vector to 0
+  void Clear();
+};
+
 // This is our customn BioDynaMo environment to describe the female population
 // at all locations. By knowing the all females at a location, it's easy to
 // select suitable mates during the MatingBehavior.
@@ -74,6 +107,7 @@ class CategoricalEnvironment : public Environment {
   // This is the update function, the is called automatically by BioDynaMo for
   // every simulation step. We delete the previous information and store a
   // vector of AgentPointers for each location.
+  // AM TO DO: Update probability to select a female mate from each location. Depends on static mixing matrix and update number of female agents per location
   void Update() override {
     // // Debug
     // uint64_t iter =
@@ -108,10 +142,44 @@ class CategoricalEnvironment : public Environment {
                      "person_ptr is nullptr");
         }
         env->AddAgentToLocation(person->location_, person_ptr);
+        // AM TO DO:
+        //env->AddAgentToLocationAge(person->location_, person->age_, person_ptr);
+
       } else {
         ;
       };
     });
+      
+    // AM : Update probability matrix to select female mate from one location given location of male agent
+    mate_location_distribution_.clear();
+    mate_location_distribution_.resize(Location::kLocLast);
+      
+    auto* sim = Simulation::GetActive();
+    auto* param = sim->GetParam();
+    const auto* sparam = param->Get<SimParam>(); // AM : Needed to get location mixing matrix
+      
+    for (int i=0; i<Location::kLocLast; i++){ // Loop over male agent locations
+        mate_location_distribution_[i].resize(Location::kLocLast);
+        float sum = 0.0;
+        for (int j=0; j<Location::kLocLast; j++){ // Loop over female mate locations
+            mate_location_distribution_[i][j]=sparam->location_mixing_matrix[i][j]*female_agents_[j].GetNumAgents();
+            sum += mate_location_distribution_[i][j];
+        }
+        for (int j=0; j<Location::kLocLast; j++){ // Loop again over female mate locations to NORMALIZE (probabilities should sum to 1 for each male location over all female mate locations) and compute CUMULATIVE probabilities.
+            mate_location_distribution_[i][j]/=sum;
+            if (j>0){
+                mate_location_distribution_[i][j]+=mate_location_distribution_[i][j-1];
+            }
+        }
+    }
+    
+    // DEBUG: Check mate location distribution
+    /*for (int i=0; i<Location::kLocLast; i++){
+        for (int j=0; j<Location::kLocLast; j++){
+            std::cout << mate_location_distribution_[i][j] << ", ";
+        }
+        std::cout << "\n";
+    }*/
   };
 
   // Add an agent pointer to a certain location
@@ -136,7 +204,7 @@ class CategoricalEnvironment : public Environment {
     }
     return female_agents_[loc].GetRandomAgent();
   };
-
+    
   // Setter functions to access private member variables
   void SetNumLocations(size_t num_locations);
   void SetMinAge(int min_age);
@@ -146,6 +214,8 @@ class CategoricalEnvironment : public Environment {
   size_t GetNumLocations() { return female_agents_.size(); };
   int GetMinAge() { return min_age_; };
   int GetMaxAge() { return max_age_; };
+  // AM: Add Getter of mate_location_distribution_
+  std::vector<float> GetMateLocationDistribution(size_t loc){return mate_location_distribution_[loc]; };
 
   // The remaining public functinos are inherited from Environment but not
   // needed here.
@@ -169,6 +239,8 @@ class CategoricalEnvironment : public Environment {
   // Vector to store all female agents of within a certain age interval
   // [min_age_, max_age_].
   std::vector<AgentVector> female_agents_;
+  // AM: Vector to store cumulative probability to select a female mate from one location given male agent location
+  std::vector<std::vector<float>>  mate_location_distribution_;
 };
 
 }  // namespace bdm

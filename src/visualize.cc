@@ -62,6 +62,32 @@ int PlotAndSaveTimeseries() {
   g.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp, "/simulation_hiv"),
            {".svg", ".png"});
 
+  // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g2(ts, "my result", "Time", "Number of agents",
+                                   true);
+  g2.Add("healthy_agents", "Healthy", "L", kBlue, 1.0, 1);
+  g2.Add("infected_agents", "HIV", "L", kOrange, 1.0, 1);
+  g2.Add("acute_agents", "Acute", "L", kRed, 1.0, 10);
+  g2.Add("chronic_agents", "Chronic", "L", kMagenta, 1.0, 10);
+  g2.Add("treated_agents", "Treated", "L", kGreen, 1.0, 10);
+  g2.Add("failing_agents", "Failing", "L", kGray, 1.0, 10);
+  g2.Add("prevalence", "Prevalence", "L", kOrange, 1.0, 3, 1, kOrange, 1.0, 5);
+  g2.Add("incidence", "Incidence", "L", kRed, 1.0, 3, 1, kRed, 1.0, 5);
+
+  g2.Draw();
+  g2.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp, "/simulation_hiv_with_states"),
+             {".svg", ".png"});
+    
+  // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g3(ts, "my result", "Time", "Number of agents",
+                                     true);
+  g3.Add("prevalence", "Prevalence", "L", kOrange, 1.0, 3, 1, kOrange, 1.0, 5);
+  g3.Add("incidence", "Incidence", "L", kRed, 1.0, 3, 1, kRed, 1.0, 5);
+
+  g3.Draw();
+  g3.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp, "/simulation_hiv_prevalence_incidence"),
+               {".svg", ".png"});
+    
   // Print info for user to let him/her know where to find simulation results
   std::string info =
       Concat("<PlotAndSaveTimeseries> ", "Results of simulation were saved to ",

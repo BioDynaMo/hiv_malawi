@@ -80,13 +80,86 @@ int Simulate(int argc, const char** argv) {
     });
     return static_cast<double>(bdm::experimental::Count(sim, cond));
   };
+
+  // AM: Define how to count the infected acute individuals
+  auto count_acute = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond = L2F([](Agent* a){
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->IsAcute();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  };
+    
+  // AM: Define how to count the infected chronic individuals
+  auto count_chronic = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond = L2F([](Agent* a){
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->IsChronic();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  };
+    
+  // AM: Define how to count the infected treated individuals
+  auto count_treated = [](Simulation* sim) {
+  // Condition for Count operation, e.g. check if person is infected.
+    auto cond = L2F([](Agent* a){
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->IsTreated();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  };
+    
+  // AM: Define how to count the infected failing individuals
+    auto count_failing = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+      auto cond = L2F([](Agent* a){
+        auto* person = bdm_static_cast<Person*>(a);
+        return person->IsFailing();
+      });
+      return static_cast<double>(bdm::experimental::Count(sim, cond));
+  };
+    
+  auto pct_prevalence = [](Simulation* sim) {
+      // Condition for Count operation, e.g. check if person is infected.
+        auto cond_infected = L2F([](Agent* a){
+          auto* person = bdm_static_cast<Person*>(a);
+          return !(person->IsHealthy());
+        });
+        auto cond_all = L2F([](Agent* a){
+          auto* person = bdm_static_cast<Person*>(a);
+          return !(person->IsHealthy()) or person->IsHealthy();
+        });
+        return static_cast<double>(bdm::experimental::Count(sim, cond_infected))/static_cast<double>(bdm::experimental::Count(sim, cond_all));
+    };
+    
+  auto pct_incidence = [](Simulation* sim) {
+      // Condition for Count operation, e.g. check if person is infected.
+        auto cond_acute = L2F([](Agent* a){
+          auto* person = bdm_static_cast<Person*>(a);
+          return person->IsAcute();
+        });
+        auto cond_all = L2F([](Agent* a){
+          auto* person = bdm_static_cast<Person*>(a);
+          return !(person->IsHealthy()) or person->IsHealthy();
+        });
+        return static_cast<double>(bdm::experimental::Count(sim, cond_acute))/static_cast<double>(bdm::experimental::Count(sim, cond_all));
+    };
+    
   // Define how to get the time values of the TimeSeries
   auto get_year = [](Simulation* sim) {
     return static_cast<double>(1960 + sim->GetScheduler()->GetSimulatedSteps());
   };
   ts->AddCollector("healthy_agents", count_healthy, get_year);
   ts->AddCollector("infected_agents", count_infected, get_year);
-  
+  // AM: Added detailed follow up of HIV states time series
+  ts->AddCollector("acute_agents", count_acute, get_year);
+  ts->AddCollector("chronic_agents", count_chronic, get_year);
+  ts->AddCollector("treated_agents", count_treated, get_year);
+  ts->AddCollector("failing_agents", count_failing, get_year);
+  ts->AddCollector("prevalence", pct_prevalence, get_year);
+  ts->AddCollector("incidence", pct_incidence, get_year);
 
   // Unschedule some default operations
   auto* scheduler = simulation.GetScheduler();

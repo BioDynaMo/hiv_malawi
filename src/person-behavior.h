@@ -1,15 +1,12 @@
 // -----------------------------------------------------------------------------
 //
-// Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
-// Reserved.
+// Copyright (C) 2021 CERN and the University of Geneva for the benefit of the
+// BioDynaMo collaboration. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 //
 // See the LICENSE file distributed with this work for details.
-// See the NOTICE file distributed with this work for additional information
-// regarding copyright ownership.
 //
 // -----------------------------------------------------------------------------
 
@@ -80,7 +77,8 @@ struct MatingBehaviour : public Behavior {
     // the infection goes into both directions.
     if (no_mates > 0 && person->sex_ == Sex::kMale &&
         person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
-      for (size_t i = 0; i < no_mates; i++) {
+
+        for (size_t i = 0; i < no_mates; i++) {
         // AM: select location of mate
         float rand_num = static_cast<float>(random->Uniform());
         std::vector<float> mate_location_distribution = env->GetMateLocationDistribution(person->location_);
@@ -200,7 +198,8 @@ struct GetOlder : public Behavior {
     auto* person = bdm_static_cast<Person*>(agent);
 
     // If between min_age and max_age, reassign risk factors
-    if (person->age_ >= sparam->min_age && person->age_ <= sparam->max_age) { // AM correted typo sparam->min_age <= sparam->max_age
+    if (person->age_ >= sparam->min_age && person->age_ <= sparam->max_age) { // AM corrected typo sparam->min_age <= sparam->max_age
+        
       // Update risk factors stochastically like in initialization
       if (random->Uniform() < sparam->sociobehavioural_risk_probability) {
         person->social_behaviour_factor_ = 0;
@@ -305,7 +304,7 @@ struct GiveBirth : public Behavior {
 
   // Helper function to create a single child
   Person* CreateChild(Random* random_generator, Person* mother,
-                       const SimParam* sparam) {
+                      const SimParam* sparam) {
     // Create new child
     Person* child = new Person();
     // Assign sex

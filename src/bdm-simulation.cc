@@ -1,15 +1,12 @@
 // -----------------------------------------------------------------------------
 //
-// Copyright (C) 2021 CERN (Tobias Duswald, Lukas Breitwieser, Ahmad Hesam, Fons
-// Rademakers) for the benefit of the BioDynaMo collaboration. All Rights
-// Reserved.
+// Copyright (C) 2021 CERN and the University of Geneva for the benefit of the
+// BioDynaMo collaboration. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 //
 // See the LICENSE file distributed with this work for details.
-// See the NOTICE file distributed with this work for additional information
-// regarding copyright ownership.
 //
 // -----------------------------------------------------------------------------
 
@@ -30,7 +27,6 @@ namespace bdm {
 // of a cc file, depends on #include "sim-param.h". With this, we can access the
 // simulation parameters anywhere in the simulation.
 const ParamGroupUid SimParam::kUid = ParamGroupUidGenerator::Get()->NewUid();
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's main simulation
@@ -65,18 +61,18 @@ int Simulate(int argc, const char** argv) {
   // Define how to count the healthy individuals
   auto count_healthy = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is healhy.
-    auto cond = L2F([](Agent* a){ 
+    auto cond = L2F([](Agent* a) {
       auto* person = bdm_static_cast<Person*>(a);
-      return person->IsHealthy(); 
+      return person->IsHealthy();
     });
     return static_cast<double>(bdm::experimental::Count(sim, cond));
   };
   // Define how to count the infected individuals
   auto count_infected = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a){ 
+    auto cond = L2F([](Agent* a) {
       auto* person = bdm_static_cast<Person*>(a);
-      return !(person->IsHealthy()); 
+      return !(person->IsHealthy());
     });
     return static_cast<double>(bdm::experimental::Count(sim, cond));
   };
@@ -153,6 +149,7 @@ int Simulate(int argc, const char** argv) {
   };
   ts->AddCollector("healthy_agents", count_healthy, get_year);
   ts->AddCollector("infected_agents", count_infected, get_year);
+
   // AM: Added detailed follow up of HIV states time series
   ts->AddCollector("acute_agents", count_acute, get_year);
   ts->AddCollector("chronic_agents", count_chronic, get_year);

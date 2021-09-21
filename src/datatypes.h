@@ -27,7 +27,8 @@ namespace bdm {
 // Possible illness states. If you adjust this enum, make sure to put the last
 // element into the definition of struct Population below. Even better, just
 // leave the kGemsLast at the End.
-enum GemsState { kHealthy, kGems1, kGems2, kGems3, kGemsLast };
+// AM: Added 4 HIV progression states 
+enum GemsState { kHealthy, kAcute, kChronic, kTreated, kFailing, kGemsLast };
 
 // Possible sex
 enum Sex { kMale, kFemale };

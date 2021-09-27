@@ -77,7 +77,7 @@ struct MatingBehaviour : public Behavior {
     // the infection goes into both directions.
     if (no_mates > 0 && person->sex_ == Sex::kMale &&
         person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
-      for (size_t i = 0; i < no_mates; i++) {
+      for (int i = 0; i < no_mates; i++) {
         // AM: select location of mate
         float rand_num = static_cast<float>(random->Uniform());
         const std::vector<float> mate_location_distribution =
@@ -253,7 +253,7 @@ struct GetOlder : public Behavior {
     }
     std::vector<float> transition_proba =
         sparam->hiv_transition_matrix[person->state_][year_population_category];
-    for (int i = 0; i < transition_proba.size(); i++) {
+    for (size_t i = 0; i < transition_proba.size(); i++) {
       if (random->Uniform() < transition_proba[i]) {
         person->state_ = i;
         break;

@@ -168,6 +168,10 @@ class CategoricalEnvironment : public Environment {
                 mate_location_distribution_[i][j]+=mate_location_distribution_[i][j-1];
             }
         }
+        // Make sure that the commulative probability distribution actually ends
+        // with 1.0 and not 0.9999x or something similar. (Fix for 
+        // SampleLocation warning).
+        mate_location_distribution_[i][Location::kLocLast - 1] = 1.0;
     }
     
     // DEBUG: Check mate location distribution

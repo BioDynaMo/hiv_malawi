@@ -80,7 +80,7 @@ struct MatingBehaviour : public Behavior {
       for (size_t i = 0; i < no_mates; i++) {
         // AM: select location of mate
         float rand_num = static_cast<float>(random->Uniform());
-        std::vector<float> mate_location_distribution =
+        const std::vector<float> mate_location_distribution =
             env->GetMateLocationDistribution(person->location_);
 
         // DEBUG : Having problems sampling location when rand_num = 1

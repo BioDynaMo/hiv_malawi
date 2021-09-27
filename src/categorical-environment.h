@@ -230,7 +230,7 @@ class CategoricalEnvironment : public Environment {
   int GetMinAge() { return min_age_; };
   int GetMaxAge() { return max_age_; };
   // AM: Add Getter of mate_location_distribution_
-  std::vector<float> GetMateLocationDistribution(size_t loc) {
+  const std::vector<float>& GetMateLocationDistribution(size_t loc) {
     return mate_location_distribution_[loc];
   };
 

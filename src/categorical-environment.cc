@@ -56,19 +56,20 @@ void AgentVector::Clear() {
 ////////////////////////////////////////////////////////////////////////////////
 
 size_t AgentVectorTwo::GetNumAgents() {
-    size_t sum = 0;
-    for (auto a:agents_sb_){
-        sum += a.GetNumAgents(); // Number of agents with given socio-behavioural feature within age category
-    }
-    return sum;
+  size_t sum = 0;
+  for (auto a : agents_sb_) {
+    sum += a.GetNumAgents();  // Number of agents with given socio-behavioural
+                              // feature within age category
+  }
+  return sum;
 }
 
 void AgentVectorTwo::Clear() {
-  for (auto a:agents_sb_){
+  for (auto a : agents_sb_) {
     a.Clear();
   }
   agents_sb_.clear();
-  //agents_.reserve(10000);
+  // agents_.reserve(10000);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

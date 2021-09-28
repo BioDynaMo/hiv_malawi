@@ -77,12 +77,12 @@ struct MatingBehaviour : public Behavior {
     // the infection goes into both directions.
     if (no_mates > 0 && person->sex_ == Sex::kMale &&
         person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
-
-        for (size_t i = 0; i < no_mates; i++) {
+      for (int i = 0; i < no_mates; i++) {
         // AM: select location of mate
         float rand_num = static_cast<float>(random->Uniform());
-        std::vector<float> mate_location_distribution = env->GetMateLocationDistribution(person->location_);
-        
+        const std::vector<float> mate_location_distribution =
+            env->GetMateLocationDistribution(person->location_);
+
         // DEBUG : Having problems sampling location when rand_num = 1
         /*if (rand_num == 1.0){
           std::cout << rand_num << std::endl;
@@ -91,13 +91,14 @@ struct MatingBehaviour : public Behavior {
           }
           std::cout << std::endl;
         } */// END DEBUG
-          
-        size_t mate_location = SampleLocation(rand_num,mate_location_distribution);
+
+        size_t mate_location =
+            SampleLocation(rand_num, mate_location_distribution);
 
         // choose a random female mate at the location
         /*AgentPointer<Person> mate =
             env->GetRamdomAgentAtLocation(person->location_);*/
-        
+
         // Choose a random female mate at the selected mate location
         AgentPointer<Person> mate =
               env->GetRamdomAgentAtLocation(mate_location);
@@ -113,46 +114,48 @@ struct MatingBehaviour : public Behavior {
         if (mate->state_ == GemsState::kAcute &&
             person->state_ == GemsState::kHealthy &&
             random->Uniform() < sparam->infection_probability_acute_fm) {
-            person->state_ = GemsState::kAcute;
+          person->state_ = GemsState::kAcute;
         }
         // Scenario healthy male has intercourse with infected chronic female
         else if (mate->state_ == GemsState::kChronic &&
-            person->state_ == GemsState::kHealthy &&
-            random->Uniform() < sparam->infection_probability_chronic_fm) {
-            person->state_ = GemsState::kAcute;
-         }
+                 person->state_ == GemsState::kHealthy &&
+                 random->Uniform() < sparam->infection_probability_chronic_fm) {
+          person->state_ = GemsState::kAcute;
+        }
         // Scenario healthy male has intercourse with infected treated female
         else if (mate->state_ == GemsState::kTreated &&
-            person->state_ == GemsState::kHealthy &&
-            random->Uniform() < sparam->infection_probability_treated_fm) {
-            person->state_ = GemsState::kAcute;
+                 person->state_ == GemsState::kHealthy &&
+                 random->Uniform() < sparam->infection_probability_treated_fm) {
+          person->state_ = GemsState::kAcute;
         }
-        // Scenario healthy male has intercourse with infected failing treatment female
+        // Scenario healthy male has intercourse with infected failing treatment
+        // female
         else if (mate->state_ == GemsState::kFailing &&
-            person->state_ == GemsState::kHealthy &&
-            random->Uniform() < sparam->infection_probability_failing_fm) {
-            person->state_ = GemsState::kAcute;
+                 person->state_ == GemsState::kHealthy &&
+                 random->Uniform() < sparam->infection_probability_failing_fm) {
+          person->state_ = GemsState::kAcute;
         }
         // Scenario infected acute male has intercourse with healthy female
-        else if(mate->state_ == GemsState::kHealthy &&
-            person->state_ == GemsState::kAcute &&
-            random->Uniform() < sparam->infection_probability_acute_mf) {
-            mate->state_ = GemsState::kAcute;
-        }// Scenario infected chronic male has intercourse with healthy female
-        else if(mate->state_ == GemsState::kHealthy &&
-            person->state_ == GemsState::kChronic &&
-            random->Uniform() < sparam->infection_probability_chronic_mf) {
-            mate->state_ = GemsState::kAcute;
-        }// Scenario infected treated male has intercourse with healthy female
-        else if(mate->state_ == GemsState::kHealthy &&
-            person->state_ == GemsState::kTreated &&
-            random->Uniform() < sparam->infection_probability_treated_mf) {
-            mate->state_ = GemsState::kAcute;
-        }// Scenario infected failing treatment male has intercourse with healthy female
-        else if(mate->state_ == GemsState::kHealthy &&
-            person->state_ == GemsState::kFailing &&
-            random->Uniform() < sparam->infection_probability_failing_mf) {
-            mate->state_ = GemsState::kAcute;
+        else if (mate->state_ == GemsState::kHealthy &&
+                 person->state_ == GemsState::kAcute &&
+                 random->Uniform() < sparam->infection_probability_acute_mf) {
+          mate->state_ = GemsState::kAcute;
+        }  // Scenario infected chronic male has intercourse with healthy female
+        else if (mate->state_ == GemsState::kHealthy &&
+                 person->state_ == GemsState::kChronic &&
+                 random->Uniform() < sparam->infection_probability_chronic_mf) {
+          mate->state_ = GemsState::kAcute;
+        }  // Scenario infected treated male has intercourse with healthy female
+        else if (mate->state_ == GemsState::kHealthy &&
+                 person->state_ == GemsState::kTreated &&
+                 random->Uniform() < sparam->infection_probability_treated_mf) {
+          mate->state_ = GemsState::kAcute;
+        }  // Scenario infected failing treatment male has intercourse with
+           // healthy female
+        else if (mate->state_ == GemsState::kHealthy &&
+                 person->state_ == GemsState::kFailing &&
+                 random->Uniform() < sparam->infection_probability_failing_mf) {
+          mate->state_ = GemsState::kAcute;
         } else {
           ;  // if both are infected or both are healthy, do nothing
         }
@@ -167,32 +170,32 @@ struct GetOlder : public Behavior {
   BDM_BEHAVIOR_HEADER(GetOlder, Behavior, 1);
 
   GetOlder() {}
-    
+
   // AM TO DO: DO NOT DEFINE PARAMETERS HERE BUT IN sim-param.h
-  float get_mortality_rate_age(float age){
-      if (age < 15){
-          return 0.01;
-      } else if (age < 50){
-          return 0.005;
-      } else if (age < 90){
-          return 0.05;
-      }else {
-          return 1.0;
-      }
+  float get_mortality_rate_age(float age) {
+    if (age < 15) {
+      return 0.01;
+    } else if (age < 50) {
+      return 0.005;
+    } else if (age < 90) {
+      return 0.05;
+    } else {
+      return 1.0;
+    }
   }
-    
-  float get_mortality_rate_hiv(int state){
-      if (state == GemsState::kChronic){
-          return 0.05;
-      } else if (state == GemsState::kTreated){
-          return 0.01;
-      } else if (state == GemsState::kFailing){
-          return 0.1;
-      } else {
-          return 0.0;
-      }
+
+  float get_mortality_rate_hiv(int state) {
+    if (state == GemsState::kChronic) {
+      return 0.05;
+    } else if (state == GemsState::kTreated) {
+      return 0.01;
+    } else if (state == GemsState::kFailing) {
+      return 0.1;
+    } else {
+      return 0.0;
+    }
   }
-    
+
   void Run(Agent* agent) override {
     auto* sim = Simulation::GetActive();
     auto* random = sim->GetRandom();
@@ -201,8 +204,10 @@ struct GetOlder : public Behavior {
     auto* person = bdm_static_cast<Person*>(agent);
 
     // If between min_age and max_age, reassign risk factors
-    if (person->age_ >= sparam->min_age && person->age_ <= sparam->max_age) { // AM corrected typo sparam->min_age <= sparam->max_age
-        
+    if (person->age_ >= sparam->min_age &&
+        person->age_ <= sparam->max_age) {  // AM corrected typo sparam->min_age
+                                            // <= sparam->max_age
+
       // Update risk factors stochastically like in initialization
       if (random->Uniform() < sparam->sociobehavioural_risk_probability) {
         person->social_behaviour_factor_ = 0;
@@ -218,36 +223,44 @@ struct GetOlder : public Behavior {
       person->social_behaviour_factor_ = 0;
       person->biomedical_factor_ = 0;
     }
-      
-    // AM: HIV state transition, depending on current year and population category (important for transition to treatment)
+
+    // AM: HIV state transition, depending on current year and population
+    // category (important for transition to treatment)
     int year_population_category = -1;
-    double year = static_cast<double>(1960 + sim->GetScheduler()->GetSimulatedSteps());
-      
-    if (year < 2003){ // Prior to 2003
-      year_population_category = 0;     // All (No difference in ART between people. ART not available.)
-    } else if (year < 2011){ // Between 2003 and 2010
-      if (person->sex_ == Sex::kFemale and person->age_ >=18 and person->age_<=40){
-          year_population_category = 1; // Female between 18 and 40
-      } else if (person->age_ < 15){
-          year_population_category = 2; // Child
+    double year =
+        static_cast<double>(1960 + sim->GetScheduler()->GetSimulatedSteps());
+
+    if (year < 2003) {  // Prior to 2003
+      year_population_category =
+          0;  // All (No difference in ART between people. ART not available.)
+    } else if (year < 2011) {  // Between 2003 and 2010
+      if (person->sex_ == Sex::kFemale and person->age_ >= 18 and
+          person->age_ <= 40) {
+        year_population_category = 1;  // Female between 18 and 40
+      } else if (person->age_ < 15) {
+        year_population_category = 2;  // Child
       } else {
-          year_population_category = 3; // Others (Male, Female under 18, and Female over 40)
+        year_population_category =
+            3;  // Others (Male, Female under 18, and Female over 40)
       }
-    } else { // After 2011
-      if (person->sex_ == Sex::kFemale and person->age_ >=18 and person->age_<=40){
-          year_population_category = 4; // Female between 18 and 40
-      } else if (person->age_ < 15){
-          year_population_category = 5; // Child
+    } else {  // After 2011
+      if (person->sex_ == Sex::kFemale and person->age_ >= 18 and
+          person->age_ <= 40) {
+        year_population_category = 4;  // Female between 18 and 40
+      } else if (person->age_ < 15) {
+        year_population_category = 5;  // Child
       } else {
-          year_population_category = 6; // Others (Male, Female under 18, and Female over 40)
+        year_population_category =
+            6;  // Others (Male, Female under 18, and Female over 40)
       }
     }
-    std::vector<float> transition_proba = sparam->hiv_transition_matrix[person->state_][year_population_category];
-    for (int i = 0; i<transition_proba.size(); i++){
-        if (random->Uniform() < transition_proba[i]){
-            person->state_ = i;
-            break;
-        } 
+    std::vector<float> transition_proba =
+        sparam->hiv_transition_matrix[person->state_][year_population_category];
+    for (size_t i = 0; i < transition_proba.size(); i++) {
+      if (random->Uniform() < transition_proba[i]) {
+        person->state_ = i;
+        break;
+      }
     }
 
     // Possibly die - if not, just get older
@@ -273,19 +286,19 @@ struct GetOlder : public Behavior {
     if (person->age_ >= sparam->age_of_death) {
       stay_alive = false;
     }*/
-      
+
     // AM: Mortality
     // HIV-related mortality
     float rand_num_hiv = static_cast<float>(random->Uniform());
-    if (rand_num_hiv < get_mortality_rate_hiv(person->state_)){
+    if (rand_num_hiv < get_mortality_rate_hiv(person->state_)) {
       stay_alive = false;
     }
     // Age-related mortality
     float rand_num_age = static_cast<float>(random->Uniform());
-    if (rand_num_age < get_mortality_rate_age(person->age_)){
+    if (rand_num_age < get_mortality_rate_age(person->age_)) {
       stay_alive = false;
     }
-      
+
     if (!stay_alive) {
       // Person dies, i.e. is removed from simulation.
       person->RemoveFromSimulation();
@@ -330,30 +343,30 @@ struct GiveBirth : public Behavior {
     }
     // let's assume that if a mother is HIV positive, the child will be HIV
     // positive, too. (with a certain probability)
-    //else if (random_generator->Uniform() <
+    // else if (random_generator->Uniform() <
     //         sparam->birth_infection_probability) {
     //  // child->state_ = GemsState::kAcute;
     //  child->state_ = GemsState::kChronic;
 
-      ///! The aguments below are currently either not used or repetitive.
-      // // year of infection to present year, Question: Ask Lukas how to get
-      // iter child->year_of_infection_ = 2000;
+    ///! The aguments below are currently either not used or repetitive.
+    // // year of infection to present year, Question: Ask Lukas how to get
+    // iter child->year_of_infection_ = 2000;
     //}
     // AM: birth infection probability depends on whether mother is treated
     else if (mother->state_ == GemsState::kTreated) {
-        if (random_generator->Uniform() <
-            sparam->birth_infection_probability_treated){
-            child->state_ = GemsState::kAcute;
-        } else {
-            child->state_ = GemsState::kHealthy;
-        }
-    } else { // AM: Mother is not healthy and not treated
-        if (random_generator->Uniform() <
-            sparam->birth_infection_probability_untreated){
-            child->state_ = GemsState::kAcute;
-        } else {
-            child->state_ = GemsState::kHealthy;
-        }
+      if (random_generator->Uniform() <
+          sparam->birth_infection_probability_treated) {
+        child->state_ = GemsState::kAcute;
+      } else {
+        child->state_ = GemsState::kHealthy;
+      }
+    } else {  // AM: Mother is not healthy and not treated
+      if (random_generator->Uniform() <
+          sparam->birth_infection_probability_untreated) {
+        child->state_ = GemsState::kAcute;
+      } else {
+        child->state_ = GemsState::kHealthy;
+      }
     }
 
     ///! The aguments below are currently either not used or repetitive.

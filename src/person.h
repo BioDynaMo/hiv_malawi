@@ -54,18 +54,17 @@ class Person : public Cell {
   // AgentPointer<Person> partner_id_;
 
   // Returns True if the agent is healthy
-  bool IsHealthy(){return state_ == GemsState::kHealthy;}
-    
+  bool IsHealthy() { return state_ == GemsState::kHealthy; }
+
   // AM: Added below functions for more detailed follow up of HIV state
   // Returns True if the agent is infected in acute state
-  bool IsAcute(){return state_ == GemsState::kAcute;}
+  bool IsAcute() { return state_ == GemsState::kAcute; }
   // Returns True if the agent is infected in chronic state
-  bool IsChronic(){return state_ == GemsState::kChronic;}
+  bool IsChronic() { return state_ == GemsState::kChronic; }
   // Returns True if the agent is infected and treated state
-  bool IsTreated(){return state_ == GemsState::kTreated;}
+  bool IsTreated() { return state_ == GemsState::kTreated; }
   // Returns True if the agent is infected in failing treatement state
-  bool IsFailing(){return state_ == GemsState::kFailing;}
-
+  bool IsFailing() { return state_ == GemsState::kFailing; }
 };
 
 }  // namespace bdm

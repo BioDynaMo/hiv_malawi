@@ -48,20 +48,21 @@ int SampleLocation(float rand_num,
       continue;
     }*/
   }
-  
+
   // This line of code should never be reached
   // DEBUG: Check mate location distribution
-  std::cout << "Location distribution (" << location_distribution.size() << ")"<< std::endl;
-  for (int i=0; i<location_distribution.size(); i++){
-      std::cout << location_distribution[i] << ",";
-  } // END DEBUG
+  std::cout << "Location distribution (" << location_distribution.size() << ")"
+            << std::endl;
+  for (size_t i = 0; i < location_distribution.size(); i++) {
+    std::cout << location_distribution[i] << ",";
+  }  // END DEBUG
   std::cout << std::endl;
   Log::Warning("SampleLocation()",
                "Could not sample the location. Recieved inputs: ", rand_num,
                //". Use location 0.");
-               ". Use location ", location_distribution.size()-1,".");
-  return location_distribution.size()-1;
-  //return 0;
+               ". Use location ", location_distribution.size() - 1, ".");
+  return location_distribution.size() - 1;
+  // return 0;
 }
 
 int SampleSex(float rand_num, float probability_male) {
@@ -80,21 +81,22 @@ int SampleSex(float rand_num, float probability_male) {
   }
  }*/
 
-int SampleState(float rand_num, const std::vector<float>& initial_infection_probability) {
-
-    for (int i = 0; i < initial_infection_probability.size(); i++) {
-      if (rand_num <= initial_infection_probability[i]) {
-          return i; // AM: GemsState Enum values are by default associated with int values
-      } else {
-        continue;
-      }
+int SampleState(float rand_num,
+                const std::vector<float>& initial_infection_probability) {
+  for (size_t i = 0; i < initial_infection_probability.size(); i++) {
+    if (rand_num <= initial_infection_probability[i]) {
+      return i;  // AM: GemsState Enum values are by default associated with int
+                 // values
+    } else {
+      continue;
     }
-    
-    // This line of code should never be reached
-    Log::Warning("SampleState()",
-                 "Could not sample the state. Recieved inputs:", rand_num,
-                 ". Use state GemsState::kHealthy.");
-    return GemsState::kHealthy;
+  }
+
+  // This line of code should never be reached
+  Log::Warning("SampleState()",
+               "Could not sample the state. Recieved inputs:", rand_num,
+               ". Use state GemsState::kHealthy.");
+  return GemsState::kHealthy;
 }
 
 int ComputeSociobehavioural(float rand_num, int age,

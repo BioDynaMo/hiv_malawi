@@ -53,7 +53,7 @@ int SampleLocation(float rand_num,
   // DEBUG: Check mate location distribution
   std::cout << "Location distribution (" << location_distribution.size() << ")"
             << std::endl;
-  for (int i = 0; i < location_distribution.size(); i++) {
+  for (size_t i = 0; i < location_distribution.size(); i++) {
     std::cout << location_distribution[i] << ",";
   }  // END DEBUG
   std::cout << std::endl;
@@ -83,7 +83,7 @@ int SampleSex(float rand_num, float probability_male) {
 
 int SampleState(float rand_num,
                 const std::vector<float>& initial_infection_probability) {
-  for (int i = 0; i < initial_infection_probability.size(); i++) {
+  for (size_t i = 0; i < initial_infection_probability.size(); i++) {
     if (rand_num <= initial_infection_probability[i]) {
       return i;  // AM: GemsState Enum values are by default associated with int
                  // values

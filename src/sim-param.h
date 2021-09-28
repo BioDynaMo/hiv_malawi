@@ -161,9 +161,9 @@ struct SimParam : public ParamGroup {
 
   // AM test: Add Location Mixing Matrix. Location->Location
   std::vector<std::vector<float>> location_mixing_matrix =
-      set_location_mixing_matrix();
+      SetLocationMixingMatrix();
 
-  std::vector<std::vector<float>> set_location_mixing_matrix() {
+  std::vector<std::vector<float>> SetLocationMixingMatrix() {
     std::vector<std::vector<float>> location_mixing_matrix;
 
     int nb_locations = Location::kLocLast;
@@ -196,9 +196,9 @@ struct SimParam : public ParamGroup {
                                // age and returns the age category
 
   // AM test: Add Age Mixing Matrix. Age Category -> Age Category
-  std::vector<std::vector<float>> age_mixing_matrix = set_age_mixing_matrix();
+  std::vector<std::vector<float>> age_mixing_matrix = SetAgeMixingMatrix();
 
-  std::vector<std::vector<float>> set_age_mixing_matrix() {
+  std::vector<std::vector<float>> SetAgeMixingMatrix() {
     std::vector<std::vector<float>> age_mixing_matrix;
 
     age_mixing_matrix.clear();
@@ -215,9 +215,9 @@ struct SimParam : public ParamGroup {
   // AM: Socio-beahvoural Mixing matrix. Test with 2x2 in case of boolean
   // feature. // AM TO DO: Generalize to Categorical Feature
   std::vector<std::vector<float>> sociobehav_mixing_matrix =
-      set_sociobehav_mixing_matrix();
+      SetSociobehavMixingMatrix();
 
-  std::vector<std::vector<float>> set_sociobehav_mixing_matrix() {
+  std::vector<std::vector<float>> SetSociobehavMixingMatrix() {
     std::vector<std::vector<float>> sociobehav_mixing_matrix;
     int nb_sociobehav_categories =
         2;  // AM TO DO: Change to N. ex. Number of elements in new datatype in

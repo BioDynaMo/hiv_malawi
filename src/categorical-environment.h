@@ -182,6 +182,10 @@ class CategoricalEnvironment : public Environment {
               mate_location_distribution_[i][j - 1];
         }
       }
+      // Make sure that the commulative probability distribution actually ends
+      // with 1.0 and not 0.9999x or something similar. (Fix for
+      // SampleLocation warning).
+      mate_location_distribution_[i][Location::kLocLast - 1] = 1.0;
     }
 
     // DEBUG: Check mate location distribution
@@ -226,7 +230,7 @@ class CategoricalEnvironment : public Environment {
   int GetMinAge() { return min_age_; };
   int GetMaxAge() { return max_age_; };
   // AM: Add Getter of mate_location_distribution_
-  std::vector<float> GetMateLocationDistribution(size_t loc) {
+  const std::vector<float>& GetMateLocationDistribution(size_t loc) {
     return mate_location_distribution_[loc];
   };
 

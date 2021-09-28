@@ -5,8 +5,8 @@ on:
     # Every day at 3 am
     - cron: '0 3 * * *'
   push:
-    branches: [ master ]
   pull_request:
+    branches: [ master ]
 
 jobs:
   build:

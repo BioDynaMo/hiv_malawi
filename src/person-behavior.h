@@ -102,6 +102,9 @@ struct MatingBehaviour : public Behavior {
         AgentPointer<Person> mate =
               env->GetRamdomAgentAtLocation(mate_location);
            
+        // DEBUG: Increase count of partners in from given locations
+        env->IncreaseCountMatesInLocations(person->location_,mate_location);
+            
         if (mate == nullptr) {
           Log::Fatal("MatingBehaviour()",
                      "Received nullptr as AgentPointer mate.");

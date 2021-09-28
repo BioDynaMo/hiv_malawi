@@ -99,7 +99,16 @@ class CategoricalEnvironment : public Environment {
   // Default constructor
   CategoricalEnvironment(int min_age = 15, int max_age = 40,
                          size_t n_loc = Location::kLocLast)
-      : min_age_(min_age), max_age_(max_age), female_agents_(n_loc) {}
+      : min_age_(min_age), max_age_(max_age), female_agents_(n_loc) {
+    // Initialise all elements of mate_location_frequencies_ matrix with 0.0.
+    mate_location_frequencies_.clear();
+    mate_location_frequencies_.resize(Location::kLocLast);
+    for (int i=0; i<Location::kLocLast; i++){
+        mate_location_frequencies_[i].resize(Location::kLocLast);
+        fill(mate_location_frequencies_[i].begin(),mate_location_frequencies_[i].end(), 0.0);
+    }
+    PrintMateLocationFrequencies();
+  }
 
   // This is the update function, the is called automatically by BioDynaMo for
   // every simulation step. We delete the previous information and store a
@@ -202,6 +211,35 @@ class CategoricalEnvironment : public Environment {
     return female_agents_[loc].GetRandomAgent();
   };
     
+  // AM: Increase count of mates in given locations
+  void IncreaseCountMatesInLocations(size_t loc_agent, size_t loc_mate){
+        mate_location_frequencies_[loc_agent][loc_mate]+=1.0;
+  }
+
+  // AM: Normalize count/frequencies of mates in given locations
+  void NormalizeMateLocationFrequencies(){
+      for (int i=0; i<Location::kLocLast; i++){
+          float sum = 0.0;
+          for (int j=0; j<Location::kLocLast; j++){
+              sum+=mate_location_frequencies_[i][j];
+          }
+          for (int j=0; j<Location::kLocLast; j++){
+              mate_location_frequencies_[i][j]/=sum;
+          }
+      }
+  }
+  
+  // AM: Print mate locations frequency matrix
+  void PrintMateLocationFrequencies(){
+      std::cout << "DEBUG : PrintMateLocationFrequencies()"<<std::endl;
+      for (int i=0; i<Location::kLocLast; i++){
+          for (int j=0; j<Location::kLocLast; j++){
+              std::cout << mate_location_frequencies_[i][j] << ",";
+          }
+          std::cout<< std::endl;
+      }
+  }
+    
   // Setter functions to access private member variables
   void SetNumLocations(size_t num_locations);
   void SetMinAge(int min_age);
@@ -236,8 +274,11 @@ class CategoricalEnvironment : public Environment {
   // Vector to store all female agents of within a certain age interval
   // [min_age_, max_age_].
   std::vector<AgentVector> female_agents_;
-  // AM: Vector to store cumulative probability to select a female mate from one location given male agent location
+  // AM: Matrix to store cumulative probability to select a female mate from one location given male agent location
   std::vector<std::vector<float>>  mate_location_distribution_;
+  // AM: DEBUG Matrix to store the locations of selected mates
+  std::vector<std::vector<float>> mate_location_frequencies_;
+
 };
 
 }  // namespace bdm

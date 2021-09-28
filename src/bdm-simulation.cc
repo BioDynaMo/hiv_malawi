@@ -178,6 +178,10 @@ int Simulate(int argc, const char** argv) {
     // individuals over time.
     PlotAndSaveTimeseries();
   }
+    
+  // DEBUG
+  env->NormalizeMateLocationFrequencies();
+  env->PrintMateLocationFrequencies();
 
   return 0;
 }

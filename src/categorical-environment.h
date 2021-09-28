@@ -34,20 +34,10 @@ class AgentVector {
  private:
   // vector of AgentPointers
   std::vector<AgentPointer<Person>> agents_;
-  // Has the vector been shuffled or not
-  bool shuffled_;
-  // Iter to go through vector and obtain random Agents
-  size_t iter_;
-
-  // Shuffle the vector agents_
-  void Shuffle();
 
  public:
   // Get the number of agents in the vector
   size_t GetNumAgents() { return agents_.size(); }
-
-  // Return if vector is suffled or not
-  bool IsShuffled() { return shuffled_; };
 
   // Get a radom agent from the vector agents_
   AgentPointer<Person> GetRandomAgent();

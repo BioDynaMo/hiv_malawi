@@ -169,7 +169,7 @@ int Simulate(int argc, const char** argv) {
 
   // Run simulation for <number_of_iterations> timesteps
   {
-    Timing timer_sim("RUNTIME SIMULATION:                ");
+    Timing timer_sim("RUNTIME");
     simulation.GetScheduler()->Simulate(sparam->number_of_iterations);
   }
 

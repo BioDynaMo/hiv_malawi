@@ -10,6 +10,7 @@
 //
 // -----------------------------------------------------------------------------
 
+#include "biodynamo.h"
 #include "categorical-environment.h"
 
 namespace bdm {
@@ -18,27 +19,14 @@ namespace bdm {
 // AgentVector
 ////////////////////////////////////////////////////////////////////////////////
 
-void AgentVector::Shuffle() {
-  std::random_device rd;
-  std::mt19937 g(rd());
-  std::shuffle(agents_.begin(), agents_.end(), g);
-  shuffled_ = true;
-}
-
 AgentPointer<Person> AgentVector::GetRandomAgent() {
   if (agents_.size() == 0) {
     Log::Fatal("AgentVector::GetRandomAgent()",
                "There are no females available for mating in one of your "
                "regions. Consider increasing the number of Agents.");
   }
-  if (!shuffled_) {
-    Shuffle();
-  }
-  if (iter_ == agents_.size()) {
-    Shuffle();
-    iter_ = 0;
-  }
-  return agents_[iter_++];
+  auto* r = Simulation::GetActive()->GetRandom();
+  return agents_[r->Integer(agents_.size() - 1)];
 }
 
 void AgentVector::AddAgent(AgentPointer<Person> agent) {
@@ -46,7 +34,6 @@ void AgentVector::AddAgent(AgentPointer<Person> agent) {
 }
 
 void AgentVector::Clear() {
-  shuffled_ = false;
   agents_.clear();
   agents_.reserve(10000);
 }
@@ -131,8 +118,7 @@ void CategoricalEnvironment::DescribePopulation() {
   size_t sum{0};
   std::cout << "[ ";
   for (auto loc : female_agents_) {
-    std::cout << loc.GetNumAgents() << " " << loc.IsShuffled() << " (" << cntr
-              << ")  ";
+    std::cout << loc.GetNumAgents();
     sum += loc.GetNumAgents();
     if (cntr % 5 == 0) {
       std::cout << "\n  ";

@@ -200,7 +200,7 @@ class CategoricalEnvironment : public Environment {
 
   // Mapping from (location, age, socialbehaviour) to the appropriate position
   // in the female_agents_ index.
-  size_t ComputeCompoundIndex(size_t location, size_t age, size_t sb) {
+  inline size_t ComputeCompoundIndex(size_t location, size_t age, size_t sb) {
     assert(location < no_locations_);
     assert(age < no_age_categories_);
     assert(sb < no_sociobehavioural_categories_);

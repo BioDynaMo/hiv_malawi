@@ -10,8 +10,8 @@
 //
 // -----------------------------------------------------------------------------
 
-#include "biodynamo.h"
 #include "categorical-environment.h"
+#include "biodynamo.h"
 
 namespace bdm {
 
@@ -39,33 +39,8 @@ void AgentVector::Clear() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// AgentVectorTwo
-////////////////////////////////////////////////////////////////////////////////
-
-size_t AgentVectorTwo::GetNumAgents() {
-  size_t sum = 0;
-  for (auto a : agents_sb_) {
-    sum += a.GetNumAgents();  // Number of agents with given socio-behavioural
-                              // feature within age category
-  }
-  return sum;
-}
-
-void AgentVectorTwo::Clear() {
-  for (auto a : agents_sb_) {
-    a.Clear();
-  }
-  agents_sb_.clear();
-  // agents_.reserve(10000);
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // CategoricalEnvironment
 ////////////////////////////////////////////////////////////////////////////////
-
-void CategoricalEnvironment::SetNumLocations(size_t num_locations) {
-  female_agents_.resize(num_locations);
-}
 
 void CategoricalEnvironment::SetMinAge(int min_age) {
   if (min_age >= 0 && min_age <= 120) {
@@ -114,18 +89,22 @@ CategoricalEnvironment::GetNeighborMutexBuilder() {
 
 // Function for Debug - prints number of females per location.
 void CategoricalEnvironment::DescribePopulation() {
-  size_t cntr{0};
-  size_t sum{0};
-  std::cout << "[ ";
-  for (auto loc : female_agents_) {
-    std::cout << loc.GetNumAgents();
-    sum += loc.GetNumAgents();
-    if (cntr % 5 == 0) {
-      std::cout << "\n  ";
+  size_t total_population{0};
+  std::cout << "\n ### population description ### \n";
+  std::cout << "SB | location | age |  number of humans in index\n";
+  for (size_t s = 0; s < no_sociobehavioural_categories_; s++) {
+    for (size_t l = 0; l < no_locations_; l++) {
+      for (size_t a = 0; a < no_age_categories_; a++) {
+        auto num_agents = GetNumAgentsAtIndex(l, a, s);
+        std::cout << std::setw(2) << s << "   " << std::setw(8) << l << "   "
+                  << std::setw(3) << a << "   " << std::setw(25) << num_agents
+                  << "\n";
+        total_population += num_agents;
+      }
     }
-    cntr++;
   }
-  std::cout << " ]\nsum = " << sum << std::endl;
+  std::cout << "PopulationIndex Total: " << total_population << "\n"
+            << std::endl;
 };
 
 }  // namespace bdm

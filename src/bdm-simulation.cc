@@ -36,16 +36,19 @@ int Simulate(int argc, const char** argv) {
   Param::RegisterParamGroup(new SimParam());
 
   // Initialize the Simulation
-  Simulation simulation(argc, argv);
+  auto set_param = [&](Param* param) {
+    param->show_simulation_step = true;
+    param->remove_output_dir_contents = false;
+  };
+  Simulation simulation(argc, argv, set_param);
 
   // Get a pointer to the param object
   auto* param = simulation.GetParam();
   // Get a pointer to an instance of SimParam
   auto* sparam = param->Get<SimParam>();
 
-  // Use custom environment for simulation. The command SetEnvironment is
-  // currently not implemented in the master, it needs to set in BioDynaMo
-  // in simulation.h / simulation.cc (see README.md)
+  // Todo(Aziza): bring in age_category and sociobehavioral category to this
+  // constructor.
   auto* env = new CategoricalEnvironment(sparam->min_age, sparam->max_age);
   simulation.SetEnvironment(env);
 
@@ -180,7 +183,7 @@ int Simulate(int argc, const char** argv) {
     // individuals over time.
     PlotAndSaveTimeseries();
   }
-    
+
   // DEBUG
   env->NormalizeMateLocationFrequencies();
   env->PrintMateLocationFrequencies();

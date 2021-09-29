@@ -95,17 +95,15 @@ struct MatingBehaviour : public Behavior {
         size_t mate_location =
             SampleLocation(rand_num, mate_location_distribution);
 
-        // choose a random female mate at the location
-        /*AgentPointer<Person> mate =
-            env->GetRamdomAgentAtLocation(person->location_);*/
-
-        // Choose a random female mate at the selected mate location
+        // Todo(Aziza): bring in age_category and sociobehavioral category
+        // Choose a random female mate at the selected mate location, age group
+        // and sociobehavioral category
         AgentPointer<Person> mate =
-              env->GetRamdomAgentAtLocation(mate_location);
-           
+            env->GetRamdomAgentFromIndex(mate_location, 0, 0);
+
         // DEBUG: Increase count of partners in from given locations
-        env->IncreaseCountMatesInLocations(person->location_,mate_location);
-            
+        env->IncreaseCountMatesInLocations(person->location_, mate_location);
+
         if (mate == nullptr) {
           Log::Fatal("MatingBehaviour()",
                      "Received nullptr as AgentPointer mate.");

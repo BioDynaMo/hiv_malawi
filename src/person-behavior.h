@@ -100,10 +100,10 @@ struct MatingBehaviour : public Behavior {
         // and sociobehavioral category
         AgentPointer<Person> mate =
             env->GetRamdomAgentFromIndex(mate_location, 0, 0);
-
-        // DEBUG: Increase count of partners in from given locations
-        env->IncreaseCountMatesInLocations(person->location_, mate_location);
-
+        
+        // DEBUG: Increase count of partners from given locations
+        // env->IncreaseCountMatesInLocations(person->location_,mate_location);
+            
         if (mate == nullptr) {
           Log::Fatal("MatingBehaviour()",
                      "Received nullptr as AgentPointer mate.");

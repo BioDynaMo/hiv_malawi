@@ -90,14 +90,14 @@ class CategoricalEnvironment : public Environment {
   CategoricalEnvironment(int min_age = 15, int max_age = 40,
                          size_t n_loc = Location::kLocLast)
       : min_age_(min_age), max_age_(max_age), female_agents_(n_loc) {
-    // Initialise all elements of mate_location_frequencies_ matrix with 0.0.
-    mate_location_frequencies_.clear();
+    // AM: DEBUG - Initialise all elements of mate_location_frequencies_ matrix with 0.0.
+    /*mate_location_frequencies_.clear();
     mate_location_frequencies_.resize(Location::kLocLast);
     for (int i=0; i<Location::kLocLast; i++){
         mate_location_frequencies_[i].resize(Location::kLocLast);
         fill(mate_location_frequencies_[i].begin(),mate_location_frequencies_[i].end(), 0.0);
     }
-    PrintMateLocationFrequencies();
+    PrintMateLocationFrequencies();*/
   }
 
   // This is the update function, the is called automatically by BioDynaMo for

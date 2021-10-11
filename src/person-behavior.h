@@ -103,8 +103,8 @@ struct MatingBehaviour : public Behavior {
         AgentPointer<Person> mate =
               env->GetRamdomAgentAtLocation(mate_location);
            
-        // DEBUG: Increase count of partners in from given locations
-        env->IncreaseCountMatesInLocations(person->location_,mate_location);
+        // DEBUG: Increase count of partners from given locations
+        // env->IncreaseCountMatesInLocations(person->location_,mate_location);
             
         if (mate == nullptr) {
           Log::Fatal("MatingBehaviour()",

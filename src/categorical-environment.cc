@@ -63,26 +63,26 @@ CategoricalEnvironment::CategoricalEnvironment(
   PrintMateLocationFrequencies();
 }
 
-// AM TO DO: Update probability to select a female mate from each location.
-// Depends on static mixing matrix and update number of female agents per
-// location
+// AM : Update probability to select a female mate from each location x age x sb compound category.
+// Depends on static mixing matrices and updated number of female agents per
+// category
 void CategoricalEnvironment::Update() {
-  // // Debug
-  // uint64_t iter =
-  //     Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
-  // if (iter < 4) {
-  //   std::cout << "Iteration: " << iter << std::endl;
-  //   std::cout << "Before clearing section" << std::endl;
-  //   DescribePopulation();
-  // }
+  // Debug
+  uint64_t iter =
+       Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
+  if (iter < 4) {
+     std::cout << "Iteration: " << iter << std::endl;
+     std::cout << "Before clearing section" << std::endl;
+     DescribePopulation();
+  }
   female_agents_.clear();
   female_agents_.resize(no_age_categories_ * no_locations_ *
                         no_sociobehavioural_categories_);
-  // // DEBUG
-  // if (iter < 4) {
-  //   std::cout << "After clearing section" << std::endl;
-  //   DescribePopulation();
-  // }
+  // DEBUG
+  if (iter < 4) {
+     std::cout << "After clearing section" << std::endl;
+     DescribePopulation();
+  }
 
   auto* rm = Simulation::GetActive()->GetResourceManager();
   rm->ForEachAgent([](Agent* agent) {
@@ -99,8 +99,11 @@ void CategoricalEnvironment::Update() {
       if (person_ptr == nullptr) {
         Log::Fatal("CategoricalEnvironment::Update()", "person_ptr is nullptr");
       }
-      // Todo(Aziza): bring in age_category and sociobehavioral category
+      // AM - Added Age and Socio-behavioural Categories 
+      size_t age_category = person->GetAgeCategory(env->GetMinAge(),env->GetNoAgeCategories());
+      //env->AddAgentToIndex(person_ptr, person->location_, age_category, person->social_behaviour_factor_);
       env->AddAgentToIndex(person_ptr, person->location_, 0, 0);
+
       // AM TO DO:
       // env->AddAgentToIndexAge(person->location_, person->age_,
       // person_ptr);
@@ -111,42 +114,95 @@ void CategoricalEnvironment::Update() {
   });
 
   // AM : Update probability matrix to select female mate from one location
-  // given location of male agent
-  mate_location_distribution_.clear();
-  mate_location_distribution_.resize(no_locations_ * no_age_categories_ *
-                                     no_sociobehavioural_categories_);
+  // given location, age and socio-behaviour of male agent
+  mate_compound_category_distribution_.clear();
+  mate_compound_category_distribution_.resize(no_locations_ * no_age_categories_ *
+                                              no_sociobehavioural_categories_);
 
   auto* sim = Simulation::GetActive();
   auto* param = sim->GetParam();
   const auto* sparam =
       param->Get<SimParam>();  // AM : Needed to get location mixing matrix
 
-  for (int i = 0; i < Location::kLocLast;
-       i++) {  // Loop over male agent locations
-    mate_location_distribution_[i].resize(Location::kLocLast);
-    float sum = 0.0;
-    // Todo(Aziza): bring in age_category and sociobehavioral category
-    // Loop over female mate locations
-    for (int j = 0; j < Location::kLocLast; j++) {
-      mate_location_distribution_[i][j] =
-          sparam->location_mixing_matrix[i][j] * GetNumAgentsAtIndex(j, 0, 0);
-      sum += mate_location_distribution_[i][j];
+  for (int i = 0; i < no_locations_ * no_age_categories_ *
+       no_sociobehavioural_categories_; i++) {  // Loop over male agent compound categories (location x age x socio-behaviour)
+    
+    // AM : Probability distribution matrix to select a mate given male agent and female mate compound categories
+    mate_compound_category_distribution_[i].resize(no_locations_ * no_age_categories_ *
+                                          no_sociobehavioural_categories_);
+    
+    // Get Location, Age and Socio-behaviour from Index
+      size_t l_i = 1;//ComputeLocationFromCompoundIndex(i);
+      size_t a_i = 1;//ComputeAgeFromCompoundIndex(i);
+      size_t s_i = 1;//ComputeSociobehaviourFromCompoundIndex(i);
+    
+    // Step 1 - Location: Compute probability to select a female mate from each location
+    std::vector<float> proba_locations(no_locations_,0);
+    float sum_locations = 0.0;
+    for (size_t l_j = 0; l_j < no_locations_; l_j++){
+        proba_locations[l_j] = sparam->location_mixing_matrix[l_i][l_j]*GetNumAgentsAtLocation(l_j);
+        sum_locations += proba_locations[l_j];
     }
-    for (int j = 0; j < Location::kLocLast;
-         j++) {  // Loop again over female mate locations to NORMALIZE
-                 // (probabilities should sum to 1 for each male location over
-                 // all female mate locations) and compute CUMULATIVE
-                 // probabilities.
-      mate_location_distribution_[i][j] /= sum;
-      if (j > 0) {
-        mate_location_distribution_[i][j] +=
-            mate_location_distribution_[i][j - 1];
-      }
+    // Normalise to get probability between 0 and 1
+    for (size_t l_j = 0; l_j < no_locations_; l_j++){
+        proba_locations[l_j] /= sum_locations;
     }
+    
+    // Step 2 -  Age: Compute probability to select a female mate from each age category given the selected location
+    std::vector<std::vector<float>> proba_ages_given_location;
+    proba_ages_given_location.resize(no_locations_);
+    for (size_t l_j = 0; l_j < no_locations_; l_j++){
+        proba_ages_given_location[l_j].resize(no_age_categories_);
+        float sum_ages = 0.0;
+        for (size_t a_j = 0; a_j < no_age_categories_; a_j++){
+            proba_ages_given_location[l_j][a_j] = sparam->age_mixing_matrix[a_i][a_j]*GetNumAgentsAtLocationAge(l_j,a_j);
+            sum_ages += proba_ages_given_location[l_j][a_j];
+        }
+        // Normalise to compute probability between 0 and 1 to select each age category given a location
+        for (size_t a_j = 0; a_j < no_age_categories_; a_j++){
+            proba_ages_given_location[l_j][a_j] /=sum_ages;
+        }
+    }
+      
+    // Step 3 - Socio-behaviour : Compute probability to select from each socio-behavioural category given the selected location and age
+    std::vector<std::vector<std::vector<float>>> proba_socio_given_location_age;
+    proba_socio_given_location_age.resize(no_locations_);
+    for (size_t l_j = 0; l_j < no_locations_; l_j++){
+        proba_socio_given_location_age[l_j].resize(no_age_categories_);
+        for (size_t a_j = 0; a_j < no_age_categories_; a_j++){
+            proba_socio_given_location_age[l_j][a_j].resize(no_sociobehavioural_categories_);
+            float sum_socio = 0.0;
+            for (size_t s_j = 0; s_j < no_sociobehavioural_categories_; s_j++){
+                proba_socio_given_location_age[l_j][a_j][s_j] = sparam->sociobehav_mixing_matrix[s_i][s_j]*GetNumAgentsAtIndex(l_j,a_j,s_j);
+                sum_socio += proba_socio_given_location_age[l_j][a_j][s_j];
+                
+            }
+            // Normalise to compute probability between 0 and 1 to select each socio-behaviour given location and age
+            for (size_t s_j = 0; s_j < no_sociobehavioural_categories_; s_j++){
+                proba_socio_given_location_age[l_j][a_j][s_j] /=sum_socio;
+            }
+        }
+    }
+    
+    // Compute the final probability that a male agent of compound category i, selects a female mate of compound category j.
+    for (size_t j = 0; j < no_locations_* no_age_categories_ * no_sociobehavioural_categories_; j++){
+        size_t l_j = ComputeLocationFromCompoundIndex(j);
+        size_t a_j = ComputeAgeFromCompoundIndex(j);
+        size_t s_j = ComputeSociobehaviourFromCompoundIndex(j);
+
+        mate_compound_category_distribution_[i][j] = proba_locations[l_j] * proba_ages_given_location[l_j][a_j] * proba_socio_given_location_age[l_j][a_j][s_j];
+        
+        if (j > 0) {
+            mate_compound_category_distribution_[i][j] +=
+            mate_compound_category_distribution_[i][j - 1];
+        }
+    }
+    
     // Make sure that the commulative probability distribution actually ends
     // with 1.0 and not 0.9999x or something similar. (Fix for
     // SampleLocation warning).
-    mate_location_distribution_[i][Location::kLocLast - 1] = 1.0;
+    size_t no_compound_categories = no_locations_* no_age_categories_ * no_sociobehavioural_categories_;
+    mate_compound_category_distribution_[i][no_compound_categories - 1] = 1.0;
   }
 
   // DEBUG: Check mate location distribution
@@ -183,6 +239,22 @@ AgentPointer<Person> CategoricalEnvironment::GetRamdomAgentFromIndex(
   return female_agents_[compound_index].GetRandomAgent();
 };
 
+AgentPointer<Person> CategoricalEnvironment::GetRamdomAgentFromIndex(
+    size_t compound_index) {
+
+    if (compound_index >= female_agents_.size()) {
+      size_t location = ComputeLocationFromCompoundIndex(compound_index);
+      size_t age = ComputeAgeFromCompoundIndex(compound_index);
+      size_t sb = ComputeSociobehaviourFromCompoundIndex(compound_index);
+        
+      Log::Fatal("CategoricalEnvironment::AddAgentToIndex()",
+               "Location index is out of bounds. Received compound index: ",
+               compound_index, " (loc ", location, ", age ", age, ", sb ", sb,
+               ") female_agents_.size(): ", female_agents_.size());
+  }
+  return female_agents_[compound_index].GetRandomAgent();
+};
+
 // Function for Debug - prints number of females per location.
 void CategoricalEnvironment::DescribePopulation() {
   size_t total_population{0};
@@ -208,6 +280,28 @@ size_t CategoricalEnvironment::GetNumAgentsAtIndex(size_t location, size_t age,
   size_t compound_index = ComputeCompoundIndex(location, age, sb);
   assert(compound_index < female_agents_.size());
   return female_agents_[compound_index].GetNumAgents();
+}
+
+size_t CategoricalEnvironment::GetNumAgentsAtLocationAge(size_t location, size_t age) {
+    size_t sum = 0;
+    for (size_t sb = 0; sb < no_sociobehavioural_categories_; sb++){
+        size_t compound_index = ComputeCompoundIndex(location, age, sb);
+        assert(compound_index < female_agents_.size());
+        sum += female_agents_[compound_index].GetNumAgents();
+    }
+    return sum;
+}
+
+size_t CategoricalEnvironment::GetNumAgentsAtLocation(size_t location) {
+    size_t sum = 0;
+    for (size_t sb = 0; sb < no_sociobehavioural_categories_; sb++){
+        for (size_t age = 0; age < no_age_categories_; age++){
+            size_t compound_index = ComputeCompoundIndex(location, age, sb);
+            assert(compound_index < female_agents_.size());
+            sum += female_agents_[compound_index].GetNumAgents();
+        }
+    }
+    return sum;
 }
 
 void CategoricalEnvironment::IncreaseCountMatesInLocations(size_t loc_agent,
@@ -237,9 +331,9 @@ void CategoricalEnvironment::PrintMateLocationFrequencies() {
   }
 }
 
-const std::vector<float>& CategoricalEnvironment::GetMateLocationDistribution(
-    size_t loc) {
-  return mate_location_distribution_[loc];
+const std::vector<float>& CategoricalEnvironment::GetMateCompoundCategoryDistribution(size_t loc, size_t age_category, size_t sociobehav) {
+  size_t compound_index = ComputeCompoundIndex(loc,age_category,sociobehav);
+  return mate_compound_category_distribution_[compound_index];
 };
 
 void CategoricalEnvironment::SetMinAge(int min_age) {

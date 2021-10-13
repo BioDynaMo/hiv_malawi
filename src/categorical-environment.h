@@ -71,7 +71,8 @@ class CategoricalEnvironment : public Environment {
 
   // AM: Matrix to store cumulative probability to select a female mate from one
   // location given male agent location
-  std::vector<std::vector<float>> mate_location_distribution_;
+  //std::vector<std::vector<float>> mate_location_distribution_;
+  std::vector<std::vector<float>> mate_compound_category_distribution_;
   // AM: DEBUG Matrix to store the locations of selected mates
   std::vector<std::vector<float>> mate_location_frequencies_;
 
@@ -100,6 +101,27 @@ class CategoricalEnvironment : public Environment {
            (no_age_categories_ * no_locations_) * sb;
   }
 
+  // Mapping from position in the female_agents_ index to the approporiate location.
+  inline size_t ComputeLocationFromCompoundIndex(size_t i) {
+    assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
+  
+    return (int)(i%(no_age_categories_ * no_locations_))/ no_age_categories_;
+  }
+    
+  // Mapping from position in the female_agents_ index to the approporiate age category.
+  inline size_t ComputeAgeFromCompoundIndex(size_t i) {
+    assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
+
+    return (int)(i%(no_age_categories_ * no_locations_))% no_age_categories_;
+  }
+    
+  // Mapping from position in the female_agents_ index to the approporiate Socio-behavioural category.
+  inline size_t ComputeSociobehaviourFromCompoundIndex(size_t i) {
+    assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
+
+    return (int)i/(no_age_categories_ * no_locations_);
+  }
+    
   // Add an agent pointer to a certain location, age group, and sb category
   void AddAgentToIndex(AgentPointer<Person> agent, size_t location, size_t age,
                        size_t sb);
@@ -108,6 +130,10 @@ class CategoricalEnvironment : public Environment {
   // category
   AgentPointer<Person> GetRamdomAgentFromIndex(size_t location, size_t age,
                                                size_t sb);
+  
+  // Returns a random AgentPointer at a specific compound category (location, age group, and sb
+  // category)
+  AgentPointer<Person> GetRamdomAgentFromIndex(size_t compound_index);
 
   // Prints how many females are at a certain location, age group, and sb
   // category. Note that by population we refer to women between min_age_ and
@@ -116,6 +142,12 @@ class CategoricalEnvironment : public Environment {
 
   // Get number of agents at location, age_category, and sb category
   size_t GetNumAgentsAtIndex(size_t location, size_t age, size_t sb);
+
+  // Get number of agents at location
+  size_t GetNumAgentsAtLocation(size_t location);
+  
+  // Get number of agents at location and age_category
+  size_t GetNumAgentsAtLocationAge(size_t location, size_t age);
 
   // AM: Increase count of mates in given locations
   void IncreaseCountMatesInLocations(size_t loc_agent, size_t loc_mate);
@@ -133,8 +165,13 @@ class CategoricalEnvironment : public Environment {
   // Getter functions to access private member variables
   int GetMinAge() { return min_age_; };
   int GetMaxAge() { return max_age_; };
-  // AM: Add Getter of mate_location_distribution_
-  const std::vector<float>& GetMateLocationDistribution(size_t loc);
+  // AM: Add getter of no_age_categories_
+  int GetNoAgeCategories() {return no_age_categories_;};
+  // AM: Add getter of no_sociobehavioural_categories_
+  int GetNoSociobehaviouralCategories() {return no_sociobehavioural_categories_;};
+
+  // AM: Add Getter of mate_compound_category_distribution_
+  const std::vector<float>& GetMateCompoundCategoryDistribution(size_t loc, size_t age_category, size_t sociobehav);
 
   // The remaining public functinos are inherited from Environment but not
   // needed here.

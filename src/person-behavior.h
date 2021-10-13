@@ -61,6 +61,22 @@ struct MatingBehaviour : public Behavior {
 
   MatingBehaviour() {}
 
+  int SampleCompoundCategory(float rand_num,
+                       const std::vector<float>& category_distribution) {
+      for (size_t i = 0; i < category_distribution.size(); i++) {
+        if (rand_num <= category_distribution[i]) {
+          return i;
+        }
+      }
+
+      // This line of code should never be reached
+      std::cout << std::endl;
+      Log::Warning("SampleCompoundCategory()",
+                   "Could not sample the category. Recieved inputs: ", rand_num,
+                   ". Use location 0.");
+      return 0;
+  }
+    
   void Run(Agent* agent) override {
     auto* sim = Simulation::GetActive();
     auto* env = bdm_static_cast<CategoricalEnvironment*>(sim->GetEnvironment());
@@ -78,31 +94,23 @@ struct MatingBehaviour : public Behavior {
     if (no_mates > 0 && person->sex_ == Sex::kMale &&
         person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
       for (int i = 0; i < no_mates; i++) {
-        // AM: select location of mate
+        // AM: select compound category of mate
         float rand_num = static_cast<float>(random->Uniform());
-        const std::vector<float> mate_location_distribution =
-            env->GetMateLocationDistribution(person->location_);
+        // Compute male agent's age category
+        size_t age_category = person->GetAgeCategory(env->GetMinAge(),env->GetNoAgeCategories());
+        const std::vector<float> mate_compound_category_distribution =
+            env->GetMateCompoundCategoryDistribution(person->location_,age_category,person->social_behaviour_factor_);
 
-        // DEBUG : Having problems sampling location when rand_num = 1
-        /*if (rand_num == 1.0){
-          std::cout << rand_num << std::endl;
-          for (int l=0; l<mate_location_distribution.size();l++){
-            std::cout<< mate_location_distribution[l]<<",";
-          }
-          std::cout << std::endl;
-        } */// END DEBUG
+        size_t mate_compound_category =
+            SampleCompoundCategory(rand_num, mate_compound_category_distribution);
 
-        size_t mate_location =
-            SampleLocation(rand_num, mate_location_distribution);
-
-        // Todo(Aziza): bring in age_category and sociobehavioral category
-        // Choose a random female mate at the selected mate location, age group
+        // AM: Choose a random female mate at the selected mate compound category (location, age group
         // and sociobehavioral category
         AgentPointer<Person> mate =
-            env->GetRamdomAgentFromIndex(mate_location, 0, 0);
+            env->GetRamdomAgentFromIndex(mate_compound_category);
         
         // DEBUG: Increase count of partners from given locations
-        // env->IncreaseCountMatesInLocations(person->location_,mate_location);
+        //env->IncreaseCountMatesInLocations(person->location_,mate_location);
             
         if (mate == nullptr) {
           Log::Fatal("MatingBehaviour()",

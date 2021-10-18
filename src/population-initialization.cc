@@ -50,19 +50,10 @@ int SampleLocation(float rand_num,
   }
 
   // This line of code should never be reached
-  // DEBUG: Check mate location distribution
-  std::cout << "Location distribution (" << location_distribution.size() << ")"
-            << std::endl;
-  for (size_t i = 0; i < location_distribution.size(); i++) {
-    std::cout << location_distribution[i] << ",";
-  }  // END DEBUG
-  std::cout << std::endl;
   Log::Warning("SampleLocation()",
                "Could not sample the location. Recieved inputs: ", rand_num,
-               //". Use location 0.");
-               ". Use location ", location_distribution.size() - 1, ".");
-  return location_distribution.size() - 1;
-  // return 0;
+               ". Use location 0.");
+  return 0;
 }
 
 int SampleSex(float rand_num, float probability_male) {

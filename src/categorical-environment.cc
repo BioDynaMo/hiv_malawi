@@ -101,19 +101,15 @@ void CategoricalEnvironment::Update() {
       }
       // AM - Added Age and Socio-behavioural Categories 
       size_t age_category = person->GetAgeCategory(env->GetMinAge(),env->GetNoAgeCategories());
-      //env->AddAgentToIndex(person_ptr, person->location_, age_category, person->social_behaviour_factor_);
-      env->AddAgentToIndex(person_ptr, person->location_, 0, 0);
-
-      // AM TO DO:
-      // env->AddAgentToIndexAge(person->location_, person->age_,
-      // person_ptr);
+      env->AddAgentToIndex(person_ptr, person->location_, age_category, person->social_behaviour_factor_);
+      //env->AddAgentToIndex(person_ptr, person->location_, 0, 0);
 
     } else {
       ;
     };
   });
 
-  // AM : Update probability matrix to select female mate from one location
+  // AM : Update probability matrix to select female mate
   // given location, age and socio-behaviour of male agent
   mate_compound_category_distribution_.clear();
   mate_compound_category_distribution_.resize(no_locations_ * no_age_categories_ *
@@ -127,17 +123,17 @@ void CategoricalEnvironment::Update() {
   for (int i = 0; i < no_locations_ * no_age_categories_ *
        no_sociobehavioural_categories_; i++) {  // Loop over male agent compound categories (location x age x socio-behaviour)
     
-    // AM : Probability distribution matrix to select a mate given male agent and female mate compound categories
+    // AM : Probability distribution matrix to select a female mate given male agent and female mate compound categories
     mate_compound_category_distribution_[i].resize(no_locations_ * no_age_categories_ *
                                           no_sociobehavioural_categories_);
     
-    // Get Location, Age and Socio-behaviour from Index
-      size_t l_i = 1;//ComputeLocationFromCompoundIndex(i);
-      size_t a_i = 1;//ComputeAgeFromCompoundIndex(i);
-      size_t s_i = 1;//ComputeSociobehaviourFromCompoundIndex(i);
+    // Get Location, Age and Socio-behaviour of male agent from Index
+    size_t l_i = ComputeLocationFromCompoundIndex(i); //1;//
+    size_t a_i = ComputeAgeFromCompoundIndex(i);//1;//
+    size_t s_i = ComputeSociobehaviourFromCompoundIndex(i);//1;//
     
     // Step 1 - Location: Compute probability to select a female mate from each location
-    std::vector<float> proba_locations(no_locations_,0);
+    std::vector<float> proba_locations(no_locations_,0.0);
     float sum_locations = 0.0;
     for (size_t l_j = 0; l_j < no_locations_; l_j++){
         proba_locations[l_j] = sparam->location_mixing_matrix[l_i][l_j]*GetNumAgentsAtLocation(l_j);
@@ -151,14 +147,14 @@ void CategoricalEnvironment::Update() {
     // Step 2 -  Age: Compute probability to select a female mate from each age category given the selected location
     std::vector<std::vector<float>> proba_ages_given_location;
     proba_ages_given_location.resize(no_locations_);
-    for (size_t l_j = 0; l_j < no_locations_; l_j++){
+    for (size_t l_j = 0; l_j < no_locations_; l_j++){ // Loop over potential locations of female mate
         proba_ages_given_location[l_j].resize(no_age_categories_);
         float sum_ages = 0.0;
-        for (size_t a_j = 0; a_j < no_age_categories_; a_j++){
+        for (size_t a_j = 0; a_j < no_age_categories_; a_j++){ // For each location l_j, compute probability to select a female mate from each age category a_j
             proba_ages_given_location[l_j][a_j] = sparam->age_mixing_matrix[a_i][a_j]*GetNumAgentsAtLocationAge(l_j,a_j);
             sum_ages += proba_ages_given_location[l_j][a_j];
         }
-        // Normalise to compute probability between 0 and 1 to select each age category given a location
+        // Normalise to compute probability between 0 and 1 to select from each age category given a location
         for (size_t a_j = 0; a_j < no_age_categories_; a_j++){
             proba_ages_given_location[l_j][a_j] /=sum_ages;
         }
@@ -192,6 +188,7 @@ void CategoricalEnvironment::Update() {
 
         mate_compound_category_distribution_[i][j] = proba_locations[l_j] * proba_ages_given_location[l_j][a_j] * proba_socio_given_location_age[l_j][a_j][s_j];
         
+        // Compute Cumulative distribution
         if (j > 0) {
             mate_compound_category_distribution_[i][j] +=
             mate_compound_category_distribution_[i][j - 1];

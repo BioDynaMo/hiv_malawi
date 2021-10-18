@@ -93,14 +93,17 @@ struct MatingBehaviour : public Behavior {
     // the infection goes into both directions.
     if (no_mates > 0 && person->sex_ == Sex::kMale &&
         person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
+      
+      // Compute male agent's age category
+      size_t age_category = person->GetAgeCategory(env->GetMinAge(),env->GetNoAgeCategories());
+      // Get (cumulative) probability distribution that the male agent selects a female mate from each compound category
+      const std::vector<float> mate_compound_category_distribution =
+            env->GetMateCompoundCategoryDistribution(person->location_,age_category,person->social_behaviour_factor_);
+
       for (int i = 0; i < no_mates; i++) {
         // AM: select compound category of mate
         float rand_num = static_cast<float>(random->Uniform());
-        // Compute male agent's age category
-        size_t age_category = person->GetAgeCategory(env->GetMinAge(),env->GetNoAgeCategories());
-        const std::vector<float> mate_compound_category_distribution =
-            env->GetMateCompoundCategoryDistribution(person->location_,age_category,person->social_behaviour_factor_);
-
+        
         size_t mate_compound_category =
             SampleCompoundCategory(rand_num, mate_compound_category_distribution);
 

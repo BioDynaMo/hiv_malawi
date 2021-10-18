@@ -24,7 +24,7 @@ struct SimParam : public ParamGroup {
   BDM_PARAM_GROUP_HEADER(SimParam, 1);
 
   // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-  uint64_t number_of_iterations = 5;//5;  // 60;  // (1960-2020)
+  uint64_t number_of_iterations = 1;//5;  // 60;  // (1960-2020)
 
   // Number of agents that are present at the first iteration of the simulation
   uint64_t initial_population_size = 3600000;
@@ -217,11 +217,10 @@ struct SimParam : public ParamGroup {
   std::vector<std::vector<float>> sociobehav_mixing_matrix =
       SetSociobehavMixingMatrix();
 
+  int nb_sociobehav_categories = 2;  // AM TO DO: Change to N. ex. Number of elements in new datatype in
+            // datatype.h?
   std::vector<std::vector<float>> SetSociobehavMixingMatrix() {
     std::vector<std::vector<float>> sociobehav_mixing_matrix;
-    int nb_sociobehav_categories =
-        2;  // AM TO DO: Change to N. ex. Number of elements in new datatype in
-            // datatype.h?
 
     sociobehav_mixing_matrix.clear();
     sociobehav_mixing_matrix.resize(nb_age_categories);

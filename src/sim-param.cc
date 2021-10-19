@@ -27,7 +27,6 @@ void SimParam::SetAgeMixingMatrix() {
 };
 
 void SimParam::SetLocationMixingMatrix() {
-  int nb_locations = Location::kLocLast;
   location_mixing_matrix.clear();
   location_mixing_matrix.resize(nb_locations);
 

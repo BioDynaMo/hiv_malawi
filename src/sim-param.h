@@ -129,6 +129,9 @@ class SimParam : public ParamGroup {
   // ToDo: Add Documentation
   std::vector<std::vector<float>> sociobehav_mixing_matrix;
 
+  // Number of locations
+  int nb_locations = Location::kLocLast;
+
   // Probability for agent to be infected at beginning of simulation. You can
   // expect roughly <initial_population_size * initial_infection_probability>
   // infected agents at the beginning of the simulation. These infected

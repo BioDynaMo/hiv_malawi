@@ -49,13 +49,12 @@ int Simulate(int argc, const char** argv) {
 
   // Todo(Aziza): bring in age_category and sociobehavioral category to this
   // constructor.
-  auto* env = new CategoricalEnvironment
-    //(sparam->min_age, sparam->max_age, sparam->nb_age_categories, Location::kLocLast, sparam->nb_sociobehav_categories);
-    (sparam->min_age, sparam->max_age);
+  auto* env = new CategoricalEnvironment(
+      sparam->min_age, sparam->max_age, sparam->nb_age_categories,
+      sparam->nb_locations, sparam->nb_sociobehav_categories);
 
   simulation.SetEnvironment(env);
 
-  
   // Randomly initialize a population
   {
     Timing timer_init("RUNTIME POPULATION INITIALIZATION: ");
@@ -187,7 +186,7 @@ int Simulate(int argc, const char** argv) {
     // individuals over time.
     PlotAndSaveTimeseries();
   }
-    
+
   // DEBUG - AM
   env->NormalizeMateLocationFrequencies();
   env->PrintMateLocationFrequencies();

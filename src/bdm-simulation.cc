@@ -47,12 +47,11 @@ int Simulate(int argc, const char** argv) {
   // Get a pointer to an instance of SimParam
   auto* sparam = param->Get<SimParam>();
 
-  // Todo(Aziza): bring in age_category and sociobehavioral category to this
+  // AM: added age_category and sociobehavioral category
   // constructor.
   auto* env = new CategoricalEnvironment
-    //(sparam->min_age, sparam->max_age, sparam->nb_age_categories, Location::kLocLast, sparam->nb_sociobehav_categories);
-    (sparam->min_age, sparam->max_age);
-
+    (sparam->min_age, sparam->max_age, sparam->nb_age_categories, Location::kLocLast, sparam->nb_sociobehav_categories);
+    
   simulation.SetEnvironment(env);
 
   
@@ -188,9 +187,9 @@ int Simulate(int argc, const char** argv) {
     PlotAndSaveTimeseries();
   }
     
-  // DEBUG - AM
-  env->NormalizeMateLocationFrequencies();
-  env->PrintMateLocationFrequencies();
+  // DEBUG - AM - TO DO: Works only when selection depended soloely on locations
+  /*env->NormalizeMateLocationFrequencies();
+  env->PrintMateLocationFrequencies();*/
 
   return 0;
 }

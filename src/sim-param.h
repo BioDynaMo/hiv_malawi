@@ -57,10 +57,26 @@ struct SimParam : public ParamGroup {
   // The mating behaviour is modeled with a random process. For each male agent,
   // we sample the number of female sex partners per year from a Gaussian
   // distribution, which parameters are:
-  float no_mates_mean =
-      80.0;  // 100.0;//AM replaced 2.0 by 100, if considered as casual sex
+  /*float no_mates_mean = 80.0;  // 100.0;//AM replaced 2.0 by 100, if considered as casual sex
              // acts; TO DO: Should probably depend of soc-behav risk factor!
-  float no_mates_sigma = 100.0;  // 20.0;
+  float no_mates_sigma = 100.0;  // 20.0;*/
+
+  int nb_sociobehav_categories = 2;  // AM TO DO: Define the socio-behavioral categories in a new datatype in
+                // datatype.h? Important! This variable/attribute must be defined before it is used in any function ex. SetNumberMatesMean, SetNumberMatesSigma, etc.
+   
+  // Gaussian distribution defining the number of casual partners per year depending on socio-behaviour
+  std::vector<float>& no_mates_mean = SetNumberMatesMean();
+  std::vector<float>& no_mates_sigma = SetNumberMatesSigma();
+
+  std::vector<float>& SetNumberMatesMean(){
+      std::vector<float>& means = std::vector<float>(nb_sociobehav_categories,0);
+      means[0] = 70.0;
+      means[1] = 20.0;
+      return means;
+  }
+  
+
+  
 
   // Death is modeled by a random process. We generate a random number r in
   // [0,1] and check if: r< (age - min) \ (delta * alpha). If that evaluates to
@@ -192,10 +208,9 @@ struct SimParam : public ParamGroup {
   };
 
   // Five-years age categories 15-19, 20-24, ...,65-69,70+
-  int nb_age_categories = 12;  // AM TO DO : Implement function that takes the
-                               // age and returns the age category
-
-  // AM test: Add Age Mixing Matrix. Age Category -> Age Category
+  int nb_age_categories = 12;
+    
+  // Age Category Mixing Matrix
   std::vector<std::vector<float>> age_mixing_matrix = SetAgeMixingMatrix();
 
   std::vector<std::vector<float>> SetAgeMixingMatrix() {
@@ -212,9 +227,6 @@ struct SimParam : public ParamGroup {
     return age_mixing_matrix;
   };
 
-  int nb_sociobehav_categories = 2;  // AM TO DO: Change to N. ex. Number of elements in new datatype in
-              // datatype.h?
-    
   // AM: Socio-beahvoural Mixing matrix. Test with 2x2 in case of boolean
   // feature. // AM TO DO: Generalize to Categorical Feature
   std::vector<std::vector<float>> sociobehav_mixing_matrix =

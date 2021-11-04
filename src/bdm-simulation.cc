@@ -47,8 +47,7 @@ int Simulate(int argc, const char** argv) {
   // Get a pointer to an instance of SimParam
   auto* sparam = param->Get<SimParam>();
 
-  // AM: added age_category and sociobehavioral category
-  // constructor.
+  // AM: Construct Environment with numbers of age and socio-behavioral categories.
   auto* env = new CategoricalEnvironment(
       sparam->min_age, sparam->max_age, sparam->nb_age_categories,
       sparam->nb_locations, sparam->nb_sociobehav_categories);

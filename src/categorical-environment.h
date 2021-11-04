@@ -91,31 +91,31 @@ class CategoricalEnvironment : public Environment {
   // location
   void Update() override;
 
-  // Mapping from (location, age, socialbehaviour) to the appropriate position
+  // Mapping from (location, age_category, socialbehaviour) to the appropriate position
   // in the female_agents_ index.
-  inline size_t ComputeCompoundIndex(size_t location, size_t age, size_t sb) {
+  inline size_t ComputeCompoundIndex(size_t location, size_t age_category, size_t sb) {
     assert(location < no_locations_);
-    assert(age < no_age_categories_);
+    assert(age_category < no_age_categories_);
     assert(sb < no_sociobehavioural_categories_);
-    return age + no_age_categories_ * location +
+    return age_category + no_age_categories_ * location +
            (no_age_categories_ * no_locations_) * sb;
   }
 
-  // Mapping from position in the female_agents_ index to the approporiate location.
+  // Mapping from position in the female_agents_ index to the appropriate location.
   inline size_t ComputeLocationFromCompoundIndex(size_t i) {
     assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
   
     return (int)(i%(no_age_categories_ * no_locations_))/ no_age_categories_;
   }
     
-  // Mapping from position in the female_agents_ index to the approporiate age category.
+  // Mapping from position in the female_agents_ index to the appropriate age category.
   inline size_t ComputeAgeFromCompoundIndex(size_t i) {
     assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
 
     return (int)(i%(no_age_categories_ * no_locations_))% no_age_categories_;
   }
     
-  // Mapping from position in the female_agents_ index to the approporiate Socio-behavioural category.
+  // Mapping from position in the female_agents_ index to the appropriate Socio-behavioural category.
   inline size_t ComputeSociobehaviourFromCompoundIndex(size_t i) {
     assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
 
@@ -149,14 +149,14 @@ class CategoricalEnvironment : public Environment {
   // Get number of agents at location and age_category
   size_t GetNumAgentsAtLocationAge(size_t location, size_t age);
 
-  // AM: Increase count of mates in given locations
-  void IncreaseCountMatesInLocations(size_t loc_agent, size_t loc_mate);
+  // AM: DEBUG - Increase count of mates in given locations
+  //void IncreaseCountMatesInLocations(size_t loc_agent, size_t loc_mate);
 
-  // AM: Normalize count/frequencies of mates in given locations
-  void NormalizeMateLocationFrequencies();
+  // AM: DEBUG - Normalize count/frequencies of mates in given locations
+  //void NormalizeMateLocationFrequencies();
 
-  // AM: Print mate locations frequency matrix
-  void PrintMateLocationFrequencies();
+  // AM: DEBUG - Print mate locations frequency matrix
+  //void PrintMateLocationFrequencies();
 
   // Setter functions to access private member variables
   void SetMinAge(int min_age);
@@ -165,12 +165,11 @@ class CategoricalEnvironment : public Environment {
   // Getter functions to access private member variables
   int GetMinAge() { return min_age_; };
   int GetMaxAge() { return max_age_; };
-  // AM: Add getter of no_age_categories_
+  // AM: Getter of no_age_categories_
   int GetNoAgeCategories() {return no_age_categories_;};
-  // AM: Add getter of no_sociobehavioural_categories_
+  // AM: Getter of no_sociobehavioural_categories_
   int GetNoSociobehaviouralCategories() {return no_sociobehavioural_categories_;};
-
-  // AM: Add Getter of mate_compound_category_distribution_
+  // AM: Getter of mate_compound_category_distribution_
   const std::vector<float>& GetMateCompoundCategoryDistribution(size_t loc, size_t age_category, size_t sociobehav);
 
   // The remaining public functinos are inherited from Environment but not

@@ -100,10 +100,6 @@ class SimParam : public ParamGroup {
   /*const std::vector<float> mortality_rate_hiv{
         0.0, 0.05, 0.06, 0.16};*/
 
-  // Probability of getting infected when having sex with infected agent
-  // float infection_probability = 2e-3;//AM replaced 0.01 by O(1e-3) if
-  // considered infection probability per sex
-
   // AM added: Probability of getting infected depends on 1) disease state, 2)
   // sex of partners Male-to-female
   float infection_probability_acute_mf = 9.3e-3;
@@ -121,49 +117,35 @@ class SimParam : public ParamGroup {
   float infection_probability_treated_mm = 1.3e-3;
   float infection_probability_failing_mm = 7.6e-3;
 
-  // AM test: Add Transition Matrix between HIV states.
+  // AM: Transition Matrix between HIV states.
   // GemState->GemsState->Year and Population_category
   std::vector<std::vector<std::vector<float>>> hiv_transition_matrix;
 
-  // AM test: Add Location Mixing Matrix. Location->Location
+  // Number of locations
+  int nb_locations = Location::kLocLast;
+    
+  // AM: Location Mixing Matrix. Location->Location
   std::vector<std::vector<float>> location_mixing_matrix;
 
   // Five-years age categories 15-19, 20-24, ...,65-69,70+
-  int nb_age_categories = 12;  // AM TO DO : Implement function that takes the
-                               // age and returns the age category
+  int nb_age_categories = 12;
 
-  // AM test: Add Age Mixing Matrix. Age Category -> Age Category
+  // AM: Age Mixing Matrix. Age Category -> Age Category
   std::vector<std::vector<float>> age_mixing_matrix;
 
-  // AM: Socio-beahvoural Mixing matrix. Test with 2x2 in case of boolean
-  // feature. // AM TO DO: Generalize to Categorical Feature
-  int nb_sociobehav_categories = 2;  // AM TO DO: Change to N. ex. Number of
-                                     // elements in new datatype in datatype.h?
+  // AM: Number of socio-behavioural categories
+  int nb_sociobehav_categories = 2;
 
-  // ToDo: Add Documentation
+  // AM: Socio-behavioural Mixing Matrix. Socio-beahioural Category -> Socio-behavioural Category
   std::vector<std::vector<float>> sociobehav_mixing_matrix;
 
-  // Number of locations
-  int nb_locations = Location::kLocLast;
-
-  // Probability for agent to be infected at beginning of simulation. You can
-  // expect roughly <initial_population_size * initial_infection_probability>
-  // infected agents at the beginning of the simulation. These infected
-  // individuals can occur anywhere on the age spectrum.
-  // float initial_infection_probability = 0.01;
-
   // AM: Probability for agent to be healthy or at a certain HIV progression
-  // state at beginning of simulation. Given in a summed up form. First vector
+  // state at beginning of simulation. Given in a summed up/cumulative form. First vector
   // x1 = p_Healthy component corresponds to probability of being Healthy. x2 =
   // p_Healthy + p_Acute, x3 = p_Healthy + p_Acute + p_Chronic, x4 = p_Healthy +
   // p_Acute + p_Chronic + p_Treated, x5 = p_Healthy + p_Acute + p_Chronic +
   // p_Treated + p_Failing
-  // const std::vector<float> initial_infection_probability{
-  //    0.99, 0.99, 1, 1, 1, 1};
-
-  // Reduce initial probability infection to 1e-5 instead of 1e-2
-  /*const std::vector<float> initial_infection_probability{
-        99999e-5, 99999e-5, 1, 1, 1, 1};*/
+  // Initial probability infection to 1e-3 (or 1e-5, or 1e-2, etc.)
   const std::vector<float> initial_infection_probability{999e-3, 999e-3, 1,
                                                          1,      1,      1};
 
@@ -174,8 +156,6 @@ class SimParam : public ParamGroup {
   // motability and reach a realistic demographic development from 1960-2020.
   float give_birth_probability = 0.18;
 
-  // Probability for agent to be infected at birth, if its mother is infected
-  // float birth_infection_probability = 0.1;
   // AM : Probability for agent to be infected at birth, if its mother is
   // infected and treated
   float birth_infection_probability_treated = 0.01;

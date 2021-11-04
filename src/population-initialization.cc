@@ -44,9 +44,7 @@ int SampleLocation(float rand_num,
   for (size_t i = 0; i < location_distribution.size(); i++) {
     if (rand_num <= location_distribution[i]) {
       return i;
-    } /*else { // AM: not needed if nothing after ifelse statement
-      continue;
-    }*/
+    }
   }
 
   // This line of code should never be reached
@@ -63,14 +61,6 @@ int SampleSex(float rand_num, float probability_male) {
     return Sex::kFemale;
   }
 }
-
-/*int SampleState(float rand_num, float initial_infection_probability) {
-  if (rand_num <= initial_infection_probability) {
-    return GemsState::kGems1;
-  } else {
-    return GemsState::kHealthy;
-  }
- }*/
 
 int SampleState(float rand_num,
                 const std::vector<float>& initial_infection_probability) {

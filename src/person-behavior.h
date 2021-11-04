@@ -215,8 +215,7 @@ struct GetOlder : public Behavior {
 
     // If between min_age and max_age, reassign risk factors
     if (person->age_ >= sparam->min_age &&
-        person->age_ <= sparam->max_age) {  // AM corrected typo sparam->min_age
-                                            // <= sparam->max_age
+        person->age_ <= sparam->max_age) {
 
       // Update risk factors stochastically like in initialization
       if (random->Uniform() < sparam->sociobehavioural_risk_probability) {
@@ -275,27 +274,6 @@ struct GetOlder : public Behavior {
 
     // Possibly die - if not, just get older
     bool stay_alive{true};
-    // Let's assume a linear increase of the death probability per year for
-    // healty agents.
-    /*if (person->state_ == GemsState::kHealthy) {
-      if (random->Uniform() <
-          (person->age_ - sparam->min_healthy) /
-              (sparam->delta_healthy * sparam->alpha_healthy)) {
-        stay_alive = false;
-      }
-    }
-    // Let's assume a linear increase of the death probability per year for
-    // non-healty agents.
-    if (person->state_ != GemsState::kHealthy) {
-      if (random->Uniform() < (person->age_ - sparam->min_hiv) /
-                                  (sparam->delta_hiv * sparam->alpha_hiv)) {
-        stay_alive = false;
-      }
-    }
-    // hard cut at a certain age
-    if (person->age_ >= sparam->age_of_death) {
-      stay_alive = false;
-    }*/
 
     // AM: Mortality
     // HIV-related mortality

@@ -52,15 +52,15 @@ CategoricalEnvironment::CategoricalEnvironment(
       no_sociobehavioural_categories_(no_sociobehavioural_categories),
       female_agents_(no_age_categories * no_locations *
                      no_sociobehavioural_categories) {
-  // Initialise all elements of mate_location_frequencies_ matrix with 0.0.
-  mate_location_frequencies_.clear();
+  // DEBUG - Initialise all elements of mate_location_frequencies_ matrix with 0.0.
+  /*mate_location_frequencies_.clear();
   mate_location_frequencies_.resize(Location::kLocLast);
   for (int i = 0; i < Location::kLocLast; i++) {
     mate_location_frequencies_[i].resize(Location::kLocLast);
     fill(mate_location_frequencies_[i].begin(),
          mate_location_frequencies_[i].end(), 0.0);
   }
-  //PrintMateLocationFrequencies();
+  PrintMateLocationFrequencies();*/
 }
 
 // AM : Update probability to select a female mate from each location x age x sb compound category.
@@ -99,11 +99,10 @@ void CategoricalEnvironment::Update() {
       if (person_ptr == nullptr) {
         Log::Fatal("CategoricalEnvironment::Update()", "person_ptr is nullptr");
       }
-      // AM - Added Age and Socio-behavioural Categories 
+      // Compute age category of female agent
       size_t age_category = person->GetAgeCategory(env->GetMinAge(),env->GetNoAgeCategories());
+      // Add female agent to the right index, based on her location, age category and socio-behavioural category
       env->AddAgentToIndex(person_ptr, person->location_, age_category, person->social_behaviour_factor_);
-      //env->AddAgentToIndex(person_ptr, person->location_, 0, 0);
-
     } else {
       ;
     };
@@ -128,9 +127,9 @@ void CategoricalEnvironment::Update() {
                                           no_sociobehavioural_categories_);
     
     // Get Location, Age and Socio-behaviour of male agent from Index
-    size_t l_i = ComputeLocationFromCompoundIndex(i); //1;//
-    size_t a_i = ComputeAgeFromCompoundIndex(i);//1;//
-    size_t s_i = ComputeSociobehaviourFromCompoundIndex(i);//1;//
+    size_t l_i = ComputeLocationFromCompoundIndex(i);
+    size_t a_i = ComputeAgeFromCompoundIndex(i);
+    size_t s_i = ComputeSociobehaviourFromCompoundIndex(i);
     
     // Step 1 - Location: Compute probability to select a female mate from each location
     std::vector<float> proba_locations(no_locations_,0.0);
@@ -247,7 +246,6 @@ void CategoricalEnvironment::Update() {
             break;
         }
       }
-    //mate_compound_category_distribution_[i][no_compound_categories - 1] = 1.0;
   }
 
   // DEBUG: Check mate location distribution
@@ -359,7 +357,7 @@ size_t CategoricalEnvironment::GetNumAgentsAtLocation(size_t location) {
     return sum;
 }
 
-void CategoricalEnvironment::IncreaseCountMatesInLocations(size_t loc_agent,
+/*void CategoricalEnvironment::IncreaseCountMatesInLocations(size_t loc_agent,
                                                            size_t loc_mate) {
   mate_location_frequencies_[loc_agent][loc_mate] += 1.0;
 }
@@ -384,7 +382,7 @@ void CategoricalEnvironment::PrintMateLocationFrequencies() {
     }
     std::cout << std::endl;
   }
-}
+}*/
 
 const std::vector<float>& CategoricalEnvironment::GetMateCompoundCategoryDistribution(size_t loc, size_t age_category, size_t sociobehav) {
   size_t compound_index = ComputeCompoundIndex(loc,age_category,sociobehav);

@@ -63,6 +63,7 @@ struct MatingBehaviour : public Behavior {
 
   int SampleCompoundCategory(float rand_num,
                        const std::vector<float>& category_distribution) {
+
       for (size_t i = 0; i < category_distribution.size(); i++) {
         if (rand_num <= category_distribution[i]) {
           return i;

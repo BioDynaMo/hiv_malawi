@@ -22,6 +22,7 @@
 #include "person.h"
 #include "sim-param.h"  // AM: Added to get location_mixing_matrix to update mate_location_distribution_
 
+#include <cassert>
 #include <iostream>
 #include <random>
 
@@ -49,56 +50,38 @@ class AgentVector {
   void Clear();
 };
 
-// This class wraps a vector of vector of Agent pointers.
-// We store a vector of
-// AgentVector for each of the categorical location and age category.
-class AgentVectorTwo {
- private:
-  // vector of AgentVectors
-  std::vector<AgentVector> agents_sb_;
-
- public:
-  // Get the number of agents in the vector
-  size_t GetNumAgents();
-
-  // Delete vector entries and resize vector to 0
-  void Clear();
-};
-
-// This class wraps a vector of vector of Agent pointers.
-// We store a vector of
-// AgentVectorTwo for each of the categorical location.
-class AgentVectorThree {
- private:
-  // vector of AgentVectors
-  std::vector<AgentVectorTwo> agents_ag_;
-
- public:
-  // Get the number of agents in the vector
-  size_t GetNumAgents();
-
-  // Delete vector entries and resize vector to 0
-  void Clear();
-};
-
 // This is our customn BioDynaMo environment to describe the female population
 // at all locations. By knowing the all females at a location, it's easy to
 // select suitable mates during the MatingBehavior.
 class CategoricalEnvironment : public Environment {
+ private:
+  // minimal age for sexual interaction
+  int min_age_;
+  // maximal age for sexual interaction
+  int max_age_;
+  // Number of age categories in the female_agent_index
+  size_t no_age_categories_;
+  // Number of locations in the female_agent_index
+  size_t no_locations_;
+  // Number of socialbehavioural categories in the female_agent_index
+  size_t no_sociobehavioural_categories_;
+  // Vector to store all female agents of within a certain age interval
+  // [min_age_, max_age_].
+  std::vector<AgentVector> female_agents_;
+
+  // AM: Matrix to store cumulative probability to select a female mate from one
+  // location given male agent location
+  //std::vector<std::vector<float>> mate_location_distribution_;
+  std::vector<std::vector<float>> mate_compound_category_distribution_;
+  // AM: DEBUG Matrix to store the locations of selected mates
+  std::vector<std::vector<float>> mate_location_frequencies_;
+
  public:
-  // Default constructor
+  // Constructor
   CategoricalEnvironment(int min_age = 15, int max_age = 40,
-                         size_t n_loc = Location::kLocLast)
-      : min_age_(min_age), max_age_(max_age), female_agents_(n_loc) {
-    // AM: DEBUG - Initialise all elements of mate_location_frequencies_ matrix with 0.0.
-    /*mate_location_frequencies_.clear();
-    mate_location_frequencies_.resize(Location::kLocLast);
-    for (int i=0; i<Location::kLocLast; i++){
-        mate_location_frequencies_[i].resize(Location::kLocLast);
-        fill(mate_location_frequencies_[i].begin(),mate_location_frequencies_[i].end(), 0.0);
-    }
-    PrintMateLocationFrequencies();*/
-  }
+                         size_t no_age_categories = 1,
+                         size_t no_locations = Location::kLocLast,
+                         size_t no_sociobehavioural_categories = 1);
 
   // This is the update function, the is called automatically by BioDynaMo for
   // every simulation step. We delete the previous information and store a
@@ -106,161 +89,88 @@ class CategoricalEnvironment : public Environment {
   // AM TO DO: Update probability to select a female mate from each location.
   // Depends on static mixing matrix and update number of female agents per
   // location
-  void Update() override {
-    // // Debug
-    // uint64_t iter =
-    //     Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
-    // if (iter < 4) {
-    //   std::cout << "Iteration: " << iter << std::endl;
-    //   std::cout << "Before clearing section" << std::endl;
-    //   DescribePopulation();
-    // }
-    female_agents_.clear();
-    female_agents_.resize(Location::kLocLast);
-    // // DEBUG
-    // if (iter < 4) {
-    //   std::cout << "After clearing section" << std::endl;
-    //   DescribePopulation();
-    // }
+  void Update() override;
 
-    auto* rm = Simulation::GetActive()->GetResourceManager();
-    rm->ForEachAgent([](Agent* agent) {
-      auto* env = bdm_static_cast<CategoricalEnvironment*>(
-          Simulation::GetActive()->GetEnvironment());
-      auto* person = bdm_static_cast<Person*>(agent);
-      if (person == nullptr) {
-        Log::Fatal("CategoricalEnvironment::Update()", "person is nullptr");
-      }
+  // Mapping from (location, age_category, socialbehaviour) to the appropriate position
+  // in the female_agents_ index.
+  inline size_t ComputeCompoundIndex(size_t location, size_t age_category, size_t sb) {
+    assert(location < no_locations_);
+    assert(age_category < no_age_categories_);
+    assert(sb < no_sociobehavioural_categories_);
+    return age_category + no_age_categories_ * location +
+           (no_age_categories_ * no_locations_) * sb;
+  }
 
-      if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge() &&
-          person->age_ <= env->GetMaxAge()) {
-        AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
-        if (person_ptr == nullptr) {
-          Log::Fatal("CategoricalEnvironment::Update()",
-                     "person_ptr is nullptr");
-        }
-        env->AddAgentToLocation(person->location_, person_ptr);
-        // AM TO DO:
-        // env->AddAgentToLocationAge(person->location_, person->age_,
-        // person_ptr);
+  // Mapping from position in the female_agents_ index to the appropriate location.
+  inline size_t ComputeLocationFromCompoundIndex(size_t i) {
+    assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
+  
+    return (int)(i%(no_age_categories_ * no_locations_))/ no_age_categories_;
+  }
+    
+  // Mapping from position in the female_agents_ index to the appropriate age category.
+  inline size_t ComputeAgeFromCompoundIndex(size_t i) {
+    assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
 
-      } else {
-        ;
-      };
-    });
+    return (int)(i%(no_age_categories_ * no_locations_))% no_age_categories_;
+  }
+    
+  // Mapping from position in the female_agents_ index to the appropriate Socio-behavioural category.
+  inline size_t ComputeSociobehaviourFromCompoundIndex(size_t i) {
+    assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
 
-    // AM : Update probability matrix to select female mate from one location
-    // given location of male agent
-    mate_location_distribution_.clear();
-    mate_location_distribution_.resize(Location::kLocLast);
+    return (int)i/(no_age_categories_ * no_locations_);
+  }
+    
+  // Add an agent pointer to a certain location, age group, and sb category
+  void AddAgentToIndex(AgentPointer<Person> agent, size_t location, size_t age,
+                       size_t sb);
 
-    auto* sim = Simulation::GetActive();
-    auto* param = sim->GetParam();
-    const auto* sparam =
-        param->Get<SimParam>();  // AM : Needed to get location mixing matrix
+  // Returns a random AgentPointer at a specific location, age group, and sb
+  // category
+  AgentPointer<Person> GetRamdomAgentFromIndex(size_t location, size_t age,
+                                               size_t sb);
+  
+  // Returns a random AgentPointer at a specific compound category (location, age group, and sb
+  // category)
+  AgentPointer<Person> GetRamdomAgentFromIndex(size_t compound_index);
 
-    for (int i = 0; i < Location::kLocLast;
-         i++) {  // Loop over male agent locations
-      mate_location_distribution_[i].resize(Location::kLocLast);
-      float sum = 0.0;
-      for (int j = 0; j < Location::kLocLast;
-           j++) {  // Loop over female mate locations
-        mate_location_distribution_[i][j] =
-            sparam->location_mixing_matrix[i][j] *
-            female_agents_[j].GetNumAgents();
-        sum += mate_location_distribution_[i][j];
-      }
-      for (int j = 0; j < Location::kLocLast;
-           j++) {  // Loop again over female mate locations to NORMALIZE
-                   // (probabilities should sum to 1 for each male location over
-                   // all female mate locations) and compute CUMULATIVE
-                   // probabilities.
-        mate_location_distribution_[i][j] /= sum;
-        if (j > 0) {
-          mate_location_distribution_[i][j] +=
-              mate_location_distribution_[i][j - 1];
-        }
-      }
-      // Make sure that the commulative probability distribution actually ends
-      // with 1.0 and not 0.9999x or something similar. (Fix for
-      // SampleLocation warning).
-      mate_location_distribution_[i][Location::kLocLast - 1] = 1.0;
-    }
-
-    // DEBUG: Check mate location distribution
-    /*for (int i=0; i<Location::kLocLast; i++){
-        for (int j=0; j<Location::kLocLast; j++){
-            std::cout << mate_location_distribution_[i][j] << ", ";
-        }
-        std::cout << "\n";
-    }*/
-  };
-
-  // Add an agent pointer to a certain location
-  void AddAgentToLocation(size_t loc, AgentPointer<Person> agent) {
-    if (female_agents_.size() <= loc) {
-      Log::Fatal("CategoricalEnvironment::AddAgentToLocation()",
-                 "Location index is out of bounds. Received loc: ", loc,
-                 "female_agents_.size(): ", female_agents_.size());
-    }
-    female_agents_[loc].AddAgent(agent);
-  };
-
-  // Prints how many females are at a certain location
+  // Prints how many females are at a certain location, age group, and sb
+  // category. Note that by population we refer to women between min_age_ and
+  // max_age_.
   void DescribePopulation();
 
-  // Returns a random AgentPointer at a specific location
-  AgentPointer<Person> GetRamdomAgentAtLocation(size_t loc) {
-    if (female_agents_.size() <= loc) {
-      Log::Fatal("CategoricalEnvironment::AddAgentToLocation()",
-                 "Location index is out of bounds. Received loc: ", loc,
-                 "female_agents_.size(): ", female_agents_.size());
-    }
-    return female_agents_[loc].GetRandomAgent();
-  };
-    
-  // AM: Increase count of mates in given locations
-  void IncreaseCountMatesInLocations(size_t loc_agent, size_t loc_mate){
-        mate_location_frequencies_[loc_agent][loc_mate]+=1.0;
-  }
+  // Get number of agents at location, age_category, and sb category
+  size_t GetNumAgentsAtIndex(size_t location, size_t age, size_t sb);
 
-  // AM: Normalize count/frequencies of mates in given locations
-  void NormalizeMateLocationFrequencies(){
-      for (int i=0; i<Location::kLocLast; i++){
-          float sum = 0.0;
-          for (int j=0; j<Location::kLocLast; j++){
-              sum+=mate_location_frequencies_[i][j];
-          }
-          for (int j=0; j<Location::kLocLast; j++){
-              mate_location_frequencies_[i][j]/=sum;
-          }
-      }
-  }
+  // Get number of agents at location
+  size_t GetNumAgentsAtLocation(size_t location);
   
-  // AM: Print mate locations frequency matrix
-  void PrintMateLocationFrequencies(){
-      std::cout << "DEBUG : PrintMateLocationFrequencies()"<<std::endl;
-      for (int i=0; i<Location::kLocLast; i++){
-          for (int j=0; j<Location::kLocLast; j++){
-              std::cout << mate_location_frequencies_[i][j] << ",";
-          }
-          std::cout<< std::endl;
-      }
-  }
-    
+  // Get number of agents at location and age_category
+  size_t GetNumAgentsAtLocationAge(size_t location, size_t age);
+
+  // AM: DEBUG - Increase count of mates in given locations
+  //void IncreaseCountMatesInLocations(size_t loc_agent, size_t loc_mate);
+
+  // AM: DEBUG - Normalize count/frequencies of mates in given locations
+  //void NormalizeMateLocationFrequencies();
+
+  // AM: DEBUG - Print mate locations frequency matrix
+  //void PrintMateLocationFrequencies();
+
   // Setter functions to access private member variables
-  void SetNumLocations(size_t num_locations);
   void SetMinAge(int min_age);
   void SetMaxAge(int max_age);
 
   // Getter functions to access private member variables
-  size_t GetNumLocations() { return female_agents_.size(); };
   int GetMinAge() { return min_age_; };
   int GetMaxAge() { return max_age_; };
-  // AM: Add Getter of mate_location_distribution_
-  const std::vector<float>& GetMateLocationDistribution(size_t loc) {
-    return mate_location_distribution_[loc];
-  };
+  // AM: Getter of no_age_categories_
+  int GetNoAgeCategories() {return no_age_categories_;};
+  // AM: Getter of no_sociobehavioural_categories_
+  int GetNoSociobehaviouralCategories() {return no_sociobehavioural_categories_;};
+  // AM: Getter of mate_compound_category_distribution_
+  const std::vector<float>& GetMateCompoundCategoryDistribution(size_t loc, size_t age_category, size_t sociobehav);
 
   // The remaining public functinos are inherited from Environment but not
   // needed here.
@@ -275,21 +185,6 @@ class CategoricalEnvironment : public Environment {
   LoadBalanceInfo* GetLoadBalanceInfo() override;
 
   Environment::NeighborMutexBuilder* GetNeighborMutexBuilder() override;
-
- private:
-  // minimal age for sexual interaction
-  int min_age_;
-  // maximal age for sexual interaction
-  int max_age_;
-  // Vector to store all female agents of within a certain age interval
-  // [min_age_, max_age_].
-  std::vector<AgentVector> female_agents_;
-
-  // AM: Matrix to store cumulative probability to select a female mate from one location given male agent location
-  std::vector<std::vector<float>>  mate_location_distribution_;
-  // AM: DEBUG Matrix to store the locations of selected mates
-  std::vector<std::vector<float>> mate_location_frequencies_;
-
 };
 
 }  // namespace bdm

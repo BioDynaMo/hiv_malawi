@@ -61,6 +61,23 @@ struct MatingBehaviour : public Behavior {
 
   MatingBehaviour() {}
 
+  int SampleCompoundCategory(float rand_num,
+                       const std::vector<float>& category_distribution) {
+
+      for (size_t i = 0; i < category_distribution.size(); i++) {
+        if (rand_num <= category_distribution[i]) {
+          return i;
+        }
+      }
+
+      // This line of code should never be reached
+      std::cout << std::endl;
+      Log::Warning("SampleCompoundCategory()",
+                   "Could not sample the category. Recieved inputs: ", rand_num,
+                   ". Use location 0.");
+      return 0;
+  }
+    
   void Run(Agent* agent) override {
     auto* sim = Simulation::GetActive();
     auto* env = bdm_static_cast<CategoricalEnvironment*>(sim->GetEnvironment());
@@ -77,34 +94,27 @@ struct MatingBehaviour : public Behavior {
     // the infection goes into both directions.
     if (no_mates > 0 && person->sex_ == Sex::kMale &&
         person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
+      
+      // Compute male agent's age category
+      size_t age_category = person->GetAgeCategory(env->GetMinAge(),env->GetNoAgeCategories());
+      // Get (cumulative) probability distribution that the male agent selects a female mate from each compound category
+      const std::vector<float> mate_compound_category_distribution =
+            env->GetMateCompoundCategoryDistribution(person->location_,age_category,person->social_behaviour_factor_);
+
       for (int i = 0; i < no_mates; i++) {
-        // AM: select location of mate
+        // AM: select compound category of mate
         float rand_num = static_cast<float>(random->Uniform());
-        const std::vector<float> mate_location_distribution =
-            env->GetMateLocationDistribution(person->location_);
+        
+        size_t mate_compound_category =
+            SampleCompoundCategory(rand_num, mate_compound_category_distribution);
 
-        // DEBUG : Having problems sampling location when rand_num = 1
-        /*if (rand_num == 1.0){
-          std::cout << rand_num << std::endl;
-          for (int l=0; l<mate_location_distribution.size();l++){
-            std::cout<< mate_location_distribution[l]<<",";
-          }
-          std::cout << std::endl;
-        } */// END DEBUG
-
-        size_t mate_location =
-            SampleLocation(rand_num, mate_location_distribution);
-
-        // choose a random female mate at the location
-        /*AgentPointer<Person> mate =
-            env->GetRamdomAgentAtLocation(person->location_);*/
-
-        // Choose a random female mate at the selected mate location
+        // AM: Choose a random female mate at the selected mate compound category (location, age group
+        // and sociobehavioral category
         AgentPointer<Person> mate =
-              env->GetRamdomAgentAtLocation(mate_location);
-           
+            env->GetRamdomAgentFromIndex(mate_compound_category);
+        
         // DEBUG: Increase count of partners from given locations
-        // env->IncreaseCountMatesInLocations(person->location_,mate_location);
+        //env->IncreaseCountMatesInLocations(person->location_,mate_location);
             
         if (mate == nullptr) {
           Log::Fatal("MatingBehaviour()",
@@ -205,8 +215,7 @@ struct GetOlder : public Behavior {
 
     // If between min_age and max_age, reassign risk factors
     if (person->age_ >= sparam->min_age &&
-        person->age_ <= sparam->max_age) {  // AM corrected typo sparam->min_age
-                                            // <= sparam->max_age
+        person->age_ <= sparam->max_age) {
 
       // Update risk factors stochastically like in initialization
       if (random->Uniform() < sparam->sociobehavioural_risk_probability) {
@@ -265,27 +274,6 @@ struct GetOlder : public Behavior {
 
     // Possibly die - if not, just get older
     bool stay_alive{true};
-    // Let's assume a linear increase of the death probability per year for
-    // healty agents.
-    /*if (person->state_ == GemsState::kHealthy) {
-      if (random->Uniform() <
-          (person->age_ - sparam->min_healthy) /
-              (sparam->delta_healthy * sparam->alpha_healthy)) {
-        stay_alive = false;
-      }
-    }
-    // Let's assume a linear increase of the death probability per year for
-    // non-healty agents.
-    if (person->state_ != GemsState::kHealthy) {
-      if (random->Uniform() < (person->age_ - sparam->min_hiv) /
-                                  (sparam->delta_hiv * sparam->alpha_hiv)) {
-        stay_alive = false;
-      }
-    }
-    // hard cut at a certain age
-    if (person->age_ >= sparam->age_of_death) {
-      stay_alive = false;
-    }*/
 
     // AM: Mortality
     // HIV-related mortality

@@ -20,8 +20,16 @@
 namespace bdm {
 
 /// This class defines parameters that are specific to this simulation.
-struct SimParam : public ParamGroup {
-  BDM_PARAM_GROUP_HEADER(SimParam, 1);
+class SimParam : public ParamGroup {
+ private:
+  BDM_CLASS_DEF_OVERRIDE(SimParam, 1);
+
+ public:
+  static const ParamGroupUid kUid;
+  SimParam() { Initialize(); }
+  virtual ~SimParam() {}
+  ParamGroup* NewCopy() const override { return new SimParam(*this); }
+  ParamGroupUid GetUid() const override { return kUid; }
 
   // The number of iterations that BioDynaMo simulates. (#iterations = #years)
   uint64_t number_of_iterations = 5;//5;  // 60;  // (1960-2020)
@@ -57,10 +65,24 @@ struct SimParam : public ParamGroup {
   // The mating behaviour is modeled with a random process. For each male agent,
   // we sample the number of female sex partners per year from a Gaussian
   // distribution, which parameters are:
-  float no_mates_mean =
-      80.0;  // 100.0;//AM replaced 2.0 by 100, if considered as casual sex
+  float no_mates_mean = 80.0;  // 100.0;//AM replaced 2.0 by 100, if considered as casual sex
              // acts; TO DO: Should probably depend of soc-behav risk factor!
   float no_mates_sigma = 100.0;  // 20.0;
+
+  //int nb_sociobehav_categories = 2;  // AM TO DO: Define the socio-behavioral categories in a new datatype in
+                // datatype.h? Important! This variable/attribute must be defined before it is used in any function ex. SetNumberMatesMean, SetNumberMatesSigma, etc.
+   
+  // Gaussian distribution defining the number of casual partners per year depending on socio-behaviour
+  /*std::vector<float>& no_mates_mean = SetNumberMatesMean();
+  std::vector<float>& no_mates_sigma = SetNumberMatesSigma();
+
+  std::vector<float>& SetNumberMatesMean(){
+      std::vector<float>& means = std::vector<float>(nb_sociobehav_categories,0);
+      means[0] = 70.0;
+      means[1] = 20.0;
+      return means;
+  }*/
+  
 
   // Death is modeled by a random process. We generate a random number r in
   // [0,1] and check if: r< (age - min) \ (delta * alpha). If that evaluates to
@@ -77,10 +99,6 @@ struct SimParam : public ParamGroup {
   // Failing (Cumulative probabilities)
   /*const std::vector<float> mortality_rate_hiv{
         0.0, 0.05, 0.06, 0.16};*/
-
-  // Probability of getting infected when having sex with infected agent
-  // float infection_probability = 2e-3;//AM replaced 0.01 by O(1e-3) if
-  // considered infection probability per sex
 
   // AM added: Probability of getting infected depends on 1) disease state, 2)
   // sex of partners Male-to-female
@@ -99,160 +117,35 @@ struct SimParam : public ParamGroup {
   float infection_probability_treated_mm = 1.3e-3;
   float infection_probability_failing_mm = 7.6e-3;
 
-  // AM test: Add Transition Matrix between HIV states.
+  // AM: Transition Matrix between HIV states.
   // GemState->GemsState->Year and Population_category
-  std::vector<std::vector<std::vector<float>>> hiv_transition_matrix =
-      set_hiv_transition_matrix();
+  std::vector<std::vector<std::vector<float>>> hiv_transition_matrix;
 
-  std::vector<std::vector<std::vector<float>>> set_hiv_transition_matrix() {
-    std::vector<std::vector<std::vector<float>>> hiv_transition_matrix;
-
-    int nb_states = GemsState::kGemsLast;
-    hiv_transition_matrix.clear();
-    hiv_transition_matrix.resize(nb_states);
-
-    int nb_years_categ = 7;
-
-    for (int i = 0; i < nb_states; i++) {
-      hiv_transition_matrix[i].resize(nb_years_categ);
-      for (int j = 0; j < nb_years_categ; j++) {
-        if (i == GemsState::kAcute) {
-          // For all years and population categories
-          hiv_transition_matrix[i][j].resize(nb_states);
-          hiv_transition_matrix[i][j] = {
-              0.0, 0.0, 1.0, 1.0, 1.0};  // After one year ACUTE, go to CHRONIC
-        } else if (i == GemsState::kChronic) {
-          if (j ==
-              0) {  // Prior to 2003, for all (women 18-40, children and others)
-            hiv_transition_matrix[i][j].resize(nb_states);
-            hiv_transition_matrix[i][j] = {0.0, 0.0, 1.0, 1.0,
-                                           1.0};  // NO ART, then stay chronic
-          } else if (j == 1) {  // Between to 2003 and 2010, for women 18-40
-            hiv_transition_matrix[i][j].resize(nb_states);
-            hiv_transition_matrix[i][j] = {0.0, 0.0, 0.9, 1.0, 1.0};
-          } else if (j == 2) {  // Between to 2003 and 2010, for children
-            hiv_transition_matrix[i][j].resize(nb_states);
-            hiv_transition_matrix[i][j] = {0.0, 0.0, 0.8, 1.0, 1.0};
-          } else if (j == 3) {  // Between to 2003 and 2010, for others
-            hiv_transition_matrix[i][j].resize(nb_states);
-            hiv_transition_matrix[i][j] = {0.0, 0.0, 0.9, 1.0, 1.0};
-          } else if (j == 4) {  // From 2011, for women 18-40
-            hiv_transition_matrix[i][j].resize(nb_states);
-            hiv_transition_matrix[i][j] = {0.0, 0.0, 0.5, 1.0, 1.0};
-          } else if (j == 5) {  // From 2011, for children
-            hiv_transition_matrix[i][j].resize(nb_states);
-            hiv_transition_matrix[i][j] = {0.0, 0.0, 0.5, 1.0, 1.0};
-          } else if (j == 6) {  // After 2011, for others
-            hiv_transition_matrix[i][j].resize(nb_states);
-            hiv_transition_matrix[i][j] = {0.0, 0.0, 0.8, 1.0, 1.0};
-          }
-        } else if (i == GemsState::kTreated) {
-          // For all years and population categories
-          hiv_transition_matrix[i][j].resize(nb_states);
-          hiv_transition_matrix[i][j] = {0.0, 0.0, 0.1, 1.0, 1.0};
-        } else {
-          hiv_transition_matrix[i][j].resize(nb_states);
-          hiv_transition_matrix[i][j] = {0.0, 0.0, 0.0, 0.0, 0.0};
-        }
-      }
-    }
-    return hiv_transition_matrix;
-  };
-
-  // AM test: Add Location Mixing Matrix. Location->Location
-  std::vector<std::vector<float>> location_mixing_matrix =
-      SetLocationMixingMatrix();
-
-  std::vector<std::vector<float>> SetLocationMixingMatrix() {
-    std::vector<std::vector<float>> location_mixing_matrix;
-
-    int nb_locations = Location::kLocLast;
-    location_mixing_matrix.clear();
-    location_mixing_matrix.resize(nb_locations);
-
-    for (int i = 0; i < nb_locations; i++) {
-      location_mixing_matrix[i].resize(nb_locations);
-      // Fill all elements with 0.0 except diagonal with 1.0.
-      /*fill(location_mixing_matrix[i].begin(),location_mixing_matrix[i].end(),
-      0.0); location_mixing_matrix[i][i]=1.0;*/
-      // Fill all elements with 1.0 (Homogeneous mixing)
-      fill(location_mixing_matrix[i].begin(), location_mixing_matrix[i].end(),
-           1.0);
-    }
-
-    // DEBUG
-    /*std::cout << "nb_locations = " << nb_locations << std::endl;
-    for (int i=0; i<nb_locations; i++){
-      for (int j = 0; j<nb_locations; j++){
-          std::cout << location_mixing_matrix[i][j] << ",";
-      }
-      std::cout<< std::endl;
-    }*/ // END DEBUG
-    return location_mixing_matrix;
-  };
+  // Number of locations
+  int nb_locations = Location::kLocLast;
+    
+  // AM: Location Mixing Matrix. Location->Location
+  std::vector<std::vector<float>> location_mixing_matrix;
 
   // Five-years age categories 15-19, 20-24, ...,65-69,70+
-  int nb_age_categories = 12;  // AM TO DO : Implement function that takes the
-                               // age and returns the age category
+  int nb_age_categories = 12;
 
-  // AM test: Add Age Mixing Matrix. Age Category -> Age Category
-  std::vector<std::vector<float>> age_mixing_matrix = SetAgeMixingMatrix();
+  // AM: Age Mixing Matrix. Age Category -> Age Category
+  std::vector<std::vector<float>> age_mixing_matrix;
 
-  std::vector<std::vector<float>> SetAgeMixingMatrix() {
-    std::vector<std::vector<float>> age_mixing_matrix;
+  // AM: Number of socio-behavioural categories
+  int nb_sociobehav_categories = 2;
 
-    age_mixing_matrix.clear();
-    age_mixing_matrix.resize(nb_age_categories);
-
-    for (int i = 0; i < nb_age_categories; i++) {
-      age_mixing_matrix[i].resize(nb_age_categories);
-      // Fill all elements with 1.0. Homogeneous age mixing.
-      fill(age_mixing_matrix[i].begin(), age_mixing_matrix[i].end(), 1.0);
-    }
-    return age_mixing_matrix;
-  };
-
-  // AM: Socio-beahvoural Mixing matrix. Test with 2x2 in case of boolean
-  // feature. // AM TO DO: Generalize to Categorical Feature
-  std::vector<std::vector<float>> sociobehav_mixing_matrix =
-      SetSociobehavMixingMatrix();
-
-  std::vector<std::vector<float>> SetSociobehavMixingMatrix() {
-    std::vector<std::vector<float>> sociobehav_mixing_matrix;
-    int nb_sociobehav_categories =
-        2;  // AM TO DO: Change to N. ex. Number of elements in new datatype in
-            // datatype.h?
-
-    sociobehav_mixing_matrix.clear();
-    sociobehav_mixing_matrix.resize(nb_age_categories);
-
-    for (int i = 0; i < nb_sociobehav_categories; i++) {
-      sociobehav_mixing_matrix[i].resize(nb_sociobehav_categories);
-      // Fill all elements with 1.0. Homogeneous socio-behavioural mixing.
-      fill(sociobehav_mixing_matrix[i].begin(),
-           sociobehav_mixing_matrix[i].end(), 1.0);
-    }
-    return sociobehav_mixing_matrix;
-  };
-
-  // Probability for agent to be infected at beginning of simulation. You can
-  // expect roughly <initial_population_size * initial_infection_probability>
-  // infected agents at the beginning of the simulation. These infected
-  // individuals can occur anywhere on the age spectrum.
-  // float initial_infection_probability = 0.01;
+  // AM: Socio-behavioural Mixing Matrix. Socio-beahioural Category -> Socio-behavioural Category
+  std::vector<std::vector<float>> sociobehav_mixing_matrix;
 
   // AM: Probability for agent to be healthy or at a certain HIV progression
-  // state at beginning of simulation. Given in a summed up form. First vector
+  // state at beginning of simulation. Given in a summed up/cumulative form. First vector
   // x1 = p_Healthy component corresponds to probability of being Healthy. x2 =
   // p_Healthy + p_Acute, x3 = p_Healthy + p_Acute + p_Chronic, x4 = p_Healthy +
   // p_Acute + p_Chronic + p_Treated, x5 = p_Healthy + p_Acute + p_Chronic +
   // p_Treated + p_Failing
-  // const std::vector<float> initial_infection_probability{
-  //    0.99, 0.99, 1, 1, 1, 1};
-
-  // Reduce initial probability infection to 1e-5 instead of 1e-2
-  /*const std::vector<float> initial_infection_probability{
-        99999e-5, 99999e-5, 1, 1, 1, 1};*/
+  // Initial probability infection to 1e-3 (or 1e-5, or 1e-2, etc.)
   const std::vector<float> initial_infection_probability{999e-3, 999e-3, 1,
                                                          1,      1,      1};
 
@@ -263,8 +156,6 @@ struct SimParam : public ParamGroup {
   // motability and reach a realistic demographic development from 1960-2020.
   float give_birth_probability = 0.18;
 
-  // Probability for agent to be infected at birth, if its mother is infected
-  // float birth_infection_probability = 0.1;
   // AM : Probability for agent to be infected at birth, if its mother is
   // infected and treated
   float birth_infection_probability_treated = 0.01;
@@ -297,6 +188,36 @@ struct SimParam : public ParamGroup {
       0.012, 0.03,  0.031, 0.088, 0.104, 0.116, 0.175, 0.228, 0.273, 0.4,
       0.431, 0.453, 0.498, 0.517, 0.54,  0.569, 0.645, 0.679, 0.701, 0.736,
       0.794, 0.834, 0.842, 0.86,  0.903, 0.925, 0.995, 1,     1};
+
+  ///////////////////////////////////////////////////////////////////////////
+  // Initalizer Functions
+  ///////////////////////////////////////////////////////////////////////////
+
+  // Defines the right sizes for the matrices, for some fills it's entries, and
+  // is called in constructor.
+  void Initialize() {
+    SetSociobehavMixingMatrix();
+    SetAgeMixingMatrix();
+    SetLocationMixingMatrix();
+    SetLocationMixingMatrix();
+    SetHivTransitionMatrix();
+  };
+
+  // Resizes matrix to (nb_age_categories x nb_sociobehav_categories) and fills
+  // with ones.
+  void SetSociobehavMixingMatrix();
+
+  // Resizes matrix to (nb_age_categories x nb_age_categories) and fills with
+  // zeros.
+  void SetAgeMixingMatrix();
+
+  // Resizes matrix to (nb_locations x nb_locations) and fills with
+  // zeros.
+  void SetLocationMixingMatrix();
+
+  // Resizes to (nb_states x nb_states) and fills entries with appropriate hard
+  // coded values.
+  void SetHivTransitionMatrix();
 };
 
 }  // namespace bdm

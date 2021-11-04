@@ -44,25 +44,14 @@ int SampleLocation(float rand_num,
   for (size_t i = 0; i < location_distribution.size(); i++) {
     if (rand_num <= location_distribution[i]) {
       return i;
-    } /*else { // AM: not needed if nothing after ifelse statement
-      continue;
-    }*/
+    }
   }
 
   // This line of code should never be reached
-  // DEBUG: Check mate location distribution
-  std::cout << "Location distribution (" << location_distribution.size() << ")"
-            << std::endl;
-  for (size_t i = 0; i < location_distribution.size(); i++) {
-    std::cout << location_distribution[i] << ",";
-  }  // END DEBUG
-  std::cout << std::endl;
   Log::Warning("SampleLocation()",
                "Could not sample the location. Recieved inputs: ", rand_num,
-               //". Use location 0.");
-               ". Use location ", location_distribution.size() - 1, ".");
-  return location_distribution.size() - 1;
-  // return 0;
+               ". Use location 0.");
+  return 0;
 }
 
 int SampleSex(float rand_num, float probability_male) {
@@ -72,14 +61,6 @@ int SampleSex(float rand_num, float probability_male) {
     return Sex::kFemale;
   }
 }
-
-/*int SampleState(float rand_num, float initial_infection_probability) {
-  if (rand_num <= initial_infection_probability) {
-    return GemsState::kGems1;
-  } else {
-    return GemsState::kHealthy;
-  }
- }*/
 
 int SampleState(float rand_num,
                 const std::vector<float>& initial_infection_probability) {

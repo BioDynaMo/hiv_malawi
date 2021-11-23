@@ -2,8 +2,8 @@ name: ubuntu-ci
 
 on:
   schedule:
-    # Every day at 3 am
-    - cron: '0 3 * * *'
+    # Every Monday at 3 am
+    - cron: '0 3 * * 1'
   push:
   pull_request:
     branches: [ master ]
@@ -12,8 +12,9 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
+        os: [ubuntu-20.04]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
 
     steps:
     

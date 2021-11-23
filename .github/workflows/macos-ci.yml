@@ -2,8 +2,8 @@ name: macos-ci
 
 on:
   schedule:
-    # Every day at 3 am
-    - cron: '0 3 * * *'
+    # Every Monday at 3 am
+    - cron: '0 3 * * 1'
   push:
   pull_request:
     branches: [ master ]
@@ -12,28 +12,21 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-10.15]
+        os: [macos-11]
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
 
     steps:
     
     - name: Checkout HIV_malawi repository
       uses: actions/checkout@v2
-    
-    - name: Make sure Xcode 12.4 is used on macOS 10.15 as the default /Application/Xcode.app
-      shell: bash
-      run: |
-        sudo mv /Applications/Xcode.app /Applications/Xcode.app-
-        sudo ln -s /Applications/Xcode_12.4.app /Applications/Xcode.app
-        sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-      if: matrix.os == 'macos-10.15'
 
-    - name: Make sure Xcode 12.5 is used on macOS 11.3 as the default /Application/Xcode.app
+    - name: Make sure Xcode 13.1 is used on macOS 11.6 as the default /Application/Xcode.app
       shell: bash
       run: |
         sudo mv /Applications/Xcode.app /Applications/Xcode.app-
-        sudo ln -s /Applications/Xcode_12.5.app /Applications/Xcode.app
+        sudo ln -s /Applications/Xcode_13.1.app /Applications/Xcode.app
         sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
       if: matrix.os == 'macos-11'
 

@@ -31,11 +31,14 @@ class SimParam : public ParamGroup {
   ParamGroup* NewCopy() const override { return new SimParam(*this); }
   ParamGroupUid GetUid() const override { return kUid; }
 
+  // Starting year
+  int start_year = 1975; //1975;//1960;
+    
   // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-  uint64_t number_of_iterations = 5;//5;  // 60;  // (1960-2020)
+    uint64_t number_of_iterations = 10;//20; //45;//5;// 60;// (1960-2020)
 
   // Number of agents that are present at the first iteration of the simulation
-  uint64_t initial_population_size = 3600000;
+    uint64_t initial_population_size = 5302000; //3600000;//5302000;
 
   //   // Currently this variable is not used, could be used to set a
   //   random_seed
@@ -62,46 +65,34 @@ class SimParam : public ParamGroup {
   float migration_mean = 0.0;
   float migration_sigma = 2.0;
 
+  // Years where number of mates per socio-behavioural factors changes
+  const std::vector<int> no_mates_year_transition{1960,1990,2000};
+  
   // The mating behaviour is modeled with a random process. For each male agent,
   // we sample the number of female sex partners per year from a Gaussian
-  // distribution, which parameters are:
-  float no_mates_mean = 80.0;  // 100.0;//AM replaced 2.0 by 100, if considered as casual sex
-             // acts; TO DO: Should probably depend of soc-behav risk factor!
-  float no_mates_sigma = 100.0;  // 20.0;
+  // distribution.
+  // Gaussian distribution defining the number of casual partners per year depending on year (see no_mates_year_transition) and socio-behaviour
+  const  std::vector<std::vector<float>> no_mates_mean/*{{80.0,80.0,80.0},
+                                                        {80.0,80.0,80.0},
+                                                        {80.0,80.0,80.0}};*/
+                                                    {{20.0,70.0},
+                                                        {15.0,53.0},
+                                                        {10.0,35.0}};
 
-  //int nb_sociobehav_categories = 2;  // AM TO DO: Define the socio-behavioral categories in a new datatype in
-                // datatype.h? Important! This variable/attribute must be defined before it is used in any function ex. SetNumberMatesMean, SetNumberMatesSigma, etc.
-   
-  // Gaussian distribution defining the number of casual partners per year depending on socio-behaviour
-  /*std::vector<float>& no_mates_mean = SetNumberMatesMean();
-  std::vector<float>& no_mates_sigma = SetNumberMatesSigma();
-
-  std::vector<float>& SetNumberMatesMean(){
-      std::vector<float>& means = std::vector<float>(nb_sociobehav_categories,0);
-      means[0] = 70.0;
-      means[1] = 20.0;
-      return means;
-  }*/
-  
-
-  // Death is modeled by a random process. We generate a random number r in
-  // [0,1] and check if: r< (age - min) \ (delta * alpha). If that evaluates to
-  // true, the agent dies. For healthy and hiv infected individuals, we use
-  // different parameters.
-  /*float min_healthy = 45.;
-  float delta_healthy = 75.;
-  float alpha_healthy = 8.;
-  float min_hiv = 5.;
-  float delta_hiv = 45.;
-  float alpha_hiv = 8.;*/
+  const  std::vector<std::vector<float>> no_mates_sigma/*{{100.0,100.0},
+                                                        {100.0,100.0},
+                                                        {100.0,100.0}};*/
+                                                    {{0.0,0.0},
+                                                      {0.0,0.0},
+                                                      {0.0,0.0}};
 
   // AM: Mortality rate depending on HIV state, i.e. Acute, Chronic, Treated,
   // Failing (Cumulative probabilities)
   /*const std::vector<float> mortality_rate_hiv{
         0.0, 0.05, 0.06, 0.16};*/
 
-  // AM added: Probability of getting infected depends on 1) disease state, 2)
-  // sex of partners Male-to-female
+  // AM: Probability of getting infected depends on
+  // 1) disease state, 2) sex of partners Male-to-female
   float infection_probability_acute_mf = 9.3e-3;
   float infection_probability_chronic_mf = 1.9e-3;
   float infection_probability_treated_mf = 1.3e-4;
@@ -118,9 +109,23 @@ class SimParam : public ParamGroup {
   float infection_probability_failing_mm = 7.6e-3;
 
   // AM: Transition Matrix between HIV states.
-  // GemState->GemsState->Year and Population_category
+  // GemState->Year-and-Population-category->GemsState
   std::vector<std::vector<std::vector<float>>> hiv_transition_matrix;
 
+  // AM: Transition Matrix between socio-behavioural categories.
+  // Used for yearly update of agents' socio-behaviours
+  // nb_sociobehav_categories x Sex x nb_sociobehav_categories
+  std::vector<std::vector<std::vector<float>>> sociobehaviour_transition_matrix{
+                                                                                {//sb = 0 (Low risk)
+                                                                                    {1.0,0.0}, // sex=0 (kMale)
+                                                                                    {1.0,0.0} //sex=1 (kFemale)
+                                                                                },
+                                                                                {//sb=1 (high risk)
+                                                                                    {0.04,0.96}, // sex=0  (kMale)
+                                                                                    {0.1,0.9} // sex=1  (kFemale)
+                                                                                }
+  };
+    
   // Number of locations
   int nb_locations = Location::kLocLast;
     
@@ -145,30 +150,34 @@ class SimParam : public ParamGroup {
   // p_Healthy + p_Acute, x3 = p_Healthy + p_Acute + p_Chronic, x4 = p_Healthy +
   // p_Acute + p_Chronic + p_Treated, x5 = p_Healthy + p_Acute + p_Chronic +
   // p_Treated + p_Failing
-  // Initial probability infection to 1e-3 (or 1e-5, or 1e-2, etc.)
-  const std::vector<float> initial_infection_probability{999e-3, 999e-3, 1,
-                                                         1,      1,      1};
+    const std::vector<float> initial_infection_probability{9972e-4, 9978e-4, 1, 1, 1, 1}; // AM: We want to start with a 0.1% prevalence among total population, while infecting only 15-40 years old, who represent 36% of the population ==> 0.28% prevalence among 15-40 yo. 1/5 of HIV+ (~0.06% of total) are in acute phase, others are chronic.
 
   // Parameter 0.18 is chosen because our GiveBirth Behaviour is based on a
   // Bernoulli experiment. A binomial distribuition peaks at around 6 for 25
   // tries (=40-15) and a birth probability of 0.24. This corresponds to the
   // typical birth rate in the region. We substracted 0.06 to account for child
   // motability and reach a realistic demographic development from 1960-2020.
-  float give_birth_probability = 0.18;
+    float give_birth_probability = 0.18;
 
   // AM : Probability for agent to be infected at birth, if its mother is
   // infected and treated
-  float birth_infection_probability_treated = 0.01;
+    float birth_infection_probability_treated = 0.05;
   // AM : Probability for agent to be infected at birth, if its mother is
   // infected and unterated (i.e. acute, chronic, failing)
-  float birth_infection_probability_untreated = 0.2;
+  float birth_infection_probability_untreated = 0.35;
 
   // Probability of creating a male agent, used in population initialization and
   // giving birth
   float probability_male = 0.499;
 
-  // Assign a risk factor of 1 with the following probabilities
-  float sociobehavioural_risk_probability = 0.05;
+  // Years where probability of high socio-behavioural factor changes
+  const std::vector<int> sociobehavioural_risk_year_transition{1975,1976};
+    
+  // Probability of assigning 1 to socio-behavioural factor (high risk) depending on year (see sociobehavioural_risk_year_transition) and health state (Healthy, Acute, Chronic, Treated, Failing)
+  const  std::vector<std::vector<float>> sociobehavioural_risk_probability{
+                                                            {0.05,0.5,0.5,0.5,0.5},
+                                                            {0.05,0.05,0.05,0.05,0.05}};
+                     
   float biomedical_risk_probability = 0.05;
 
   // Age distribution for population initialization. Given in a summed up form.
@@ -215,9 +224,14 @@ class SimParam : public ParamGroup {
   // zeros.
   void SetLocationMixingMatrix();
 
+  // Computes "index" representing the year and population category.
+  // Used in hiv_transition_matrix
+  //int ComputeYearPopulationCategory(int year, float age, int sex);
+    
   // Resizes to (nb_states x nb_states) and fills entries with appropriate hard
   // coded values.
   void SetHivTransitionMatrix();
+    
 };
 
 }  // namespace bdm

@@ -52,21 +52,13 @@ CategoricalEnvironment::CategoricalEnvironment(
       no_sociobehavioural_categories_(no_sociobehavioural_categories),
       female_agents_(no_age_categories * no_locations *
                      no_sociobehavioural_categories) {
-  // DEBUG - Initialise all elements of mate_location_frequencies_ matrix with 0.0.
-  /*mate_location_frequencies_.clear();
-  mate_location_frequencies_.resize(Location::kLocLast);
-  for (int i = 0; i < Location::kLocLast; i++) {
-    mate_location_frequencies_[i].resize(Location::kLocLast);
-    fill(mate_location_frequencies_[i].begin(),
-         mate_location_frequencies_[i].end(), 0.0);
-  }
-  PrintMateLocationFrequencies();*/
 }
 
 // AM : Update probability to select a female mate from each location x age x sb compound category.
 // Depends on static mixing matrices and updated number of female agents per
 // category
 void CategoricalEnvironment::Update() {
+  
   // Debug
   /*uint64_t iter =
        Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
@@ -103,8 +95,6 @@ void CategoricalEnvironment::Update() {
       size_t age_category = person->GetAgeCategory(env->GetMinAge(),env->GetNoAgeCategories());
       // Add female agent to the right index, based on her location, age category and socio-behavioural category
       env->AddAgentToIndex(person_ptr, person->location_, age_category, person->social_behaviour_factor_);
-    } else {
-      ;
     };
   });
 
@@ -118,7 +108,7 @@ void CategoricalEnvironment::Update() {
   auto* param = sim->GetParam();
   const auto* sparam =
       param->Get<SimParam>();  // AM : Needed to get location mixing matrix
-
+    
   for (int i = 0; i < no_locations_ * no_age_categories_ *
        no_sociobehavioural_categories_; i++) {  // Loop over male agent compound categories (location x age x socio-behaviour)
     
@@ -235,7 +225,7 @@ void CategoricalEnvironment::Update() {
     // END DEBUG
     
     // Make sure that the commulative probability distribution actually ends
-    // with 1.0 and not 0.9999x or something similar. Do not fix only the last element but all the previous ones, which had the same cumulative probability ~1 (<=> probability = 0)
+    // with 1.0 and not 0.9999x or something similar. Fix not only the last element but also all the previous ones that had the same cumulative probability ~1 (<=> probability = 0)
     size_t no_compound_categories = no_locations_* no_age_categories_ * no_sociobehavioural_categories_;
     auto last_cumul_proba = mate_compound_category_distribution_[i][no_compound_categories - 1];
     // Go looking backward
@@ -356,33 +346,6 @@ size_t CategoricalEnvironment::GetNumAgentsAtLocation(size_t location) {
     }
     return sum;
 }
-
-/*void CategoricalEnvironment::IncreaseCountMatesInLocations(size_t loc_agent,
-                                                           size_t loc_mate) {
-  mate_location_frequencies_[loc_agent][loc_mate] += 1.0;
-}
-
-void CategoricalEnvironment::NormalizeMateLocationFrequencies() {
-  for (int i = 0; i < Location::kLocLast; i++) {
-    float sum = 0.0;
-    for (int j = 0; j < Location::kLocLast; j++) {
-      sum += mate_location_frequencies_[i][j];
-    }
-    for (int j = 0; j < Location::kLocLast; j++) {
-      mate_location_frequencies_[i][j] /= sum;
-    }
-  }
-}
-
-void CategoricalEnvironment::PrintMateLocationFrequencies() {
-  std::cout << "DEBUG : PrintMateLocationFrequencies()" << std::endl;
-  for (int i = 0; i < Location::kLocLast; i++) {
-    for (int j = 0; j < Location::kLocLast; j++) {
-      std::cout << mate_location_frequencies_[i][j] << ",";
-    }
-    std::cout << std::endl;
-  }
-}*/
 
 const std::vector<float>& CategoricalEnvironment::GetMateCompoundCategoryDistribution(size_t loc, size_t age_category, size_t sociobehav) {
   size_t compound_index = ComputeCompoundIndex(loc,age_category,sociobehav);

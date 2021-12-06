@@ -49,6 +49,32 @@ void SimParam::SetLocationMixingMatrix() {
   }*/ // END DEBUG
 };
 
+/*int SimParam::ComputeYearPopulationCategory(int year, float age, int sex){
+    int year_population_category;
+    if (year < 2003) {  // Prior to 2003
+      year_population_category = 0;  // All (No difference in ART between people. ART not available.)
+    } else if (year < 2011) {  // Between 2003 and 2010
+      if (sex == Sex::kFemale and age >= 18 and age <= 40) {
+        year_population_category = 1;  // Female between 18 and 40
+      } else if (age < 15) {
+        year_population_category = 2;  // Child
+      } else {
+        year_population_category =
+            3;  // Others (Male, Female under 18, and Female over 40)
+      }
+    } else {  // After 2011
+      if (sex == Sex::kFemale and age >= 18 and age <= 40) {
+        year_population_category = 4;  // Female between 18 and 40
+      } else if (age < 15) {
+        year_population_category = 5;  // Child
+      } else {
+        year_population_category = 6;  // Others (Male, Female under 18, and Female over 40)
+      }
+    }
+    return year_population_category;
+}*/
+
+
 void SimParam::SetHivTransitionMatrix() {
   int nb_states = GemsState::kGemsLast;
   hiv_transition_matrix.clear();
@@ -65,8 +91,7 @@ void SimParam::SetHivTransitionMatrix() {
         hiv_transition_matrix[i][j] = {
             0.0, 0.0, 1.0, 1.0, 1.0};  // After one year ACUTE, go to CHRONIC
       } else if (i == GemsState::kChronic) {
-        if (j ==
-            0) {  // Prior to 2003, for all (women 18-40, children and others)
+        if (j == 0) {  // Prior to 2003, for all (women 18-40, children and others)
           hiv_transition_matrix[i][j].resize(nb_states);
           hiv_transition_matrix[i][j] = {0.0, 0.0, 1.0, 1.0,
                                          1.0};  // NO ART, then stay chronic

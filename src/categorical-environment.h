@@ -149,15 +149,6 @@ class CategoricalEnvironment : public Environment {
   // Get number of agents at location and age_category
   size_t GetNumAgentsAtLocationAge(size_t location, size_t age);
 
-  // AM: DEBUG - Increase count of mates in given locations
-  //void IncreaseCountMatesInLocations(size_t loc_agent, size_t loc_mate);
-
-  // AM: DEBUG - Normalize count/frequencies of mates in given locations
-  //void NormalizeMateLocationFrequencies();
-
-  // AM: DEBUG - Print mate locations frequency matrix
-  //void PrintMateLocationFrequencies();
-
   // Setter functions to access private member variables
   void SetMinAge(int min_age);
   void SetMaxAge(int max_age);
@@ -172,7 +163,7 @@ class CategoricalEnvironment : public Environment {
   // AM: Getter of mate_compound_category_distribution_
   const std::vector<float>& GetMateCompoundCategoryDistribution(size_t loc, size_t age_category, size_t sociobehav);
 
-  // The remaining public functinos are inherited from Environment but not
+  // The remaining public functions are inherited from Environment but not
   // needed here.
   void Clear() override { ; };
   void ForEachNeighbor(Functor<void, Agent*, double>& lambda,

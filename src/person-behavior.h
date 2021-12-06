@@ -87,8 +87,19 @@ struct MatingBehaviour : public Behavior {
     auto* person = bdm_static_cast<Person*>(agent);
 
     // Randomly determine the number of mates
+    // AM: Mean and standard deviation of the number of mates depend on the current year and socio-behavioural category of agent
+    int year =
+          static_cast<int>(sparam->start_year + sim->GetScheduler()->GetSimulatedSteps()); // Current year
+    // If no transition year is higher than current year, then use last transition year
+    int year_index = sparam->no_mates_year_transition.size()-1;
+    for (int y = 0; y < sparam->no_mates_year_transition.size()-1; y++){
+        if (year < sparam->no_mates_year_transition[y+1]){
+            year_index = y;
+            break;
+        }
+    }
     int no_mates = static_cast<int>(
-        random->Gaus(sparam->no_mates_mean, sparam->no_mates_sigma));
+        random->Gaus(sparam->no_mates_mean[year_index][person->social_behaviour_factor_], sparam->no_mates_sigma[year_index][person->social_behaviour_factor_]));
 
     // This part is only executed for male persons in a certain age group, since
     // the infection goes into both directions.
@@ -113,9 +124,6 @@ struct MatingBehaviour : public Behavior {
         AgentPointer<Person> mate =
             env->GetRamdomAgentFromIndex(mate_compound_category);
         
-        // DEBUG: Increase count of partners from given locations
-        //env->IncreaseCountMatesInLocations(person->location_,mate_location);
-            
         if (mate == nullptr) {
           Log::Fatal("MatingBehaviour()",
                      "Received nullptr as AgentPointer mate.");
@@ -213,22 +221,46 @@ struct GetOlder : public Behavior {
     const auto* sparam = param->Get<SimParam>();
     auto* person = bdm_static_cast<Person*>(agent);
 
-    // If between min_age and max_age, reassign risk factors
-    if (person->age_ >= sparam->min_age &&
-        person->age_ <= sparam->max_age) {
-
+    // If between min_age and max_age, assign or reassign risk factors
+    if (person->age_ == sparam->min_age) { // Assign potentially high risk factor at first year of adulthood
+        // Probability of being at high risk depends on year and HIV status
+        int year =
+              static_cast<int>(sparam->start_year + sim->GetScheduler()->GetSimulatedSteps()); // Current year
+        // Check transition year
+        // If no sociobehavioural risk transition year is higher than current year, then use last transition year
+        int year_index = sparam->sociobehavioural_risk_year_transition.size()-1;
+        for (int y = 0; y < sparam->sociobehavioural_risk_year_transition.size()-1; y++){
+            if (year < sparam->sociobehavioural_risk_year_transition[y+1]){
+                year_index = y;
+                break;
+            }
+        }
+        
+        if (random->Uniform() <= sparam->sociobehavioural_risk_probability[year_index][person->state_]) {
+          person->social_behaviour_factor_ = 1;
+        } else {
+          person->social_behaviour_factor_ = 0;
+        }
+        if (random->Uniform() <= sparam->biomedical_risk_probability) {
+          person->biomedical_factor_ = 1;
+        } else {
+          person->biomedical_factor_ = 0;
+        }
+    }
+    else if (person->age_ > sparam->min_age) { // Potential change in risk factor for adults (after first year of adulthood)
       // Update risk factors stochastically like in initialization
-      if (random->Uniform() < sparam->sociobehavioural_risk_probability) {
+      if (random->Uniform() <= sparam->sociobehaviour_transition_matrix[person->social_behaviour_factor_][person->sex_][0]){
         person->social_behaviour_factor_ = 0;
+    
       } else {
         person->social_behaviour_factor_ = 1;
       }
-      if (random->Uniform() < sparam->biomedical_risk_probability) {
+      if (random->Uniform() > sparam->biomedical_risk_probability) {
         person->biomedical_factor_ = 0;
       } else {
         person->biomedical_factor_ = 1;
       }
-    } else {
+    } else { // Low risk factor for children
       person->social_behaviour_factor_ = 0;
       person->biomedical_factor_ = 0;
     }
@@ -236,9 +268,13 @@ struct GetOlder : public Behavior {
     // AM: HIV state transition, depending on current year and population
     // category (important for transition to treatment)
     int year_population_category = -1;
-    double year =
-        static_cast<double>(1960 + sim->GetScheduler()->GetSimulatedSteps());
+    
+    int start_year = sim->GetParam()->Get<SimParam>()->start_year;
+    int year =
+        static_cast<int>(start_year + sim->GetScheduler()->GetSimulatedSteps());
 
+    // TO DO AM: Replace code below with function : ComputeYearPopulationCategory(int year, float age, int sex)
+    //year_population_category =  sim->GetParam()->Get<SimParam>()->ComputeYearPopulationCategory(year, person->age_, person->sex_);
     if (year < 2003) {  // Prior to 2003
       year_population_category =
           0;  // All (No difference in ART between people. ART not available.)

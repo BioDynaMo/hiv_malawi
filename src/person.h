@@ -65,6 +65,16 @@ class Person : public Cell {
   bool IsTreated() { return state_ == GemsState::kTreated; }
   // Returns True if the agent is infected in failing treatement state
   bool IsFailing() { return state_ == GemsState::kFailing; }
+  // Returns True if the agent has high-risk socio-behaviours
+  bool HasHighRiskSocioBehav() { return social_behaviour_factor_  == 1; }
+  // Returns True if the agent is at low-risk socio-behaviours
+  bool HasLowRiskSocioBehav() { return social_behaviour_factor_  == 0; }
+  // Returns True if the agent is adult, is at least 15 years old
+  bool IsAdult() { return age_  >= 15; }
+  // Returns True if the agent is a male
+  bool IsMale() { return sex_  == Sex::kMale; }
+  // Returns True if the agent is a female
+  bool IsFemale() { return sex_  == Sex::kFemale; }
     
   // AM - Get Age Category from 0 to no_age_categories. 5-years interval categories from min_age.
   int GetAgeCategory(size_t min_age, size_t no_age_categories){

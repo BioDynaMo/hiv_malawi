@@ -37,7 +37,7 @@ int Simulate(int argc, const char** argv) {
 
   // Initialize the Simulation
   auto set_param = [&](Param* param) {
-    param->show_simulation_step = true;
+    param->show_simulation_step = 1;
     param->remove_output_dir_contents = false;
   };
   Simulation simulation(argc, argv, set_param);
@@ -47,7 +47,8 @@ int Simulate(int argc, const char** argv) {
   // Get a pointer to an instance of SimParam
   auto* sparam = param->Get<SimParam>();
 
-  // AM: Construct Environment with numbers of age and socio-behavioral categories.
+  // AM: Construct Environment with numbers of age and socio-behavioral
+  // categories.
   auto* env = new CategoricalEnvironment(
       sparam->min_age, sparam->max_age, sparam->nb_age_categories,
       sparam->nb_locations, sparam->nb_sociobehav_categories);
@@ -185,7 +186,7 @@ int Simulate(int argc, const char** argv) {
     // individuals over time.
     PlotAndSaveTimeseries();
   }
-    
+
   // DEBUG - AM - TO DO: Works only when selection depended soloely on locations
   /*env->NormalizeMateLocationFrequencies();
   env->PrintMateLocationFrequencies();*/

@@ -37,15 +37,53 @@ struct RandomMigration : public Behavior {
     auto* person = bdm_static_cast<Person*>(agent);
     auto* param = sim->GetParam();
     const auto* sparam = param->Get<SimParam>();
-
-    int migration_direction = static_cast<int>(
-        random->Gaus(sparam->migration_mean, sparam->migration_sigma));
-    if (person->location_ + migration_direction < 0) {
-      person->location_ += Location::kLocLast + migration_direction;
-    } else if (person->location_ + migration_direction >= Location::kLocLast) {
-      person->location_ += migration_direction - Location::kLocLast;
-    } else {
-      person->location_ += migration_direction;
+      
+    // Probability to migrate
+    float rand_num = static_cast<float>(random->Uniform());
+    if (person->age_ >= 15 && rand_num <= sparam->migration_probability){
+        // Randomly determine the migration location
+        // AM: Probability of migration location depends on the current year
+        int year =
+            static_cast<int>(sparam->start_year + sim->GetScheduler()->GetSimulatedSteps()); // Current year
+        // If no transition year is higher than current year, then use last transition year
+        int year_index = sparam->no_mates_year_transition.size()-1;
+        for (int y = 0; y < sparam->no_mates_year_transition.size()-1; y++){
+          if (year < sparam->no_mates_year_transition[y+1]){
+              year_index = y;
+              break;
+          }
+        }
+        // AM: Sample migration location. It depends on the current year and current location
+        float rand_num_loc = static_cast<float>(random->Uniform());
+        int new_location = SampleLocation(rand_num_loc,
+                                          sparam->migration_location_probability[year_index][person->location_]);
+        int old_location = person->location_;
+        person->location_ = new_location;
+        
+        if (person->sex_ == Sex::kFemale){
+            int nb_children = person->GetNumberOfChildren();
+            //std::cout << "I am a woman with "<< nb_children << " children and I migrated to location " << person->location_<< std::endl;
+            for (int c = 0; c < nb_children; c++){
+                if (person->children_[c]->age_ < 15){
+                    /*if (old_location != person->children_[c]->location_){
+                        Log::Warning("RandomMigration::Run()", "child and mother had different locations BEFORE MIGRATION. Child's age = ", person->children_[c]->age_, " ==> ", old_location, " vs. ", person->children_[c]->location_);
+                    }*/
+                    //std::cout << " ==> I am a child (" << person->children_[c]->age_ << ") and I will migrate with my mother from location " << person->children_[c]->location_ << " to " << person->location_ << std::endl;
+                    person->children_[c]->location_ = person->location_;
+                }
+            }
+            // DEBUG : Check that all children migrated with Mother
+            for (int c = 0; c < nb_children; c++){
+                if (person->children_[c]->age_ < 15){
+                    if (person->children_[c]->location_ != person->location_){
+                        Log::Warning("RandomMigration::Run()", "DEBUG: child and mother have different locations AFTER MIGRATION. Child's age = ", person->children_[c]->age_);
+                    }
+                }
+            }
+        }
+        
+        // TO DO : 1) IF Single woman migrates, her (potential) child migrates too, 2) If a Man migrates, his (potential) "regular female partner", and her (potential) child migrate too
+        
     }
   }
 };
@@ -279,7 +317,7 @@ struct GetOlder : public Behavior {
       year_population_category =
           0;  // All (No difference in ART between people. ART not available.)
     } else if (year < 2011) {  // Between 2003 and 2010
-      if (person->sex_ == Sex::kFemale and person->age_ >= 18 and
+      if (person->sex_ == Sex::kFemale && person->age_ >= 18 and
           person->age_ <= 40) {
         year_population_category = 1;  // Female between 18 and 40
       } else if (person->age_ < 15) {
@@ -289,7 +327,7 @@ struct GetOlder : public Behavior {
             3;  // Others (Male, Female under 18, and Female over 40)
       }
     } else {  // After 2011
-      if (person->sex_ == Sex::kFemale and person->age_ >= 18 and
+      if (person->sex_ == Sex::kFemale && person->age_ >= 18 and
           person->age_ <= 40) {
         year_population_category = 4;  // Female between 18 and 40
       } else if (person->age_ < 15) {
@@ -324,8 +362,21 @@ struct GetOlder : public Behavior {
     }
 
     if (!stay_alive) {
+      // If mother dies, children have no mother anymore
+      if (person->sex_ == Sex::kFemale && person->GetNumberOfChildren() > 0){
+          for (int c = 0; c<person->GetNumberOfChildren(); c++){
+              person->children_[c]->mother_ = AgentPointer<Person>();
+          }
+      }
+      // If a child dies and has a mother, remove him from mother's list of children
+      if (person->age_ < 15 && person->mother_ != nullptr){
+          //std::cout << "A Child dies" << std::endl;
+          person->mother_->RemoveChild(person->GetAgentPtr<Person>());
+          //std::cout << " ==> Removed from mother's list of children" << std::endl;
+      }
       // Person dies, i.e. is removed from simulation.
       person->RemoveFromSimulation();
+        
     } else {
       // increase age
       person->age_ += 1;
@@ -365,13 +416,7 @@ struct GiveBirth : public Behavior {
       // // Store the year when the agent got infected
       // child->year_of_infection_ = std::numeric_limits<float>::max();
     }
-    // let's assume that if a mother is HIV positive, the child will be HIV
-    // positive, too. (with a certain probability)
-    // else if (random_generator->Uniform() <
-    //         sparam->birth_infection_probability) {
-    //  // child->state_ = GemsState::kAcute;
-    //  child->state_ = GemsState::kChronic;
-
+    
     ///! The aguments below are currently either not used or repetitive.
     // // year of infection to present year, Question: Ask Lukas how to get
     // iter child->year_of_infection_ = 2000;
@@ -392,13 +437,16 @@ struct GiveBirth : public Behavior {
         child->state_ = GemsState::kHealthy;
       }
     }
+    
+    // Assign mother to child. When, the child becomes adult, break the link.
+    child->mother_ = mother->GetAgentPtr<Person>();
 
     ///! The aguments below are currently either not used or repetitive.
     // // NOTE: we do not assign a specific mother or partner at the moment. Use
     // // nullptr instead.
     // child->mother_id_ = AgentPointer<Person>();
     // child->partner_id_ = AgentPointer<Person>();
-
+      
     // BioDynaMo API: Add the behaviors to the Agent
     child->AddBehavior(new RandomMigration());
     child->AddBehavior(new GetOlder());
@@ -407,6 +455,7 @@ struct GiveBirth : public Behavior {
     } else {
       child->AddBehavior(new MatingBehaviour());
     }
+    
     return child;
   }
 
@@ -417,13 +466,29 @@ struct GiveBirth : public Behavior {
     auto* param = sim->GetParam();
     const auto* sparam = param->Get<SimParam>();
     auto* mother = bdm_static_cast<Person*>(agent);
+    
     // Each potential mother gives birth with a certain probability.
     if (random->Uniform() < sparam->give_birth_probability &&
         mother->age_ <= sparam->max_age && mother->age_ >= sparam->min_age) {
       // Create a child
       auto* new_child = CreateChild(random, mother, sparam);
+
       // BioDynaMo API: Add agent (child) to simulation
       ctxt->AddAgent(new_child);
+    
+      mother->AddChild(new_child->GetAgentPtr<Person>());
+      // DEBUG: CHECK MOTHER AND CHILD HAVE SAME LOCATIONS
+      if (mother->location_!=new_child->location_){
+        Log::Warning("\n\nGiveBirth::Run()", "Mother created a child who is at a different location");
+      }
+      // DEBUG: CHECK MOTHER AND CHILD POINT ON EACH OTHERS
+      if (!mother->IsParentOf(new_child->GetAgentPtr<Person>())){
+            Log::Warning("\n\nGiveBirth::Run()", "Mother does not point on child ");
+      }
+      if (new_child->mother_ != mother->GetAgentPtr<Person>()){
+          Log::Warning("\n\nGiveBirth::Run()", "Child does not point on mother ");
+      }
+    
     }
   }
 };

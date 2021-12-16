@@ -26,7 +26,11 @@ class Person : public Cell {
   BDM_AGENT_HEADER(Person, Cell, 1);
 
  public:
-  Person() {}
+  Person() {
+      mother_ = AgentPointer<Person>();
+      children_.clear();
+      children_.reserve(100);
+  }
   explicit Person(const Double3& position) : Base(position) {}
   virtual ~Person() {}
 
@@ -48,8 +52,11 @@ class Person : public Cell {
   // bool infected_;
   // // Store the year when the agent got infected
   // float year_of_infection_;
-  // // Stores the ID of the mother
-  // AgentPointer<Person> mother_id_;
+  // Stores the ID of the mother. Useful to unlink child from mother, when child dies.
+  AgentPointer<Person> mother_;
+  // Stores the IDs of the children. Useful, when mother migrates, and takes her children. Unlink mother from child, when mother dies
+  std::vector<AgentPointer<Person>> children_;
+    
   // // Stores the id of the partner
   // AgentPointer<Person> partner_id_;
 
@@ -87,6 +94,49 @@ class Person : public Cell {
     // DEBUG:
     //std::cout << "age " << age_ << " --> age_category " << age_category << " (min_age " << min_age << ",  no_age_categories " << no_age_categories << ")" << std::endl;
     return age_category;
+  }
+    
+  void AddChild(AgentPointer<Person> child){
+    /*if (child->location_ != location_){
+        Log::Warning("Person::AddChild()", "Adding a child who is at a different location");
+    }*/
+    children_.push_back(child);
+  }
+    
+  void RemoveChild(AgentPointer<Person> child){
+      bool found = false;
+      for (int c = 0; c < GetNumberOfChildren(); c++){
+          if (children_[c] == child){
+              found = true;
+              //std::cout << "Before, nb_children = " << GetNumberOfChildren() << std::endl;
+              children_.erase(children_.begin() + c);
+              //std::cout << " => Found and removed child from mother's list of children" << std::endl;
+              //std::cout << "Afrer, nb_children = " << GetNumberOfChildren() << std::endl;
+              break;
+          }
+      }
+      if (!found){
+          Log::Warning("Person::RemoveChild()", "Child to be removed not found in mother's list of children. Age = ", child->age_ );
+      }
+  }
+
+  bool IsParentOf(AgentPointer<Person> child){
+        bool found = false;
+        for (int c = 0; c < GetNumberOfChildren(); c++){
+            if (children_[c] == child){
+                found = true;
+                break;
+            }
+        }
+      return found;
+  }
+    
+  bool IsChildOf(AgentPointer<Person> mother){
+      return mother_ == mother;
+  }
+    
+  int GetNumberOfChildren(){
+    return children_.size();
   }
   };
 

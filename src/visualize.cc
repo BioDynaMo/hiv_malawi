@@ -89,7 +89,7 @@ int PlotAndSaveTimeseries() {
             {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
-  bdm::experimental::LineGraph g4(ts, "my result", "Time", "",
+  bdm::experimental::LineGraph g4(ts, "my result", "Time", "Proportion",
                                     true);
   g4.Add("high_risk_sb_hiv", "High Risk SB - HIV", "L", kRed, 1.0, 1);
   g4.Add("low_risk_sb_hiv", "Low Risk SB - HIV", "L", kBlue, 1.0, 1);

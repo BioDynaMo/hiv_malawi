@@ -68,6 +68,9 @@ class CategoricalEnvironment : public Environment {
   // Vector to store all female agents of within a certain age interval
   // [min_age_, max_age_].
   std::vector<AgentVector> female_agents_;
+  // AM: Vector to store all potential mothers within a certain age interval
+  // [min_age_, max_age_], indexed by location only.
+  std::vector<AgentVector> mothers_;
 
   // AM: Matrix to store cumulative probability to select a female mate from one
   // location given male agent location
@@ -126,6 +129,9 @@ class CategoricalEnvironment : public Environment {
   void AddAgentToIndex(AgentPointer<Person> agent, size_t location, size_t age,
                        size_t sb);
 
+  // Add an agent pointer to a certain location, age group, and sb category
+  void AddMotherToLocation(AgentPointer<Person> agent, size_t location);
+    
   // Returns a random AgentPointer at a specific location, age group, and sb
   // category
   AgentPointer<Person> GetRamdomAgentFromIndex(size_t location, size_t age,
@@ -134,6 +140,9 @@ class CategoricalEnvironment : public Environment {
   // Returns a random AgentPointer at a specific compound category (location, age group, and sb
   // category)
   AgentPointer<Person> GetRamdomAgentFromIndex(size_t compound_index);
+    
+  // Returns a random Potential Mother (AgentPointer) at a specific location
+  AgentPointer<Person> GetRamdomMotherFromLocation(size_t location);
 
   // Prints how many females are at a certain location, age group, and sb
   // category. Note that by population we refer to women between min_age_ and

@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Simulation",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/hiv_malawi",
+      "cwd": "${workspaceFolder}/build",
+      "stopOnEntry": true,
+      "terminal": "console"
+    }
+  ]
+}

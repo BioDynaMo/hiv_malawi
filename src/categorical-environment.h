@@ -74,10 +74,19 @@ class CategoricalEnvironment : public Environment {
 
   // AM: Matrix to store cumulative probability to select a female mate from one
   // location given male agent location
-  //std::vector<std::vector<float>> mate_location_distribution_;
+  // std::vector<std::vector<float>> mate_location_distribution_;
   std::vector<std::vector<float>> mate_compound_category_distribution_;
   // AM: DEBUG Matrix to store the locations of selected mates
   std::vector<std::vector<float>> mate_location_frequencies_;
+
+ protected:
+  // This is the update function, the is called automatically by BioDynaMo for
+  // every simulation step. We delete the previous information and store a
+  // vector of AgentPointers for each location.
+  // AM TO DO: Update probability to select a female mate from each location.
+  // Depends on static mixing matrix and update number of female agents per
+  // location
+  void UpdateImplementation() override;
 
  public:
   // Constructor
@@ -86,17 +95,10 @@ class CategoricalEnvironment : public Environment {
                          size_t no_locations = Location::kLocLast,
                          size_t no_sociobehavioural_categories = 1);
 
-  // This is the update function, the is called automatically by BioDynaMo for
-  // every simulation step. We delete the previous information and store a
-  // vector of AgentPointers for each location.
-  // AM TO DO: Update probability to select a female mate from each location.
-  // Depends on static mixing matrix and update number of female agents per
-  // location
-  void Update() override;
-
-  // Mapping from (location, age_category, socialbehaviour) to the appropriate position
-  // in the female_agents_ index.
-  inline size_t ComputeCompoundIndex(size_t location, size_t age_category, size_t sb) {
+  // Mapping from (location, age_category, socialbehaviour) to the appropriate
+  // position in the female_agents_ index.
+  inline size_t ComputeCompoundIndex(size_t location, size_t age_category,
+                                     size_t sb) {
     assert(location < no_locations_);
     assert(age_category < no_age_categories_);
     assert(sb < no_sociobehavioural_categories_);
@@ -104,27 +106,33 @@ class CategoricalEnvironment : public Environment {
            (no_age_categories_ * no_locations_) * sb;
   }
 
-  // Mapping from position in the female_agents_ index to the appropriate location.
+  // Mapping from position in the female_agents_ index to the appropriate
+  // location.
   inline size_t ComputeLocationFromCompoundIndex(size_t i) {
-    assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
-  
-    return (int)(i%(no_age_categories_ * no_locations_))/ no_age_categories_;
+    assert(i < no_locations_ * no_age_categories_ *
+                   no_sociobehavioural_categories_);
+
+    return (int)(i % (no_age_categories_ * no_locations_)) / no_age_categories_;
   }
-    
-  // Mapping from position in the female_agents_ index to the appropriate age category.
+
+  // Mapping from position in the female_agents_ index to the appropriate age
+  // category.
   inline size_t ComputeAgeFromCompoundIndex(size_t i) {
-    assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
+    assert(i < no_locations_ * no_age_categories_ *
+                   no_sociobehavioural_categories_);
 
-    return (int)(i%(no_age_categories_ * no_locations_))% no_age_categories_;
+    return (int)(i % (no_age_categories_ * no_locations_)) % no_age_categories_;
   }
-    
-  // Mapping from position in the female_agents_ index to the appropriate Socio-behavioural category.
+
+  // Mapping from position in the female_agents_ index to the appropriate
+  // Socio-behavioural category.
   inline size_t ComputeSociobehaviourFromCompoundIndex(size_t i) {
-    assert(i < no_locations_*no_age_categories_*no_sociobehavioural_categories_);
+    assert(i < no_locations_ * no_age_categories_ *
+                   no_sociobehavioural_categories_);
 
-    return (int)i/(no_age_categories_ * no_locations_);
+    return (int)i / (no_age_categories_ * no_locations_);
   }
-    
+
   // Add an agent pointer to a certain location, age group, and sb category
   void AddAgentToIndex(AgentPointer<Person> agent, size_t location, size_t age,
                        size_t sb);
@@ -136,9 +144,9 @@ class CategoricalEnvironment : public Environment {
   // category
   AgentPointer<Person> GetRamdomAgentFromIndex(size_t location, size_t age,
                                                size_t sb);
-  
-  // Returns a random AgentPointer at a specific compound category (location, age group, and sb
-  // category)
+
+  // Returns a random AgentPointer at a specific compound category (location,
+  // age group, and sb category)
   AgentPointer<Person> GetRamdomAgentFromIndex(size_t compound_index);
     
   // Returns a random Potential Mother (AgentPointer) at a specific location
@@ -154,7 +162,7 @@ class CategoricalEnvironment : public Environment {
 
   // Get number of agents at location
   size_t GetNumAgentsAtLocation(size_t location);
-  
+
   // Get number of agents at location and age_category
   size_t GetNumAgentsAtLocationAge(size_t location, size_t age);
 
@@ -166,17 +174,32 @@ class CategoricalEnvironment : public Environment {
   int GetMinAge() { return min_age_; };
   int GetMaxAge() { return max_age_; };
   // AM: Getter of no_age_categories_
-  int GetNoAgeCategories() {return no_age_categories_;};
+  int GetNoAgeCategories() { return no_age_categories_; };
   // AM: Getter of no_sociobehavioural_categories_
-  int GetNoSociobehaviouralCategories() {return no_sociobehavioural_categories_;};
+  int GetNoSociobehaviouralCategories() {
+    return no_sociobehavioural_categories_;
+  };
   // AM: Getter of mate_compound_category_distribution_
-  const std::vector<float>& GetMateCompoundCategoryDistribution(size_t loc, size_t age_category, size_t sociobehav);
+  const std::vector<float>& GetMateCompoundCategoryDistribution(
+      size_t loc, size_t age_category, size_t sociobehav);
 
   // The remaining public functions are inherited from Environment but not
   // needed here.
   void Clear() override { ; };
   void ForEachNeighbor(Functor<void, Agent*, double>& lambda,
                        const Agent& query, double squared_radius) override;
+
+  // Not supported Neighbor search for this particular environment. Throws fatal
+  // error.
+  virtual void ForEachNeighbor(Functor<void, Agent*>& lambda,
+                               const Agent& query, void* criteria) override;
+
+  // Not supported Neighbor search for this particular environment. Throws fatal
+  // error.
+  virtual void ForEachNeighbor(Functor<void, Agent*, double>& lambda,
+                               const Double3& query_position,
+                               double squared_radius,
+                               const Agent* query_agent = nullptr) override;
 
   std::array<int32_t, 6> GetDimensions() const override;
 

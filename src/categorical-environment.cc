@@ -52,7 +52,8 @@ CategoricalEnvironment::CategoricalEnvironment(
       no_sociobehavioural_categories_(no_sociobehavioural_categories),
       female_agents_(no_age_categories * no_locations *
                      no_sociobehavioural_categories),
-      mothers_(no_locations) {}
+      mothers_(no_locations),
+      mothers_are_assiged_(false) {}
 
 // AM : Update probability to select a female mate from each location x age x sb
 // compound category. Depends on static mixing matrices and updated number of
@@ -127,7 +128,9 @@ void CategoricalEnvironment::UpdateImplementation() {
 
   // TO DO : During first iteration, assign mothers to children
   uint64_t iter = Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
-  if (iter == 0) {
+
+  if (!mothers_are_assiged_) {
+    mothers_are_assiged_ = true;
     std::cout << "iter = " << iter << " ==> Assign mothers to children "
               << std::endl;
 
@@ -159,7 +162,8 @@ void CategoricalEnvironment::UpdateImplementation() {
     });
 
     // AM: Assign mothers to children
-    rm->ForEachAgent([](Agent* agent) {
+    int cntr = 0;
+    rm->ForEachAgent([&](Agent* agent) {
       auto* env = bdm_static_cast<CategoricalEnvironment*>(
           Simulation::GetActive()->GetEnvironment());
       auto* person = bdm_static_cast<Person*>(agent);
@@ -187,8 +191,10 @@ void CategoricalEnvironment::UpdateImplementation() {
         person->mother_->AddChild(person_ptr);
         // std::cout << "Found a mother (age "<< person->mother_->age_ << ") at
         // location " << person->mother_->location_ << std::endl;
+        cntr += 1;
       };
     });
+    std::cout << "Assigned " << cntr << " children to mothers." << std::endl;
 
     // DEBUG: All agents' children are at the same location as their mothers
     rm->ForEachAgent([](Agent* agent) {
@@ -216,7 +222,6 @@ void CategoricalEnvironment::UpdateImplementation() {
       }
     });
   }
-
   // TO DO: Assign regular partners to men (or women)
 
   // AM : Update probability matrix to select female mate
@@ -245,8 +250,8 @@ void CategoricalEnvironment::UpdateImplementation() {
     size_t a_i = ComputeAgeFromCompoundIndex(i);
     size_t s_i = ComputeSociobehaviourFromCompoundIndex(i);
 
-    // Step 1 - Location: Compute probability to select a female mate from each
-    // location
+    // Step 1 - Location: Compute probability to select a female mate from
+    // each location
     std::vector<float> proba_locations(no_locations_, 0.0);
     float sum_locations = 0.0;
     for (size_t l_j = 0; l_j < no_locations_; l_j++) {
@@ -261,15 +266,15 @@ void CategoricalEnvironment::UpdateImplementation() {
       }
     }
     // DEBUG
-    /*std::cout << "Probability to select from locations, given male location "
+    /*std::cout << "Probability to select from locations, given male location"
     << l_i << std::endl; for (int l = 0; l < proba_locations.size(); l++){
           std::cout << proba_locations[l] << ", ";
     }
     std::cout << std::endl;*/
     // END DEBUG
 
-    // Step 2 -  Age: Compute probability to select a female mate from each age
-    // category given the selected location
+    // Step 2 -  Age: Compute probability to select a female mate from each
+    // age category given the selected location
     std::vector<std::vector<float>> proba_ages_given_location;
     proba_ages_given_location.resize(no_locations_);
     for (size_t l_j = 0; l_j < no_locations_;
@@ -293,7 +298,7 @@ void CategoricalEnvironment::UpdateImplementation() {
       }
     }
     // DEBUG
-    /*std::cout << "Probability to select from age categories, given male age "
+    /*std::cout << "Probability to select from age categories, given male age"
     << a_i << " and female locations "  << std::endl; for (int l = 0; l <
     proba_ages_given_location.size(); l++){ for (int a = 0; a <
     proba_ages_given_location[l].size(); a++){ std::cout <<

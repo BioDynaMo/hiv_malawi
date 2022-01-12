@@ -162,12 +162,12 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
 
   // BioDynaMo API: Add the behaviors to the Agent
   person->AddBehavior(new RandomMigration());
-  person->AddBehavior(new GetOlder());
   if (person->sex_ == Sex::kFemale) {
     person->AddBehavior(new GiveBirth());
   } else {
     person->AddBehavior(new MatingBehaviour());
   }
+  person->AddBehavior(new GetOlder());
   return person;
 };
 

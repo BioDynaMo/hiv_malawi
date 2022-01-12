@@ -312,9 +312,9 @@ struct GetOlder : public Behavior {
       } else {
         person->biomedical_factor_ = 0;
       }
-    } else if (person->age_ >
-               sparam->min_age) {  // Potential change in risk factor for adults
-                                   // (after first year of adulthood)
+    } else if (person->age_ > sparam->min_age) {
+      // Potential change in risk factor foradults (after first year of
+      // adulthood)
       // Update risk factors stochastically like in initialization
       if (random->Uniform() <=
           sparam->sociobehaviour_transition_matrix
@@ -393,6 +393,18 @@ struct GetOlder : public Behavior {
     float rand_num_age = static_cast<float>(random->Uniform());
     if (rand_num_age < get_mortality_rate_age(person->age_)) {
       stay_alive = false;
+    }
+
+    // We protect mothers that just gave birth. This should not have a large
+    // impact on the simulation. Essentially, if a mother gives birth, she
+    // cannot die in this particular year. This is an additional safety
+    // mechanism. By default it is not active. If the problem of children not
+    // having the right AgentPtr for their mother occurs again, consider
+    // activating this switch.
+    if (sparam->protect_mothers_at_birth && person->IsProtected()) {
+      stay_alive = true;
+      // Allow death of agent in the next year.
+      person->UnockProtection();
     }
 
     if (!stay_alive) {
@@ -485,12 +497,12 @@ struct GiveBirth : public Behavior {
 
     // BioDynaMo API: Add the behaviors to the Agent
     child->AddBehavior(new RandomMigration());
-    child->AddBehavior(new GetOlder());
     if (child->sex_ == Sex::kFemale) {
       child->AddBehavior(new GiveBirth());
     } else {
       child->AddBehavior(new MatingBehaviour());
     }
+    child->AddBehavior(new GetOlder());
 
     return child;
   }
@@ -512,7 +524,14 @@ struct GiveBirth : public Behavior {
       // BioDynaMo API: Add agent (child) to simulation
       ctxt->AddAgent(new_child);
 
+      // Register child with mother
       mother->AddChild(new_child->GetAgentPtr<Person>());
+
+      // Protect mother from death.
+      if (sparam->protect_mothers_at_birth) {
+        mother->LockProtection();
+      }
+
       // DEBUG: CHECK MOTHER AND CHILD HAVE SAME LOCATIONS
       if (mother->location_ != new_child->location_) {
         Log::Warning("\n\nGiveBirth::Run()",

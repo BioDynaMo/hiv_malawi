@@ -71,6 +71,8 @@ class CategoricalEnvironment : public Environment {
   // AM: Vector to store all potential mothers within a certain age interval
   // [min_age_, max_age_], indexed by location only.
   std::vector<AgentVector> mothers_;
+  // We only assign mother in the first update.
+  bool mothers_are_assiged_;
 
   // AM: Matrix to store cumulative probability to select a female mate from one
   // location given male agent location

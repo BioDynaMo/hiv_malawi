@@ -14,6 +14,7 @@
 #define PERSON_H_
 
 #include "biodynamo.h"
+#include "core/simulation.h"
 #include "datatypes.h"
 
 namespace bdm {
@@ -30,6 +31,7 @@ class Person : public Cell {
     mother_ = AgentPointer<Person>();
     children_.clear();
     children_.reserve(100);
+    protected_ = false;
   }
   explicit Person(const Double3& position) : Base(position) {}
   virtual ~Person() {}
@@ -46,6 +48,11 @@ class Person : public Cell {
   int social_behaviour_factor_;
   // Stores a factor representing the biomedical risk
   int biomedical_factor_;
+  // Protect a person against death. Currently only used for mothers in the year
+  // in which they give birth and if sparam->protect_mothers_at_birth is true.
+  // The associated member functions LockProtection, UnlockProtection, and
+  // IsProtected appear in the GiveBirth and GetOlder Behaviors.
+  bool protected_;
 
   ///! The aguments below are currently either not used or repetitive.
   // // Stores if an agent is infected or not
@@ -124,10 +131,12 @@ class Person : public Cell {
       }
     }
     if (!found) {
-      Log::Warning(
-          "Person::RemoveChild()",
-          "Child to be removed not found in mother's list of children. Age = ",
-          child->age_);
+      Log::Warning("Person::RemoveChild()",
+                   "Child to be removed not found in mother's list of "
+                   "children. Age = ",
+                   child->age_, " Mother:", this->GetAgentPtr(),
+                   " Age mother:", this->age_,
+                   " Num children:", children_.size());
     }
   }
 
@@ -145,6 +154,13 @@ class Person : public Cell {
   bool IsChildOf(AgentPointer<Person> mother) { return mother_ == mother; }
 
   int GetNumberOfChildren() { return children_.size(); }
+
+  // Activates the protection of an agent against death.
+  void LockProtection() { protected_ = true; }
+  // Deactivates the protection of an agent against death.
+  void UnockProtection() { protected_ = false; }
+  // Returns if an agent is protected against death.
+  bool IsProtected() { return protected_; }
 };
 
 }  // namespace bdm

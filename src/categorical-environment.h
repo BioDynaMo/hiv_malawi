@@ -139,7 +139,7 @@ class CategoricalEnvironment : public Environment {
 
   // Add an agent pointer to a certain location, age group, and sb category
   void AddMotherToLocation(AgentPointer<Person> agent, size_t location);
-    
+
   // Returns a random AgentPointer at a specific location, age group, and sb
   // category
   AgentPointer<Person> GetRamdomAgentFromIndex(size_t location, size_t age,
@@ -148,7 +148,7 @@ class CategoricalEnvironment : public Environment {
   // Returns a random AgentPointer at a specific compound category (location,
   // age group, and sb category)
   AgentPointer<Person> GetRamdomAgentFromIndex(size_t compound_index);
-    
+
   // Returns a random Potential Mother (AgentPointer) at a specific location
   AgentPointer<Person> GetRamdomMotherFromLocation(size_t location);
 

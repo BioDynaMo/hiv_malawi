@@ -68,19 +68,20 @@ int PlotAndSaveTimeseries() {
   g2.Add("chronic_agents", "Chronic", "L", kMagenta, 1.0, 10);
   g2.Add("treated_agents", "Treated", "L", kGreen, 1.0, 10);
   g2.Add("failing_agents", "Failing", "L", kGray, 1.0, 10);
-    
+
   g2.Draw();
   g2.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
                    "/simulation_hiv_with_states"),
             {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
-  bdm::experimental::LineGraph g3(ts, "my result", "Time", "",
-                                  true);
+  bdm::experimental::LineGraph g3(ts, "my result", "Time", "", true);
   g3.Add("prevalence", "Prevalence", "L", kOrange, 1.0, 3, 1, kOrange, 1.0, 5);
-  g3.Add("prevalence_women", "Prevalence - Women", "L", kRed, 1.0, 3, 1, kRed, 1.0, 10);
-  g3.Add("prevalence_men", "Prevalence - Men", "L", kBlue, 1.0, 3, 1, kBlue, 1.0, 10);
-    
+  g3.Add("prevalence_women", "Prevalence - Women", "L", kRed, 1.0, 3, 1, kRed,
+         1.0, 10);
+  g3.Add("prevalence_men", "Prevalence - Men", "L", kBlue, 1.0, 3, 1, kBlue,
+         1.0, 10);
+
   g3.Add("incidence", "Incidence", "L", kRed, 1.0, 3, 1, kRed, 1.0, 5);
 
   g3.Draw();
@@ -89,22 +90,25 @@ int PlotAndSaveTimeseries() {
             {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
-  bdm::experimental::LineGraph g4(ts, "my result", "Time", "Proportion",
-                                    true);
+  bdm::experimental::LineGraph g4(ts, "my result", "Time", "Proportion", true);
   g4.Add("high_risk_sb_hiv", "High Risk SB - HIV", "L", kRed, 1.0, 1);
   g4.Add("low_risk_sb_hiv", "Low Risk SB - HIV", "L", kBlue, 1.0, 1);
-  g4.Add("high_risk_sb_healthy", "High Risk SB - Healthy", "L", kOrange, 1.0, 1);
+  g4.Add("high_risk_sb_healthy", "High Risk SB - Healthy", "L", kOrange, 1.0,
+         1);
   g4.Add("low_risk_sb_healthy", "Low Risk SB - Healthy", "L", kGreen, 1.0, 1);
-  g4.Add("high_risk_sb_hiv_women", "High Risk SB - HIV Women", "L", kOrange, 1.0, 10);
-  g4.Add("low_risk_sb_hiv_women", "Low Risk SB - HIV Women", "L", kGreen, 1.0, 10);
+  g4.Add("high_risk_sb_hiv_women", "High Risk SB - HIV Women", "L", kOrange,
+         1.0, 10);
+  g4.Add("low_risk_sb_hiv_women", "Low Risk SB - HIV Women", "L", kGreen, 1.0,
+         10);
 
-  g4.Add("high_risk_sb_hiv_men", "High Risk SB - HIV Men", "L", kOrange, 1.0, 2);
+  g4.Add("high_risk_sb_hiv_men", "High Risk SB - HIV Men", "L", kOrange, 1.0,
+         2);
   g4.Add("low_risk_sb_hiv_men", "Low Risk SB - HIV Men", "L", kGreen, 1.0, 2);
-    
+
   g4.Draw();
   g4.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
-                     "/simulation_sociobehaviours"),
-              {".svg", ".png"});
+                   "/simulation_sociobehaviours"),
+            {".svg", ".png"});
   // Print info for user to let him/her know where to find simulation results
   std::string info =
       Concat("<PlotAndSaveTimeseries> ", "Results of simulation were saved to ",

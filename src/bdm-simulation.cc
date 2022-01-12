@@ -134,31 +134,33 @@ int Simulate(int argc, const char** argv) {
   };
   // AM: Define how to compute prevalence among women
   auto pct_prevalence_women = [](Simulation* sim) {
-      // Condition for Count operation, e.g. check if person is infected.
-      auto cond_infected_women = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-        return !(person->IsHealthy()) and person->IsFemale();
-      });
-      auto cond_women = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-        return person->IsFemale();
-      });
-      return static_cast<double>(bdm::experimental::Count(sim, cond_infected_women)) /
-             static_cast<double>(bdm::experimental::Count(sim, cond_women));
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_infected_women = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()) and person->IsFemale();
+    });
+    auto cond_women = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->IsFemale();
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_infected_women)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_women));
   };
   // AM: Define how to compute prevalence among men
   auto pct_prevalence_men = [](Simulation* sim) {
-        // Condition for Count operation, e.g. check if person is infected.
-        auto cond_infected_men = L2F([](Agent* a) {
-          auto* person = bdm_static_cast<Person*>(a);
-          return !(person->IsHealthy()) and person->IsMale();
-        });
-        auto cond_men = L2F([](Agent* a) {
-          auto* person = bdm_static_cast<Person*>(a);
-          return person->IsMale();
-        });
-        return static_cast<double>(bdm::experimental::Count(sim, cond_infected_men)) /
-               static_cast<double>(bdm::experimental::Count(sim, cond_men));
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_infected_men = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()) and person->IsMale();
+    });
+    auto cond_men = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->IsMale();
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_infected_men)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_men));
   };
   // AM: Define how to compute general incidence
   auto pct_incidence = [](Simulation* sim) {
@@ -174,7 +176,8 @@ int Simulate(int argc, const char** argv) {
     return static_cast<double>(bdm::experimental::Count(sim, cond_acute)) /
            static_cast<double>(bdm::experimental::Count(sim, cond_all));
   };
-  // AM: Define how to compute proportion of people with high-risk socio-beahviours among hiv+
+  // AM: Define how to compute proportion of people with high-risk
+  // socio-beahviours among hiv+
   auto pct_high_risk_hiv = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
     auto cond_high_risk_hiv = L2F([](Agent* a) {
@@ -185,38 +188,44 @@ int Simulate(int argc, const char** argv) {
       auto* person = bdm_static_cast<Person*>(a);
       return !(person->IsHealthy());
     });
-    return static_cast<double>(bdm::experimental::Count(sim, cond_high_risk_hiv)) /
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_high_risk_hiv)) /
            static_cast<double>(bdm::experimental::Count(sim, cond_hiv));
   };
-  // AM: Define how to compute proportion of people with low-risk socio-beahviours among hiv+
+  // AM: Define how to compute proportion of people with low-risk
+  // socio-beahviours among hiv+
   auto pct_low_risk_hiv = [](Simulation* sim) {
-      // Condition for Count operation, e.g. check if person is infected.
-      auto cond_low_risk_hiv = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-        return person->HasLowRiskSocioBehav() and !(person->IsHealthy());
-      });
-      auto cond_hiv = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-        return !(person->IsHealthy());
-      });
-      return static_cast<double>(bdm::experimental::Count(sim, cond_low_risk_hiv)) /
-             static_cast<double>(bdm::experimental::Count(sim, cond_hiv));
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_low_risk_hiv = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->HasLowRiskSocioBehav() and !(person->IsHealthy());
+    });
+    auto cond_hiv = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy());
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_low_risk_hiv)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_hiv));
   };
-  // AM: Define how to compute proportion of people with high-risk socio-beahviours among healthy
+  // AM: Define how to compute proportion of people with high-risk
+  // socio-beahviours among healthy
   auto pct_high_risk_healthy = [](Simulation* sim) {
-      // Condition for Count operation, e.g. check if person is infected.
-      auto cond_high_risk_healthy = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-        return person->HasHighRiskSocioBehav() and person->IsHealthy();
-      });
-      auto cond_healthy = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-        return person->IsHealthy();
-      });
-      return static_cast<double>(bdm::experimental::Count(sim, cond_high_risk_healthy)) /
-             static_cast<double>(bdm::experimental::Count(sim, cond_healthy));
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_high_risk_healthy = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->HasHighRiskSocioBehav() and person->IsHealthy();
+    });
+    auto cond_healthy = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->IsHealthy();
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_high_risk_healthy)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_healthy));
   };
-  // AM: Define how to compute proportion of people with low-risk socio-beahviours among healthy
+  // AM: Define how to compute proportion of people with low-risk
+  // socio-beahviours among healthy
   auto pct_low_risk_healthy = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
     auto cond_low_risk_healthy = L2F([](Agent* a) {
@@ -227,71 +236,87 @@ int Simulate(int argc, const char** argv) {
       auto* person = bdm_static_cast<Person*>(a);
       return person->IsHealthy();
     });
-    return static_cast<double>(bdm::experimental::Count(sim, cond_low_risk_healthy)) /
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_low_risk_healthy)) /
            static_cast<double>(bdm::experimental::Count(sim, cond_healthy));
   };
-  // AM: Define how to compute proportion of high-risk socio-beahviours among hiv adult women
+  // AM: Define how to compute proportion of high-risk socio-beahviours among
+  // hiv adult women
   auto pct_high_risk_hiv_women = [](Simulation* sim) {
-        // Condition for Count operation, e.g. check if person is infected.
-        auto cond_high_risk_hiv_women = L2F([](Agent* a) {
-          auto* person = bdm_static_cast<Person*>(a);
-          return person->HasHighRiskSocioBehav() and !(person->IsHealthy()) and person->IsAdult() and person->IsFemale();
-        });
-        auto cond_hiv_women = L2F([](Agent* a) {
-          auto* person = bdm_static_cast<Person*>(a);
-          return !(person->IsHealthy()) and person->IsAdult() and person->IsFemale();
-        });
-        return static_cast<double>(bdm::experimental::Count(sim, cond_high_risk_hiv_women)) /
-               static_cast<double>(bdm::experimental::Count(sim, cond_hiv_women));
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_high_risk_hiv_women = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->HasHighRiskSocioBehav() and !(person->IsHealthy()) and
+             person->IsAdult() and person->IsFemale();
+    });
+    auto cond_hiv_women = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()) and person->IsAdult() and
+             person->IsFemale();
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_high_risk_hiv_women)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_hiv_women));
   };
-  // AM: Define how to compute proportion of low-risk socio-beahviours among hiv adult women
+  // AM: Define how to compute proportion of low-risk socio-beahviours among hiv
+  // adult women
   auto pct_low_risk_hiv_women = [](Simulation* sim) {
-      // Condition for Count operation, e.g. check if person is infected.
-      auto cond_low_risk_hiv_women = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-          return person->HasLowRiskSocioBehav() and !(person->IsHealthy()) and person->IsAdult() and person->IsFemale();
-      });
-      auto cond_hiv_women = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-          return !(person->IsHealthy()) and person->IsAdult() and person->IsFemale();
-      });
-      return static_cast<double>(bdm::experimental::Count(sim, cond_low_risk_hiv_women)) /
-             static_cast<double>(bdm::experimental::Count(sim, cond_hiv_women));
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_low_risk_hiv_women = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->HasLowRiskSocioBehav() and !(person->IsHealthy()) and
+             person->IsAdult() and person->IsFemale();
+    });
+    auto cond_hiv_women = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()) and person->IsAdult() and
+             person->IsFemale();
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_low_risk_hiv_women)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_hiv_women));
   };
-  // AM: Define how to compute proportion of high-risk socio-beahviours among hiv adult men
+  // AM: Define how to compute proportion of high-risk socio-beahviours among
+  // hiv adult men
   auto pct_high_risk_hiv_men = [](Simulation* sim) {
-        // Condition for Count operation, e.g. check if person is infected.
-        auto cond_high_risk_hiv_men = L2F([](Agent* a) {
-          auto* person = bdm_static_cast<Person*>(a);
-          return person->HasHighRiskSocioBehav() and !(person->IsHealthy()) and person->IsAdult() and person->IsMale();
-        });
-        auto cond_hiv_men = L2F([](Agent* a) {
-          auto* person = bdm_static_cast<Person*>(a);
-          return !(person->IsHealthy()) and person->IsAdult() and person->IsMale();
-        });
-        return static_cast<double>(bdm::experimental::Count(sim, cond_high_risk_hiv_men)) /
-               static_cast<double>(bdm::experimental::Count(sim, cond_hiv_men));
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_high_risk_hiv_men = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->HasHighRiskSocioBehav() and !(person->IsHealthy()) and
+             person->IsAdult() and person->IsMale();
+    });
+    auto cond_hiv_men = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()) and person->IsAdult() and person->IsMale();
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_high_risk_hiv_men)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_hiv_men));
   };
-  // AM: Define how to compute proportion of low-risk socio-beahviours among hiv adult men
+  // AM: Define how to compute proportion of low-risk socio-beahviours among hiv
+  // adult men
   auto pct_low_risk_hiv_men = [](Simulation* sim) {
-      // Condition for Count operation, e.g. check if person is infected.
-      auto cond_low_risk_hiv_men = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-          return person->HasLowRiskSocioBehav() and !(person->IsHealthy()) and person->IsAdult() and person->IsMale();
-      });
-      auto cond_hiv_men = L2F([](Agent* a) {
-        auto* person = bdm_static_cast<Person*>(a);
-          return !(person->IsHealthy()) and person->IsAdult() and person->IsMale();
-      });
-      return static_cast<double>(bdm::experimental::Count(sim, cond_low_risk_hiv_men)) /
-             static_cast<double>(bdm::experimental::Count(sim, cond_hiv_men));
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_low_risk_hiv_men = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->HasLowRiskSocioBehav() and !(person->IsHealthy()) and
+             person->IsAdult() and person->IsMale();
+    });
+    auto cond_hiv_men = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()) and person->IsAdult() and person->IsMale();
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_low_risk_hiv_men)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_hiv_men));
   };
   // Define how to get the time values of the TimeSeries
   auto get_year = [](Simulation* sim) {
     // AM: Starting Year Variable set in sim_params
     int start_year = sim->GetParam()->Get<SimParam>()->start_year;
-      
-    return static_cast<double>(start_year + sim->GetScheduler()->GetSimulatedSteps());
+
+    return static_cast<double>(start_year +
+                               sim->GetScheduler()->GetSimulatedSteps());
   };
   ts->AddCollector("healthy_agents", count_healthy, get_year);
   ts->AddCollector("infected_agents", count_infected, get_year);
@@ -301,24 +326,24 @@ int Simulate(int argc, const char** argv) {
   ts->AddCollector("chronic_agents", count_chronic, get_year);
   ts->AddCollector("treated_agents", count_treated, get_year);
   ts->AddCollector("failing_agents", count_failing, get_year);
-    
+
   ts->AddCollector("prevalence", pct_prevalence, get_year);
   ts->AddCollector("prevalence_women", pct_prevalence_women, get_year);
   ts->AddCollector("prevalence_men", pct_prevalence_men, get_year);
-    
+
   ts->AddCollector("incidence", pct_incidence, get_year);
-    
+
   ts->AddCollector("high_risk_sb_hiv", pct_high_risk_hiv, get_year);
   ts->AddCollector("low_risk_sb_hiv", pct_low_risk_hiv, get_year);
   ts->AddCollector("high_risk_sb_healthy", pct_high_risk_healthy, get_year);
   ts->AddCollector("low_risk_sb_healthy", pct_low_risk_healthy, get_year);
-    
+
   ts->AddCollector("high_risk_sb_hiv_women", pct_high_risk_hiv_women, get_year);
   ts->AddCollector("low_risk_sb_hiv_women", pct_low_risk_hiv_women, get_year);
-    
+
   ts->AddCollector("high_risk_sb_hiv_men", pct_high_risk_hiv_men, get_year);
   ts->AddCollector("low_risk_sb_hiv_men", pct_low_risk_hiv_men, get_year);
-    
+
   // Unschedule some default operations
   auto* scheduler = simulation.GetScheduler();
   // Don't compute forces

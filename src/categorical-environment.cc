@@ -52,8 +52,7 @@ CategoricalEnvironment::CategoricalEnvironment(
       no_sociobehavioural_categories_(no_sociobehavioural_categories),
       female_agents_(no_age_categories * no_locations *
                      no_sociobehavioural_categories),
-      mothers_(no_locations){
-}
+      mothers_(no_locations) {}
 
 // AM : Update probability to select a female mate from each location x age x sb
 // compound category. Depends on static mixing matrices and updated number of
@@ -101,12 +100,13 @@ void CategoricalEnvironment::UpdateImplementation() {
       env->AddAgentToIndex(person_ptr, person->location_, age_category,
                            person->social_behaviour_factor_);
     };
-      
+
     // DEBUG: ARE NEW-BORN RECOGNIZED BY THEIR MOTHERS'
     /*if (person->age_ < 1){
         if (person->mother_ != nullptr){
-            if (person->mother_->IsParentOf(person->GetAgentPtr<Person>()) == 0){
-                std::cout << "I am a new-born! My mother points on me? " << person->mother_->IsParentOf(person->GetAgentPtr<Person>()) << std::endl;
+            if (person->mother_->IsParentOf(person->GetAgentPtr<Person>()) ==
+    0){ std::cout << "I am a new-born! My mother points on me? " <<
+    person->mother_->IsParentOf(person->GetAgentPtr<Person>()) << std::endl;
             }
         } else {
             std::cout << "I am a new-born! My mother is nullptr " << std::endl;
@@ -115,96 +115,108 @@ void CategoricalEnvironment::UpdateImplementation() {
     // DEBUG: ARE MOTHERS RECOGNIZED BY THEIR CHILDREN
     /*if (person->sex_ == Sex::kFemale){
           for (int c = 0; c < person->GetNumberOfChildren(); c++){
-              bool ok = person->children_[c]->IsChildOf(person->GetAgentPtr<Person>());
-              if (!ok){
-                  std::cout << "I am a woman! My child n° " << c << " (age " << person->children_[c]->age_ << ") does not point on me! Null Mum ? "<< (person->children_[c]->mother_ == nullptr) << std::endl;
+              bool ok =
+      person->children_[c]->IsChildOf(person->GetAgentPtr<Person>()); if (!ok){
+                  std::cout << "I am a woman! My child n° " << c << " (age " <<
+      person->children_[c]->age_ << ") does not point on me! Null Mum ? "<<
+      (person->children_[c]->mother_ == nullptr) << std::endl;
               }
           }
       }*/
   });
-    
+
   // TO DO : During first iteration, assign mothers to children
-  uint64_t iter =
-         Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
-  if (iter == 0){
-      std::cout << "iter = " << iter << " ==> Assign mothers to children " << std::endl;
-      
-      // AM: Index Potential Mothers by location (done only at initialisation, to assign mothers to children)
-      mothers_.clear();
-      mothers_.resize(no_locations_);
-      
-      rm->ForEachAgent([](Agent* agent) {
-        auto* env = bdm_static_cast<CategoricalEnvironment*>(
-            Simulation::GetActive()->GetEnvironment());
-        auto* person = bdm_static_cast<Person*>(agent);
-        if (person == nullptr) {
-          Log::Fatal("CategoricalEnvironment::UpdateImplementation()", "person is nullptr");
+  uint64_t iter = Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
+  if (iter == 0) {
+    std::cout << "iter = " << iter << " ==> Assign mothers to children "
+              << std::endl;
+
+    // AM: Index Potential Mothers by location (done only at initialisation, to
+    // assign mothers to children)
+    mothers_.clear();
+    mothers_.resize(no_locations_);
+
+    rm->ForEachAgent([](Agent* agent) {
+      auto* env = bdm_static_cast<CategoricalEnvironment*>(
+          Simulation::GetActive()->GetEnvironment());
+      auto* person = bdm_static_cast<Person*>(agent);
+      if (person == nullptr) {
+        Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
+                   "person is nullptr");
+      }
+
+      if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge() &&
+          person->age_ <= env->GetMaxAge()) {
+        AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
+        if (person_ptr == nullptr) {
+          Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
+                     "person_ptr is nullptr");
         }
 
-        if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge() &&
-            person->age_ <= env->GetMaxAge()) {
-          AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
-          if (person_ptr == nullptr) {
-            Log::Fatal("CategoricalEnvironment::UpdateImplementation()", "person_ptr is nullptr");
-          }
-          
-          // Add potential mother to the location index
-          env->AddMotherToLocation(person_ptr, person->location_);
-        };
-      });
-      
-      // AM: Assign mothers to children
-      rm->ForEachAgent([](Agent* agent) {
-        auto* env = bdm_static_cast<CategoricalEnvironment*>(
-            Simulation::GetActive()->GetEnvironment());
-        auto* person = bdm_static_cast<Person*>(agent);
-        if (person == nullptr) {
-          Log::Fatal("CategoricalEnvironment::UpdateImplementation()", "person is nullptr");
-        }
+        // Add potential mother to the location index
+        env->AddMotherToLocation(person_ptr, person->location_);
+      };
+    });
 
-        if (person->age_ < env->GetMinAge()) {
-          //std::cout << "I am a child (" << person->age_ << ") looking for a mother at location " << person->location_ << std::endl;
-          // Select a mother (contraints: same location, TO DO: ideally at least 15 and at most 40 years older)
-          person->mother_ = env->GetRamdomMotherFromLocation(person->location_);
-          // Check that mother and child have the same location
-          if (person->location_ != person->mother_->location_){
-              Log::Warning("CategoricalEnvironment::UpdateImplementation()",
-                           "child assigned to mother with different location");
-          }
-          AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
-          if (person_ptr == nullptr) {
-              Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
-                         "person_ptr is nullptr");
-          }
-          person->mother_->AddChild(person_ptr);
-          //std::cout << "Found a mother (age "<< person->mother_->age_ << ") at location " << person->mother_->location_ << std::endl;
-        };
-      });
-      
-      // DEBUG: All agents' children are at the same location as their mothers
-      rm->ForEachAgent([](Agent* agent) {
-        auto* person = bdm_static_cast<Person*>(agent);
-        if (person == nullptr) {
-          Log::Fatal("CategoricalEnvironment::UpdateImplementation()", "person is nullptr");
-        }
+    // AM: Assign mothers to children
+    rm->ForEachAgent([](Agent* agent) {
+      auto* env = bdm_static_cast<CategoricalEnvironment*>(
+          Simulation::GetActive()->GetEnvironment());
+      auto* person = bdm_static_cast<Person*>(agent);
+      if (person == nullptr) {
+        Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
+                   "person is nullptr");
+      }
 
-        for (int c = 0; c < person->GetNumberOfChildren(); c++){
-            if (person->children_[c]->location_ != person->location_){
-                Log::Warning("CategoricalEnvironment::UpdateImplementation()",
-                             "After child/mother assignment, child has different location from mother");
-            }
+      if (person->age_ < env->GetMinAge()) {
+        // std::cout << "I am a child (" << person->age_ << ") looking for a
+        // mother at location " << person->location_ << std::endl;
+        // Select a mother (contraints: same location, TO DO: ideally at least
+        // 15 and at most 40 years older)
+        person->mother_ = env->GetRamdomMotherFromLocation(person->location_);
+        // Check that mother and child have the same location
+        if (person->location_ != person->mother_->location_) {
+          Log::Warning("CategoricalEnvironment::UpdateImplementation()",
+                       "child assigned to mother with different location");
         }
-          
-        // Check that mothers recognise their children
-        if (person->age_ < 15){
-          if (!person->mother_->IsParentOf(person->GetAgentPtr<Person>())){
-                  Log::Warning("CategoricalEnvironment::UpdateImplementation()",
-                               "After child/mother assignment, child points on mother, who does not recognise him/her.");
-              }
-          }
-      });
+        AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
+        if (person_ptr == nullptr) {
+          Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
+                     "person_ptr is nullptr");
+        }
+        person->mother_->AddChild(person_ptr);
+        // std::cout << "Found a mother (age "<< person->mother_->age_ << ") at
+        // location " << person->mother_->location_ << std::endl;
+      };
+    });
+
+    // DEBUG: All agents' children are at the same location as their mothers
+    rm->ForEachAgent([](Agent* agent) {
+      auto* person = bdm_static_cast<Person*>(agent);
+      if (person == nullptr) {
+        Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
+                   "person is nullptr");
+      }
+
+      for (int c = 0; c < person->GetNumberOfChildren(); c++) {
+        if (person->children_[c]->location_ != person->location_) {
+          Log::Warning("CategoricalEnvironment::UpdateImplementation()",
+                       "After child/mother assignment, child has different "
+                       "location from mother");
+        }
+      }
+
+      // Check that mothers recognise their children
+      if (person->age_ < 15) {
+        if (!person->mother_->IsParentOf(person->GetAgentPtr<Person>())) {
+          Log::Warning("CategoricalEnvironment::UpdateImplementation()",
+                       "After child/mother assignment, child points on mother, "
+                       "who does not recognise him/her.");
+        }
+      }
+    });
   }
-    
+
   // TO DO: Assign regular partners to men (or women)
 
   // AM : Update probability matrix to select female mate
@@ -401,8 +413,9 @@ void CategoricalEnvironment::AddAgentToIndex(AgentPointer<Person> agent,
   female_agents_[compound_index].AddAgent(agent);
 };
 
-void CategoricalEnvironment::AddMotherToLocation(AgentPointer<Person> agent, size_t location){
-  assert(location >=0 and location < no_locations_);
+void CategoricalEnvironment::AddMotherToLocation(AgentPointer<Person> agent,
+                                                 size_t location) {
+  assert(location >= 0 and location < no_locations_);
   mothers_[location].AddAgent(agent);
 }
 
@@ -490,18 +503,20 @@ size_t CategoricalEnvironment::GetNumAgentsAtLocation(size_t location) {
 
 // AM: GET Random mother from location
 AgentPointer<Person> CategoricalEnvironment::GetRamdomMotherFromLocation(
-  size_t location) {
-    if (mothers_[location].GetNumAgents() == 0){
-      Log::Warning("CategoricalEnvironment::GetRamdomMotherFromLocation()",
-                 "Mothers empty. Received location: ",
-                 location);
-      return AgentPointer<Person>(); //nullptr
-    }
-    return mothers_[location].GetRandomAgent();
+    size_t location) {
+  if (mothers_[location].GetNumAgents() == 0) {
+    Log::Warning("CategoricalEnvironment::GetRamdomMotherFromLocation()",
+                 "Mothers empty. Received location: ", location);
+    return AgentPointer<Person>();  // nullptr
+  }
+  return mothers_[location].GetRandomAgent();
 }
 
-const std::vector<float>& CategoricalEnvironment::GetMateCompoundCategoryDistribution(size_t loc, size_t age_category, size_t sociobehav) {
-  size_t compound_index = ComputeCompoundIndex(loc,age_category,sociobehav);
+const std::vector<float>&
+CategoricalEnvironment::GetMateCompoundCategoryDistribution(size_t loc,
+                                                            size_t age_category,
+                                                            size_t sociobehav) {
+  size_t compound_index = ComputeCompoundIndex(loc, age_category, sociobehav);
   return mate_compound_category_distribution_[compound_index];
 };
 

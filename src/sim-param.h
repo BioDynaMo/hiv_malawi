@@ -32,13 +32,13 @@ class SimParam : public ParamGroup {
   ParamGroupUid GetUid() const override { return kUid; }
 
   // Starting year
-  int start_year = 1975; //1975;//1960;
-    
+  int start_year = 1975;  // 1975;//1960;
+
   // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-    uint64_t number_of_iterations = 2;//20; //45;//5;// 60;// (1960-2020)
+  uint64_t number_of_iterations = 2;  // 20; //45;//5;// 60;// (1960-2020)
 
   // Number of agents that are present at the first iteration of the simulation
-    uint64_t initial_population_size = 5302000; //3600000;//5302000;
+  uint64_t initial_population_size = 5302000;  // 3600000;//5302000;
 
   //   // Currently this variable is not used, could be used to set a
   //   random_seed
@@ -62,37 +62,34 @@ class SimParam : public ParamGroup {
   // Gausian distribution to determine to which neighbouring category an agent
   // will migrate or if it stay at the same place. The parameters of the
   // Gaussian are:
-  //float migration_mean = 0.0;
-  //float migration_sigma = 2.0;
+  // float migration_mean = 0.0;
+  // float migration_sigma = 2.0;
   // AM: Probability to migrate
-  float migration_probability = 0.01;//0.01;
+  float migration_probability = 0.01;  // 0.01;
   // AM: Migration year index
   const std::vector<int> migration_year_transition{1960};
   // AM: Migration Matrix. Year index x Location x Location
   std::vector<std::vector<std::vector<float>>> migration_matrix;
   // AM: Migration Location Probability Matrix. Year index x Location x Location
   std::vector<std::vector<std::vector<float>>> migration_location_probability;
-    
+
   // Years where number of mates per socio-behavioural factors changes
-  const std::vector<int> no_mates_year_transition{1960,1990,2000};
-  
+  const std::vector<int> no_mates_year_transition{1960, 1990, 2000};
+
   // The mating behaviour is modeled with a random process. For each male agent,
   // we sample the number of female sex partners per year from a Gaussian
   // distribution.
-  // Gaussian distribution defining the number of casual partners per year depending on year (see no_mates_year_transition) and socio-behaviour
-  const  std::vector<std::vector<float>> no_mates_mean/*{{80.0,80.0,80.0},
+  // Gaussian distribution defining the number of casual partners per year
+  // depending on year (see no_mates_year_transition) and socio-behaviour
+  const std::vector<std::vector<float>> no_mates_mean /*{{80.0,80.0,80.0},
                                                         {80.0,80.0,80.0},
                                                         {80.0,80.0,80.0}};*/
-                                                    {{20.0,70.0},
-                                                        {15.0,53.0},
-                                                        {10.0,35.0}};
+      {{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
 
-  const  std::vector<std::vector<float>> no_mates_sigma/*{{100.0,100.0},
+  const std::vector<std::vector<float>> no_mates_sigma /*{{100.0,100.0},
                                                         {100.0,100.0},
                                                         {100.0,100.0}};*/
-                                                    {{0.0,0.0},
-                                                      {0.0,0.0},
-                                                      {0.0,0.0}};
+      {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
 
   // AM: Mortality rate depending on HIV state, i.e. Acute, Chronic, Treated,
   // Failing (Cumulative probabilities)
@@ -124,19 +121,20 @@ class SimParam : public ParamGroup {
   // Used for yearly update of agents' socio-behaviours
   // nb_sociobehav_categories x Sex x nb_sociobehav_categories
   std::vector<std::vector<std::vector<float>>> sociobehaviour_transition_matrix{
-                                                                                {//sb = 0 (Low risk)
-                                                                                    {1.0,0.0}, // sex=0 (kMale)
-                                                                                    {1.0,0.0} //sex=1 (kFemale)
-                                                                                },
-                                                                                {//sb=1 (high risk)
-                                                                                    {0.04,0.96}, // sex=0  (kMale)
-                                                                                    {0.1,0.9} // sex=1  (kFemale)
-                                                                                }
-  };
-    
+      {
+          // sb = 0 (Low risk)
+          {1.0, 0.0},  // sex=0 (kMale)
+          {1.0, 0.0}   // sex=1 (kFemale)
+      },
+      {
+          // sb=1 (high risk)
+          {0.04, 0.96},  // sex=0  (kMale)
+          {0.1, 0.9}     // sex=1  (kFemale)
+      }};
+
   // Number of locations
   int nb_locations = Location::kLocLast;
-    
+
   // AM: Location Mixing Matrix. Location->Location
   std::vector<std::vector<float>> location_mixing_matrix;
 
@@ -149,27 +147,34 @@ class SimParam : public ParamGroup {
   // AM: Number of socio-behavioural categories
   int nb_sociobehav_categories = 2;
 
-  // AM: Socio-behavioural Mixing Matrix. Socio-beahioural Category -> Socio-behavioural Category
+  // AM: Socio-behavioural Mixing Matrix. Socio-beahioural Category ->
+  // Socio-behavioural Category
   std::vector<std::vector<float>> sociobehav_mixing_matrix;
 
   // AM: Probability for agent to be healthy or at a certain HIV progression
-  // state at beginning of simulation. Given in a summed up/cumulative form. First vector
-  // x1 = p_Healthy component corresponds to probability of being Healthy. x2 =
-  // p_Healthy + p_Acute, x3 = p_Healthy + p_Acute + p_Chronic, x4 = p_Healthy +
-  // p_Acute + p_Chronic + p_Treated, x5 = p_Healthy + p_Acute + p_Chronic +
-  // p_Treated + p_Failing
-    const std::vector<float> initial_infection_probability{9972e-4, 9978e-4, 1, 1, 1, 1}; // AM: We want to start with a 0.1% prevalence among total population, while infecting only 15-40 years old, who represent 36% of the population ==> 0.28% prevalence among 15-40 yo. 1/5 of HIV+ (~0.06% of total) are in acute phase, others are chronic.
+  // state at beginning of simulation. Given in a summed up/cumulative form.
+  // First vector x1 = p_Healthy component corresponds to probability of being
+  // Healthy. x2 = p_Healthy + p_Acute, x3 = p_Healthy + p_Acute + p_Chronic, x4
+  // = p_Healthy + p_Acute + p_Chronic + p_Treated, x5 = p_Healthy + p_Acute +
+  // p_Chronic + p_Treated + p_Failing
+  const std::vector<float> initial_infection_probability{
+      9972e-4, 9978e-4, 1, 1,
+      1,       1};  // AM: We want to start with a 0.1% prevalence among total
+                    // population, while infecting only 15-40 years old, who
+                    // represent 36% of the population ==> 0.28% prevalence
+                    // among 15-40 yo. 1/5 of HIV+ (~0.06% of total) are in
+                    // acute phase, others are chronic.
 
   // Parameter 0.18 is chosen because our GiveBirth Behaviour is based on a
   // Bernoulli experiment. A binomial distribuition peaks at around 6 for 25
   // tries (=40-15) and a birth probability of 0.24. This corresponds to the
   // typical birth rate in the region. We substracted 0.06 to account for child
   // motability and reach a realistic demographic development from 1960-2020.
-    float give_birth_probability = 0.18;
+  float give_birth_probability = 0.18;
 
   // AM : Probability for agent to be infected at birth, if its mother is
   // infected and treated
-    float birth_infection_probability_treated = 0.05;
+  float birth_infection_probability_treated = 0.05;
   // AM : Probability for agent to be infected at birth, if its mother is
   // infected and unterated (i.e. acute, chronic, failing)
   float birth_infection_probability_untreated = 0.35;
@@ -179,13 +184,14 @@ class SimParam : public ParamGroup {
   float probability_male = 0.499;
 
   // Years where probability of high socio-behavioural factor changes
-  const std::vector<int> sociobehavioural_risk_year_transition{1975,1976};
-    
-  // Probability of assigning 1 to socio-behavioural factor (high risk) depending on year (see sociobehavioural_risk_year_transition) and health state (Healthy, Acute, Chronic, Treated, Failing)
-  const  std::vector<std::vector<float>> sociobehavioural_risk_probability{
-                                                            {0.05,0.5,0.5,0.5,0.5},
-                                                            {0.05,0.05,0.05,0.05,0.05}};
-                     
+  const std::vector<int> sociobehavioural_risk_year_transition{1975, 1976};
+
+  // Probability of assigning 1 to socio-behavioural factor (high risk)
+  // depending on year (see sociobehavioural_risk_year_transition) and health
+  // state (Healthy, Acute, Chronic, Treated, Failing)
+  const std::vector<std::vector<float>> sociobehavioural_risk_probability{
+      {0.05, 0.5, 0.5, 0.5, 0.5}, {0.05, 0.05, 0.05, 0.05, 0.05}};
+
   float biomedical_risk_probability = 0.05;
 
   // Age distribution for population initialization. Given in a summed up form.
@@ -235,18 +241,18 @@ class SimParam : public ParamGroup {
 
   // Computes "index" representing the year and population category.
   // Used in hiv_transition_matrix
-  //int ComputeYearPopulationCategory(int year, float age, int sex);
-    
-  // Resizes to (nb_states x year_population_category x nb_states) and fills entries with appropriate hard
-  // coded values.
+  // int ComputeYearPopulationCategory(int year, float age, int sex);
+
+  // Resizes to (nb_states x year_population_category x nb_states) and fills
+  // entries with appropriate hard coded values.
   void SetHivTransitionMatrix();
 
-  // Resizes to (migration_year_transitions x nb_locations x nb_locations) and fills entries with appropriate hard
-  // coded values.
+  // Resizes to (migration_year_transitions x nb_locations x nb_locations) and
+  // fills entries with appropriate hard coded values.
   void SetMigrationMatrix();
-    
-  // Resizes to (migration_year_transitions x nb_locations x nb_locations) and fills entries with normalized and
-  // cumulative probabilities
+
+  // Resizes to (migration_year_transitions x nb_locations x nb_locations) and
+  // fills entries with normalized and cumulative probabilities
   void SetMigrationLocationProbability();
 };
 

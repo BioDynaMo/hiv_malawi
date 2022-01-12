@@ -51,8 +51,8 @@ void SimParam::SetLocationMixingMatrix() {
 /*int SimParam::ComputeYearPopulationCategory(int year, float age, int sex){
     int year_population_category;
     if (year < 2003) {  // Prior to 2003
-      year_population_category = 0;  // All (No difference in ART between people. ART not available.)
-    } else if (year < 2011) {  // Between 2003 and 2010
+      year_population_category = 0;  // All (No difference in ART between
+people. ART not available.) } else if (year < 2011) {  // Between 2003 and 2010
       if (sex == Sex::kFemale and age >= 18 and age <= 40) {
         year_population_category = 1;  // Female between 18 and 40
       } else if (age < 15) {
@@ -67,12 +67,12 @@ void SimParam::SetLocationMixingMatrix() {
       } else if (age < 15) {
         year_population_category = 5;  // Child
       } else {
-        year_population_category = 6;  // Others (Male, Female under 18, and Female over 40)
+        year_population_category = 6;  // Others (Male, Female under 18, and
+Female over 40)
       }
     }
     return year_population_category;
 }*/
-
 
 void SimParam::SetHivTransitionMatrix() {
   int nb_states = GemsState::kGemsLast;
@@ -90,7 +90,8 @@ void SimParam::SetHivTransitionMatrix() {
         hiv_transition_matrix[i][j] = {
             0.0, 0.0, 1.0, 1.0, 1.0};  // After one year ACUTE, go to CHRONIC
       } else if (i == GemsState::kChronic) {
-        if (j == 0) {  // Prior to 2003, for all (women 18-40, children and others)
+        if (j ==
+            0) {  // Prior to 2003, for all (women 18-40, children and others)
           hiv_transition_matrix[i][j].resize(nb_states);
           hiv_transition_matrix[i][j] = {0.0, 0.0, 1.0, 1.0,
                                          1.0};  // NO ART, then stay chronic
@@ -126,62 +127,64 @@ void SimParam::SetHivTransitionMatrix() {
 };
 
 void SimParam::SetMigrationMatrix() {
-    migration_matrix.clear();
-    int nb_migration_year_transitions = migration_year_transition.size();
-    migration_matrix.resize(nb_migration_year_transitions);
-    for (int y = 0; y < nb_migration_year_transitions; y++){
-        migration_matrix[y].resize(nb_locations);
-        for (int i = 0; i < nb_locations; i++) {
-          migration_matrix[y][i].resize(nb_locations);
-          // Fill all elements with 1.0 except diagonal with 0.0.
-          fill(migration_matrix[y][i].begin(),migration_matrix[y][i].end(),
-          1.0);
-          migration_matrix[y][i][i]=0.0;
-        }
-    }
-};
-
-void SimParam::SetMigrationLocationProbability(){
-    migration_location_probability.clear();
-    int nb_migration_year_transitions = migration_year_transition.size();
-    migration_location_probability.resize(nb_migration_year_transitions);
-    for (int y = 0; y < nb_migration_year_transitions; y++){
-        migration_location_probability[y].resize(nb_locations);
-        for (int i = 0; i < nb_locations; i++) {
-          migration_location_probability[y][i].resize(nb_locations);
-          // Compute Denominator for Normalization
-          float sum = 0.0;
-          for (int j = 0; j < nb_locations; j++) {
-            sum += migration_matrix[y][i][j];
-          }
-          // Normalize and Cumulate
-          for (int j = 0; j < nb_locations; j++) {
-              if (j == 0){
-                  migration_location_probability[y][i][j] = migration_matrix[y][i][j]/sum;
-              } else {
-                  migration_location_probability[y][i][j] = migration_location_probability[y][i][j-1] + migration_matrix[y][i][j]/sum;
-              }
-          }
-          // Check that we do end with 1.0 (not 0.99999, or 1.00001)
-          auto last_cumul_proba = migration_matrix[y][i][nb_locations - 1];
-          // Go looking backward
-          for (size_t j = nb_locations - 1; j>=0; j--){
-              if (migration_matrix[y][i][j] == last_cumul_proba){
-                  migration_matrix[y][i][j] = 1.0;
-              } else {
-                  break;
-              }
-          }
-        }
-    }
-    
-    /*std::cout << "migration_location_probability = " << std::endl;
+  migration_matrix.clear();
+  int nb_migration_year_transitions = migration_year_transition.size();
+  migration_matrix.resize(nb_migration_year_transitions);
+  for (int y = 0; y < nb_migration_year_transitions; y++) {
+    migration_matrix[y].resize(nb_locations);
     for (int i = 0; i < nb_locations; i++) {
-      for (int j = 0; j < nb_locations; j++) {
-          std::cout << migration_location_probability[0][i][j] << ", ";
-      }
-      std::cout << std::endl;
-    }*/
+      migration_matrix[y][i].resize(nb_locations);
+      // Fill all elements with 1.0 except diagonal with 0.0.
+      fill(migration_matrix[y][i].begin(), migration_matrix[y][i].end(), 1.0);
+      migration_matrix[y][i][i] = 0.0;
+    }
+  }
 };
 
-}
+void SimParam::SetMigrationLocationProbability() {
+  migration_location_probability.clear();
+  int nb_migration_year_transitions = migration_year_transition.size();
+  migration_location_probability.resize(nb_migration_year_transitions);
+  for (int y = 0; y < nb_migration_year_transitions; y++) {
+    migration_location_probability[y].resize(nb_locations);
+    for (int i = 0; i < nb_locations; i++) {
+      migration_location_probability[y][i].resize(nb_locations);
+      // Compute Denominator for Normalization
+      float sum = 0.0;
+      for (int j = 0; j < nb_locations; j++) {
+        sum += migration_matrix[y][i][j];
+      }
+      // Normalize and Cumulate
+      for (int j = 0; j < nb_locations; j++) {
+        if (j == 0) {
+          migration_location_probability[y][i][j] =
+              migration_matrix[y][i][j] / sum;
+        } else {
+          migration_location_probability[y][i][j] =
+              migration_location_probability[y][i][j - 1] +
+              migration_matrix[y][i][j] / sum;
+        }
+      }
+      // Check that we do end with 1.0 (not 0.99999, or 1.00001)
+      auto last_cumul_proba = migration_matrix[y][i][nb_locations - 1];
+      // Go looking backward
+      for (size_t j = nb_locations - 1; j >= 0; j--) {
+        if (migration_matrix[y][i][j] == last_cumul_proba) {
+          migration_matrix[y][i][j] = 1.0;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  /*std::cout << "migration_location_probability = " << std::endl;
+  for (int i = 0; i < nb_locations; i++) {
+    for (int j = 0; j < nb_locations; j++) {
+        std::cout << migration_location_probability[0][i][j] << ", ";
+    }
+    std::cout << std::endl;
+  }*/
+};
+
+}  // namespace bdm

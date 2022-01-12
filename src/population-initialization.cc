@@ -83,17 +83,16 @@ int SampleState(float rand_num,
 int ComputeState(float rand_num, int age, int min_age, int max_age,
                  const std::vector<float>& initial_infection_probability) {
   // Younger than min_age and older than max_age are all healthy.
-  if (age < min_age or age > max_age ) { // AM: 15 yo is not a child anymore
-    return GemsState::kHealthy; // Healthy
+  if (age < min_age or age > max_age) {  // AM: 15 yo is not a child anymore
+    return GemsState::kHealthy;          // Healthy
   }
   // Else, sample the state given the initial infection probability.
   return SampleState(rand_num, initial_infection_probability);
-    
 }
 
 int ComputeSociobehavioural(float rand_num, int age,
                             float sociobehavioural_risk_probability) {
-  if (age < 15) { // AM: 15 yo is not a child anymore
+  if (age < 15) {  // AM: 15 yo is not a child anymore
     return 0;
   }
   if (rand_num <= sociobehavioural_risk_probability) {
@@ -105,7 +104,7 @@ int ComputeSociobehavioural(float rand_num, int age,
 
 int ComputeBiomedical(float rand_num, int age,
                       float biomedical_risk_probability) {
-  if (age < 15) { // / AM: 15 yo is not a child anymore
+  if (age < 15) {  // / AM: 15 yo is not a child anymore
     return 0;
   }
   if (rand_num <= biomedical_risk_probability) {
@@ -139,12 +138,16 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   person->location_ =
       SampleLocation(rand_num[3], sparam->location_distribution);
   // Assign the GemsState of the person.
-  // AM: This depends on the person's age. HIV+ are only between min_age and max_age.
-  person->state_ =  ComputeState( rand_num[4], person->age_, sparam->min_age, sparam->max_age, sparam->initial_infection_probability);
+  // AM: This depends on the person's age. HIV+ are only between min_age and
+  // max_age.
+  person->state_ =
+      ComputeState(rand_num[4], person->age_, sparam->min_age, sparam->max_age,
+                   sparam->initial_infection_probability);
   // Compute risk factors.
   // AM: social_behaviour_factor_ depends on the age and health/hiv state
   person->social_behaviour_factor_ = ComputeSociobehavioural(
-      rand_num[5], person->age_, sparam->sociobehavioural_risk_probability[0][person->state_]);
+      rand_num[5], person->age_,
+      sparam->sociobehavioural_risk_probability[0][person->state_]);
   person->biomedical_factor_ = ComputeBiomedical(
       rand_num[6], person->age_, sparam->biomedical_risk_probability);
 

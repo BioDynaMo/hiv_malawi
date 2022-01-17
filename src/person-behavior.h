@@ -48,9 +48,9 @@ struct RandomMigration : public Behavior {
           sim->GetScheduler()->GetSimulatedSteps());  // Current year
       // If no transition year is higher than current year, then use last
       // transition year
-      int year_index = sparam->no_mates_year_transition.size() - 1;
-      for (int y = 0; y < sparam->no_mates_year_transition.size() - 1; y++) {
-        if (year < sparam->no_mates_year_transition[y + 1]) {
+      int year_index = sparam->migration_year_transition.size() - 1;
+      for (int y = 0; y < sparam->migration_year_transition.size() - 1; y++) {
+        if (year < sparam->migration_year_transition[y + 1]) {
           year_index = y;
           break;
         }

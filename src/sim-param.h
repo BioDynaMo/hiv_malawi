@@ -133,20 +133,20 @@ class SimParam : public ParamGroup {
   // Number of locations
   int nb_locations = Location::kLocLast;
 
-  // AM: Location Mixing Matrix. Location->Location
+  // AM: Location Mixing Matrix used for casual partner selection. Location->Location
   std::vector<std::vector<float>> location_mixing_matrix;
 
   // Five-years age categories 15-19, 20-24, ...,65-69,70+
   int nb_age_categories = 12;
 
-  // AM: Age Mixing Matrix. Age Category -> Age Category
+  // AM: Age Mixing Matrix used for casual partner selection. Age Category -> Age Category
   std::vector<std::vector<float>> age_mixing_matrix;
 
   // AM: Number of socio-behavioural categories
   int nb_sociobehav_categories = 2;
 
-  // AM: Socio-behavioural Mixing Matrix. Socio-beahioural Category ->
-  // Socio-behavioural Category
+  // AM: Socio-behavioural Mixing Matrix used for casual partner selection. 
+  // Socio-beahioural Category -> Socio-behavioural Category
   std::vector<std::vector<float>> sociobehav_mixing_matrix;
 
   // AM: Probability for agent to be healthy or at a certain HIV progression

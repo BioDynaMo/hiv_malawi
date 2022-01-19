@@ -57,6 +57,13 @@ class SimParam : public ParamGroup {
   // from the simulation that are older than max_age.
   int age_of_death = 90;
 
+  // Mortality rate by age. Size(mortality_rate_by_age) must be equal to 1+size(mortality_rate_age_transition).
+  std::vector<int> mortality_rate_age_transition{15,50,90};
+  std::vector<float> mortality_rate_by_age{0.01,0.005, 0.05,1.0};
+
+  // HIV-related mortality. For Healthy, Acute, Chronic, Treated, Failing states
+  std::vector<float> hiv_mortality_rate{0.0,0.0,0.05,0.01,0.1};
+
   // The migration of agents is modeled by a random process. We sample from a
   // Gausian distribution to determine to which neighbouring category an agent
   // will migrate or if it stay at the same place. The parameters of the

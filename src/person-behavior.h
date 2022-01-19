@@ -239,29 +239,24 @@ struct GetOlder : public Behavior {
 
   GetOlder() {}
 
-  // AM TO DO: DO NOT DEFINE PARAMETERS HERE BUT IN sim-param.h
-  float get_mortality_rate_age(float age) {
-    if (age < 15) {
-      return 0.01;
-    } else if (age < 50) {
-      return 0.005;
-    } else if (age < 90) {
-      return 0.05;
-    } else {
-      return 1.0;
+  // AM : Get mortality rate by age
+  float get_mortality_rate_age(float age, 
+                                std::vector<int> mortality_rate_age_transition, 
+                                std::vector<float> mortality_rate_by_age) {
+    size_t age_index = mortality_rate_by_age.size()-1; 
+    for (size_t i = 0 ; i < mortality_rate_age_transition.size() ; i++){
+        if (age < mortality_rate_age_transition[i]){
+          age_index = i;
+          break;
+        } 
     }
+    //std::cout << "Age " << age << " => Mortality rate " << mortality_rate_by_age[age_index] << std::endl;
+    return mortality_rate_by_age[age_index];
   }
 
-  float get_mortality_rate_hiv(int state) {
-    if (state == GemsState::kChronic) {
-      return 0.05;
-    } else if (state == GemsState::kTreated) {
-      return 0.01;
-    } else if (state == GemsState::kFailing) {
-      return 0.1;
-    } else {
-      return 0.0;
-    }
+  // AM: Get HIV-related mortality rate
+  float get_mortality_rate_hiv(int state, std::vector<float> hiv_mortality_rate) {
+    return hiv_mortality_rate[state];
   }
 
   void Run(Agent* agent) override {
@@ -376,12 +371,12 @@ struct GetOlder : public Behavior {
     // AM: Mortality
     // HIV-related mortality
     float rand_num_hiv = static_cast<float>(random->Uniform());
-    if (rand_num_hiv < get_mortality_rate_hiv(person->state_)) {
+    if (rand_num_hiv < get_mortality_rate_hiv(person->state_, sparam->hiv_mortality_rate)) {
       stay_alive = false;
     }
     // Age-related mortality
     float rand_num_age = static_cast<float>(random->Uniform());
-    if (rand_num_age < get_mortality_rate_age(person->age_)) {
+    if (rand_num_age < get_mortality_rate_age(person->age_, sparam->mortality_rate_age_transition, sparam->mortality_rate_by_age)) {
       stay_alive = false;
     }
 

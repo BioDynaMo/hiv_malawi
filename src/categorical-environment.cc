@@ -245,8 +245,21 @@ void CategoricalEnvironment::UpdateImplementation() {
   const auto* sparam =
   param->Get<SimParam>();  // AM : Needed to get location mixing matrix
   
-  // AM : Update probability matrix to select migration/relocation destination given year and origin location 
-  UpdateMigrationLocationProbability(sparam->migration_year_transition, sparam->migration_matrix);
+  // AM: Probability of migration location depends on the current year
+  int year = static_cast<int>(
+      sparam->start_year +
+      sim->GetScheduler()->GetSimulatedSteps());  // Current year
+  // If no transition year is higher than current year, then use last
+  // transition year
+  int year_index = sparam->migration_year_transition.size() - 1;
+  for (int y = 0; y < sparam->migration_year_transition.size() - 1; y++) {
+    if (year < sparam->migration_year_transition[y + 1]) {
+      year_index = y;
+      break;
+    }
+  }
+  // AM : Update probability matrix to select migration/relocation destination given current year index and origin location 
+  UpdateMigrationLocationProbability(year_index, sparam->migration_matrix);
 
   // AM : Update probability matrix to select female mate
   // given location, age and socio-behaviour of male agent
@@ -378,40 +391,36 @@ void CategoricalEnvironment::UpdateImplementation() {
 };
 
 void CategoricalEnvironment::UpdateMigrationLocationProbability(size_t year_index, std::vector<std::vector<std::vector<float>>> migration_matrix) {
-  migration_location_distribution_.clear();
-  int nb_migration_year_transitions = migration_year_transition.size();
-  migration_location_distribution_.resize(nb_migration_year_transitions);
-  for (int y = 0; y < nb_migration_year_transitions; y++) {
-    migration_location_distribution_[y].resize(no_locations_);
-    for (int i = 0; i < no_locations_; i++) {
-      migration_location_distribution_[y][i].resize(no_locations_);
-      // Compute Denominator for Normalization
-      float sum = 0.0;
-      for (int j = 0; j < no_locations_; j++) {
-        // Weight migration_matrix with population size per destination
-        migration_location_distribution_[y][i][j] = migration_matrix[y][i][j] * GetNumAdultsAtLocation(j);
-        sum += migration_location_distribution_[y][i][j];
+  migration_location_distribution_.clear(); 
+  migration_location_distribution_.resize(no_locations_);
+  for (int i = 0; i < no_locations_; i++) {
+    migration_location_distribution_[i].resize(no_locations_);
+    // Compute Denominator for Normalization
+    float sum = 0.0;
+    for (int j = 0; j < no_locations_; j++) {
+      // Weight migration_matrix with population size per destination
+      migration_location_distribution_[i][j] = migration_matrix[year_index][i][j] * GetNumAdultsAtLocation(j);
+      sum += migration_location_distribution_[i][j];
+    }
+    // Normalize and Cumulate
+    for (int j = 0; j < no_locations_; j++) {
+      if (j == 0) {
+        migration_location_distribution_[i][j] =
+            migration_location_distribution_[i][j] / sum;
+      } else {
+        migration_location_distribution_[i][j] =
+            migration_location_distribution_[i][j - 1] +
+            migration_location_distribution_[i][j] / sum;
       }
-      // Normalize and Cumulate
-      for (int j = 0; j < no_locations_; j++) {
-        if (j == 0) {
-          migration_location_distribution_[y][i][j] =
-              migration_location_distribution_[y][i][j] / sum;
-        } else {
-          migration_location_distribution_[y][i][j] =
-              migration_location_distribution_[y][i][j - 1] +
-              migration_location_distribution_[y][i][j] / sum;
-        }
-      }
-      // Check that we do end with 1.0 (not 0.99999, or 1.00001)
-      auto last_cumul_proba = migration_location_distribution_[y][i][no_locations_ - 1];
-      // Go looking backward
-      for (size_t j = no_locations_ - 1; j >= 0; j--) {
-        if (migration_location_distribution_[y][i][j] == last_cumul_proba) {
-          migration_location_distribution_[y][i][j] = 1.0;
-        } else {
-          break;
-        }
+    }
+    // Check that we do end with 1.0 (not 0.99999, or 1.00001)
+    auto last_cumul_proba = migration_location_distribution_[i][no_locations_ - 1];
+    // Go looking backward
+    for (size_t j = no_locations_ - 1; j >= 0; j--) {
+      if (migration_location_distribution_[i][j] == last_cumul_proba) {
+        migration_location_distribution_[i][j] = 1.0;
+      } else {
+        break;
       }
     }
   }
@@ -419,7 +428,7 @@ void CategoricalEnvironment::UpdateMigrationLocationProbability(size_t year_inde
   /*std::cout << "migration_location_distribution_ = " << std::endl;
   for (int i = 0; i < no_locations; i++) {
     for (int j = 0; j < no_locations; j++) {
-        std::cout << migration_location_distribution_[0][i][j] << ", ";
+        std::cout << migration_location_distribution_[i][j] << ", ";
     }
     std::cout << std::endl;
   }*/
@@ -565,8 +574,8 @@ CategoricalEnvironment::GetMateCompoundCategoryDistribution(size_t loc,
 };
 
 const std::vector<float>&
-CategoricalEnvironment::GetMigrationLocDistribution(size_t year_index, size_t loc){
-    return migration_location_distribution_[year_index][loc];
+CategoricalEnvironment::GetMigrationLocDistribution(size_t loc){
+    return migration_location_distribution_[loc];
 }
 
 void CategoricalEnvironment::SetMinAge(int min_age) {

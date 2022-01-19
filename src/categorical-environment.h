@@ -80,9 +80,9 @@ class CategoricalEnvironment : public Environment {
   std::vector<std::vector<float>> mate_compound_category_distribution_;
   // AM: DEBUG Matrix to store the locations of selected mates
   std::vector<std::vector<float>> mate_location_frequencies_;
-  // AM: Matrix to store the cumulative probability to relocate/migrate from one origin to one destination location. 
-  // Year index x Location x Location
-  std::vector<std::vector<std::vector<float>>> migration_location_distribution_;
+  // AM: Matrix to store the current (year) cumulative probability to relocate/migrate from one origin to one destination location 
+  // Location x Location
+  std::vector<std::vector<float>> migration_location_distribution_;
 
  protected:
   // This is the update function, the is called automatically by BioDynaMo for
@@ -93,7 +93,7 @@ class CategoricalEnvironment : public Environment {
   // compound category
   void UpdateImplementation() override;
 
-  void UpdateMigrationLocationProbability(const std::vector<int> migration_year_transition, std::vector<std::vector<std::vector<float>>> migration_matrix);
+  void UpdateMigrationLocationProbability(size_t year_index, std::vector<std::vector<std::vector<float>>> migration_matrix);
 
 
  public:
@@ -198,7 +198,7 @@ class CategoricalEnvironment : public Environment {
 
   // AM: Getter of migration_location_distribution_
   const std::vector<float>& GetMigrationLocDistribution(
-      size_t year_index, size_t loc);
+      size_t loc);
 
   // The remaining public functions are inherited from Environment but not
   // needed here.

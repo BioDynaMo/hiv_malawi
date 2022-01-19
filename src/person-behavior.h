@@ -43,24 +43,11 @@ struct RandomMigration : public Behavior {
     float rand_num = static_cast<float>(random->Uniform());
     if (person->age_ >= 15 && rand_num <= sparam->migration_probability) {
       // Randomly determine the migration location
-      // AM: Probability of migration location depends on the current year
-      int year = static_cast<int>(
-          sparam->start_year +
-          sim->GetScheduler()->GetSimulatedSteps());  // Current year
-      // If no transition year is higher than current year, then use last
-      // transition year
-      int year_index = sparam->migration_year_transition.size() - 1;
-      for (int y = 0; y < sparam->migration_year_transition.size() - 1; y++) {
-        if (year < sparam->migration_year_transition[y + 1]) {
-          year_index = y;
-          break;
-        }
-      }
       // AM: Sample migration location. It depends on the current year and
       // current location
       float rand_num_loc = static_cast<float>(random->Uniform());
       // Get (cumulative) probability distribution that agent relocates the current year, to each location
-      const std::vector<float> migration_location_distribution_ = env->GetMigrationLocDistribution(year_index, person->location_);
+      const std::vector<float> migration_location_distribution_ = env->GetMigrationLocDistribution(person->location_);
 
       int new_location = SampleLocation(
           rand_num_loc,

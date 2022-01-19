@@ -93,9 +93,16 @@ class CategoricalEnvironment : public Environment {
   // compound category
   void UpdateImplementation() override;
 
+  // Update (at every iteration) matrix storing the probability to relocate from origin location to 
+  // destination location. Probability depends on a (location x location) mixing matrix and 
+  // the adult population size (attractivity) per district
   void UpdateMigrationLocationProbability(size_t year_index, std::vector<std::vector<std::vector<float>>> migration_matrix);
 
-
+  // Update (at every iteration) matrix storing the porbability that a male agent selects a casual partner
+  // based on their compound categories (location x age category x sociobehaviour category)
+  void UpdateCasualPartnerCategoryDistribution(std::vector<std::vector<float>> location_mixing_matrix,
+                                              std::vector<std::vector<float>> age_mixing_matrix,
+                                              std::vector<std::vector<float>> sociobehav_mixing_matrix);
  public:
   // Constructor
   CategoricalEnvironment(int min_age = 15, int max_age = 40,

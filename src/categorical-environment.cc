@@ -263,11 +263,18 @@ void CategoricalEnvironment::UpdateImplementation() {
 
   // AM : Update probability matrix to select female mate
   // given location, age and socio-behaviour of male agent
+  UpdateCasualPartnerCategoryDistribution(sparam->location_mixing_matrix,
+                                          sparam->age_mixing_matrix,
+                                          sparam->sociobehav_mixing_matrix);
+};
+
+void CategoricalEnvironment::UpdateCasualPartnerCategoryDistribution(std::vector<std::vector<float>> location_mixing_matrix,
+std::vector<std::vector<float>> age_mixing_matrix,
+std::vector<std::vector<float>> sociobehav_mixing_matrix
+) {
   mate_compound_category_distribution_.clear();
   mate_compound_category_distribution_.resize(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
-
-  
 
   for (int i = 0;
        i < no_locations_ * no_age_categories_ * no_sociobehavioural_categories_;
@@ -289,7 +296,7 @@ void CategoricalEnvironment::UpdateImplementation() {
     std::vector<float> proba_locations(no_locations_, 0.0);
     float sum_locations = 0.0;
     for (size_t l_j = 0; l_j < no_locations_; l_j++) {
-      proba_locations[l_j] = sparam->location_mixing_matrix[l_i][l_j] *
+      proba_locations[l_j] = location_mixing_matrix[l_i][l_j] *
                              GetNumAgentsAtLocation(l_j);
       sum_locations += proba_locations[l_j];
     }
@@ -312,7 +319,7 @@ void CategoricalEnvironment::UpdateImplementation() {
            a_j++) {  // For each location l_j, compute probability to select a
                      // female mate from each age category a_j
         proba_ages_given_location[l_j][a_j] =
-            sparam->age_mixing_matrix[a_i][a_j] *
+            age_mixing_matrix[a_i][a_j] *
             GetNumAgentsAtLocationAge(l_j, a_j);
         sum_ages += proba_ages_given_location[l_j][a_j];
       }
@@ -337,7 +344,7 @@ void CategoricalEnvironment::UpdateImplementation() {
         float sum_socio = 0.0;
         for (size_t s_j = 0; s_j < no_sociobehavioural_categories_; s_j++) {
           proba_socio_given_location_age[l_j][a_j][s_j] =
-              sparam->sociobehav_mixing_matrix[s_i][s_j] *
+              sociobehav_mixing_matrix[s_i][s_j] *
               GetNumAgentsAtIndex(l_j, a_j, s_j);
           sum_socio += proba_socio_given_location_age[l_j][a_j][s_j];
         }
@@ -388,7 +395,7 @@ void CategoricalEnvironment::UpdateImplementation() {
       }
     }
   }
-};
+}
 
 void CategoricalEnvironment::UpdateMigrationLocationProbability(size_t year_index, std::vector<std::vector<std::vector<float>>> migration_matrix) {
   migration_location_distribution_.clear(); 
@@ -426,8 +433,8 @@ void CategoricalEnvironment::UpdateMigrationLocationProbability(size_t year_inde
   }
 
   /*std::cout << "migration_location_distribution_ = " << std::endl;
-  for (int i = 0; i < no_locations; i++) {
-    for (int j = 0; j < no_locations; j++) {
+  for (int i = 0; i < no_locations_; i++) {
+    for (int j = 0; j < no_locations_; j++) {
         std::cout << migration_location_distribution_[i][j] << ", ";
     }
     std::cout << std::endl;

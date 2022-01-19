@@ -148,16 +148,16 @@ void CategoricalEnvironment::UpdateImplementation() {
                    "person is nullptr");
       }
 
-      if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge() &&
+      if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge() && 
           person->age_ <= env->GetMaxAge()) {
         AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
         if (person_ptr == nullptr) {
           Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
-                     "person_ptr is nullptr");
+                    "person_ptr is nullptr");
         }
-
+        
         // Add potential mother to the location index
-        env->AddMotherToLocation(person_ptr, person->location_);
+        env->AddMotherToLocation(person_ptr, person->location_);           
       };
     });
 
@@ -197,7 +197,7 @@ void CategoricalEnvironment::UpdateImplementation() {
     std::cout << "Assigned " << cntr << " children to mothers." << std::endl;
 
     // DEBUG: All agents' children are at the same location as their mothers
-    rm->ForEachAgent([](Agent* agent) {
+    /*rm->ForEachAgent([](Agent* agent) {
       auto* person = bdm_static_cast<Person*>(agent);
       if (person == nullptr) {
         Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
@@ -220,7 +220,7 @@ void CategoricalEnvironment::UpdateImplementation() {
                        "who does not recognise him/her.");
         }
       }
-    });
+    });*/
   }
   // TO DO: Assign regular partners to men (or women)
 
@@ -265,13 +265,6 @@ void CategoricalEnvironment::UpdateImplementation() {
         proba_locations[l_j] /= sum_locations;
       }
     }
-    // DEBUG
-    /*std::cout << "Probability to select from locations, given male location"
-    << l_i << std::endl; for (int l = 0; l < proba_locations.size(); l++){
-          std::cout << proba_locations[l] << ", ";
-    }
-    std::cout << std::endl;*/
-    // END DEBUG
 
     // Step 2 -  Age: Compute probability to select a female mate from each
     // age category given the selected location
@@ -297,16 +290,6 @@ void CategoricalEnvironment::UpdateImplementation() {
         }
       }
     }
-    // DEBUG
-    /*std::cout << "Probability to select from age categories, given male age"
-    << a_i << " and female locations "  << std::endl; for (int l = 0; l <
-    proba_ages_given_location.size(); l++){ for (int a = 0; a <
-    proba_ages_given_location[l].size(); a++){ std::cout <<
-    proba_ages_given_location[l][a] << ", ";
-        }
-        std::cout << std::endl;
-    }*/
-    // END DEBUG
 
     // Step 3 - Socio-behaviour : Compute probability to select from each
     // socio-behavioural category given the selected location and age
@@ -333,18 +316,6 @@ void CategoricalEnvironment::UpdateImplementation() {
         }
       }
     }
-    // DEBUG
-    /*std::cout << "Probability to select from sb, given male sb " << s_i << ",
-    and female locations and ages "  << std::endl; for (int l = 0; l <
-    proba_socio_given_location_age.size(); l++){ for (int a = 0; a <
-    proba_socio_given_location_age[l].size(); a++){ for (int s = 0; s <
-    proba_socio_given_location_age[l][a].size(); s++){ std::cout <<
-    proba_socio_given_location_age[l][a][s] << ", ";
-            }
-            std::cout << std::endl;
-        }
-    }*/
-    // END DEBUG
 
     // Compute the final probability that a male agent of compound category i,
     // selects a female mate of compound category j.
@@ -365,14 +336,6 @@ void CategoricalEnvironment::UpdateImplementation() {
             mate_compound_category_distribution_[i][j - 1];
       }
     }
-    // DEBUG
-    /*std::cout << "CUMULATIVE Probability to select from female compound
-    categories given male category " << i << std::endl; for (int j = 0; j <
-    no_locations_* no_age_categories_ * no_sociobehavioural_categories_; j++){
-        std::cout << mate_compound_category_distribution_[i][j] << ", ";
-    }
-    std::cout << std::endl;*/
-    // END DEBUG
 
     // Make sure that the commulative probability distribution actually ends
     // with 1.0 and not 0.9999x or something similar. Do not fix only the last
@@ -391,14 +354,6 @@ void CategoricalEnvironment::UpdateImplementation() {
       }
     }
   }
-
-  // DEBUG: Check mate location distribution
-  /*for (int i=0; i<Location::kLocLast; i++){
-      for (int j=0; j<Location::kLocLast; j++){
-          std::cout << mate_location_distribution_[i][j] << ", ";
-      }
-      std::cout << "\n";
-  }*/
 };
 
 void CategoricalEnvironment::AddAgentToIndex(AgentPointer<Person> agent,

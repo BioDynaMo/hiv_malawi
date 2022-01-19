@@ -28,7 +28,8 @@ class Person : public Cell {
 
  public:
   Person() {
-    mother_ = AgentPointer<Person>();
+    mother_ = AgentPointer<Person>(); //AgentPointer object representing a nullptr
+    partner_ = AgentPointer<Person>(); //AgentPointer object representing a nullptr
     children_.clear();
     children_.reserve(100);
     protected_ = false;
@@ -65,13 +66,12 @@ class Person : public Cell {
   // Stores the IDs of the children. Useful, when mother migrates, and takes her
   // children. Unlink mother from child, when mother dies
   std::vector<AgentPointer<Person>> children_;
-
-  // // Stores the id of the partner
-  // AgentPointer<Person> partner_id_;
+  // Stores the ID of the regular partner. Useful for infection in 
+  // serodiscordant regular relationships, and family migration. 
+  AgentPointer<Person> partner_;
 
   // Returns True if the agent is healthy
   bool IsHealthy() { return state_ == GemsState::kHealthy; }
-
   // AM: Added below functions for more detailed follow up of HIV state
   // Returns True if the agent is infected in acute state
   bool IsAcute() { return state_ == GemsState::kAcute; }
@@ -152,6 +152,9 @@ class Person : public Cell {
   }
 
   bool IsChildOf(AgentPointer<Person> mother) { return mother_ == mother; }
+
+  bool hasPartner() {return partner_ != nullptr;}
+  bool IsPartnerOf(AgentPointer<Person> partner) { return partner_ == partner; }
 
   int GetNumberOfChildren() { return children_.size(); }
 

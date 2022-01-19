@@ -91,11 +91,11 @@ void SimParam::SetHivTransitionMatrix() {
             0.0, 0.0, 1.0, 1.0, 1.0};  // After one year ACUTE, go to CHRONIC
       } else if (i == GemsState::kChronic) {
         if (j ==
-            0) {  // Prior to 2003, for all (women 18-40, children and others)
+            0) {  // Prior to 2003, for all (women 15-40, children and others)
           hiv_transition_matrix[i][j].resize(nb_states);
           hiv_transition_matrix[i][j] = {0.0, 0.0, 1.0, 1.0,
                                          1.0};  // NO ART, then stay chronic
-        } else if (j == 1) {  // Between to 2003 and 2010, for women 18-40
+        } else if (j == 1) {  // Between to 2003 and 2010, for women 15-40
           hiv_transition_matrix[i][j].resize(nb_states);
           hiv_transition_matrix[i][j] = {0.0, 0.0, 0.9, 1.0, 1.0};
         } else if (j == 2) {  // Between to 2003 and 2010, for children
@@ -104,7 +104,7 @@ void SimParam::SetHivTransitionMatrix() {
         } else if (j == 3) {  // Between to 2003 and 2010, for others
           hiv_transition_matrix[i][j].resize(nb_states);
           hiv_transition_matrix[i][j] = {0.0, 0.0, 0.9, 1.0, 1.0};
-        } else if (j == 4) {  // From 2011, for women 18-40
+        } else if (j == 4) {  // From 2011, for women 15-40
           hiv_transition_matrix[i][j].resize(nb_states);
           hiv_transition_matrix[i][j] = {0.0, 0.0, 0.5, 1.0, 1.0};
         } else if (j == 5) {  // From 2011, for children

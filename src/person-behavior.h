@@ -62,7 +62,7 @@ struct RandomMigration : public Behavior {
           rand_num_loc,
           sparam
               ->migration_location_probability[year_index][person->location_]);
-      int old_location = person->location_;
+      //int old_location = person->location_;
       person->location_ = new_location;
 
       if (person->sex_ == Sex::kFemale) {
@@ -282,7 +282,7 @@ struct GetOlder : public Behavior {
     auto* person = bdm_static_cast<Person*>(agent);
 
     // If between min_age and max_age, assign or reassign risk factors
-    if (person->age_ == sparam->min_age) {  // Assign potentially high risk
+    if (floor(person->age_) == sparam->min_age) {  // Assign potentially high risk
                                             // factor at first year of adulthood
       // Probability of being at high risk depends on year and HIV status
       int year = static_cast<int>(
@@ -351,24 +351,24 @@ struct GetOlder : public Behavior {
       year_population_category =
           0;  // All (No difference in ART between people. ART not available.)
     } else if (year < 2011) {  // Between 2003 and 2010
-      if (person->sex_ == Sex::kFemale && person->age_ >= 18 and
+      if (person->sex_ == Sex::kFemale && person->age_ >= 15 and
           person->age_ <= 40) {
-        year_population_category = 1;  // Female between 18 and 40
+        year_population_category = 1;  // Female between 15 and 40
       } else if (person->age_ < 15) {
         year_population_category = 2;  // Child
       } else {
         year_population_category =
-            3;  // Others (Male, Female under 18, and Female over 40)
+            3;  // Others (Male over 15 and Female over 40)
       }
     } else {  // After 2011
-      if (person->sex_ == Sex::kFemale && person->age_ >= 18 and
+      if (person->sex_ == Sex::kFemale && person->age_ >= 15 and
           person->age_ <= 40) {
-        year_population_category = 4;  // Female between 18 and 40
+        year_population_category = 4;  // Female between 15 and 40
       } else if (person->age_ < 15) {
         year_population_category = 5;  // Child
       } else {
         year_population_category =
-            6;  // Others (Male, Female under 18, and Female over 40)
+            6;  // Others (Male over 15, and Female over 40)
       }
     }
     std::vector<float> transition_proba =

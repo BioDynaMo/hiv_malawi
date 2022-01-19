@@ -74,7 +74,7 @@ class CategoricalEnvironment : public Environment {
   // We only assign mother in the first update.
   bool mothers_are_assiged_;
 
-  // AM: Matrix to store cumulative probability to select a female mate from one
+  // AM: Matrix to store cumulative probability to select a female mate (casual partner) from one
   // location given male agent location
   // std::vector<std::vector<float>> mate_location_distribution_;
   std::vector<std::vector<float>> mate_compound_category_distribution_;

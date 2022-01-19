@@ -35,10 +35,10 @@ class SimParam : public ParamGroup {
   int start_year = 1975;  // 1975;//1960;
 
   // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-  uint64_t number_of_iterations = 10;  // 20; //45;//5;// 60;// (1960-2020)
+  uint64_t number_of_iterations = 20;  // 20; //45;//5;// 60;// (1960-2020)
 
   // Number of agents that are present at the first iteration of the simulation
-  uint64_t initial_population_size = 530200;  // 3600000;//5302000;
+  uint64_t initial_population_size = 53020;  // 3600000;//5302000;
 
   // Activate an additional safety mechanism: protect mothers from death in the
   // year in which they give birth
@@ -80,15 +80,16 @@ class SimParam : public ParamGroup {
   // distribution.
   // Gaussian distribution defining the number of casual partners per year
   // depending on year (see no_mates_year_transition) and socio-behaviour
-  const std::vector<std::vector<float>> no_mates_mean /*{{80.0,80.0,80.0},
-                                                        {80.0,80.0,80.0},
-                                                        {80.0,80.0,80.0}};*/
-      {{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
+  const std::vector<std::vector<float>> no_mates_mean {{80.0,80.0},
+                                                        {60.0,60.0},
+                                                        {40.0,40.0}};
+      //  {{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
+      //{{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
 
-  const std::vector<std::vector<float>> no_mates_sigma /*{{100.0,100.0},
+  const std::vector<std::vector<float>> no_mates_sigma {{100.0,100.0},
                                                         {100.0,100.0},
-                                                        {100.0,100.0}};*/
-      {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
+                                                        {100.0,100.0}};
+      //{{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
 
   // AM: Mortality rate depending on HIV state, i.e. Acute, Chronic, Treated,
   // Failing (Cumulative probabilities)

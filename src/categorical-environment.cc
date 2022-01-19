@@ -53,7 +53,9 @@ CategoricalEnvironment::CategoricalEnvironment(
       female_agents_(no_age_categories * no_locations *
                      no_sociobehavioural_categories),
       mothers_(no_locations),
+      adults_(no_locations),
       mothers_are_assiged_(false) {}
+
 
 // AM : Update probability to select a female mate from each location x age x sb
 // compound category. Depends on static mixing matrices and updated number of
@@ -70,12 +72,16 @@ void CategoricalEnvironment::UpdateImplementation() {
   female_agents_.clear();
   female_agents_.resize(no_age_categories_ * no_locations_ *
                         no_sociobehavioural_categories_);
+
+  adults_.clear();
+  adults_.resize(no_locations_);
   // DEBUG
   /*if (iter < 4) {
      std::cout << "After clearing section" << std::endl;
      DescribePopulation();
   }*/
 
+  
   auto* rm = Simulation::GetActive()->GetResourceManager();
   rm->ForEachAgent([](Agent* agent) {
     auto* env = bdm_static_cast<CategoricalEnvironment*>(
@@ -86,6 +92,8 @@ void CategoricalEnvironment::UpdateImplementation() {
                  "person is nullptr");
     }
 
+    // Index women (potential partners; >=15yo; maxAge??) by location x age x sociobhevioural risk
+    // TO DO AM: Female needs to be single to be selected as casual (or regular) partner (?)
     if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge() &&
         person->age_ <= env->GetMaxAge()) {
       AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
@@ -100,6 +108,16 @@ void CategoricalEnvironment::UpdateImplementation() {
       // category and socio-behavioural category
       env->AddAgentToIndex(person_ptr, person->location_, age_category,
                            person->social_behaviour_factor_);
+    };
+
+    // Index adults by location
+    if (person->age_ >= env->GetMinAge()) {
+      AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
+      if (person_ptr == nullptr) {
+        Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
+                   "person_ptr is nullptr");
+      }
+      env->AddAdultToLocation(person_ptr, person->location_);
     };
 
     // DEBUG: ARE NEW-BORN RECOGNIZED BY THEIR MOTHERS'
@@ -126,16 +144,14 @@ void CategoricalEnvironment::UpdateImplementation() {
       }*/
   });
 
-  // TO DO : During first iteration, assign mothers to children
-  uint64_t iter = Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
-
+  // During first iteration, assign mothers to children
   if (!mothers_are_assiged_) {
     mothers_are_assiged_ = true;
+    uint64_t iter = Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
     std::cout << "iter = " << iter << " ==> Assign mothers to children "
               << std::endl;
 
-    // AM: Index Potential Mothers by location (done only at initialisation, to
-    // assign mothers to children)
+    // AM: Index Potential Mothers by location
     mothers_.clear();
     mothers_.resize(no_locations_);
 
@@ -175,8 +191,8 @@ void CategoricalEnvironment::UpdateImplementation() {
       if (person->age_ < env->GetMinAge()) {
         // std::cout << "I am a child (" << person->age_ << ") looking for a
         // mother at location " << person->location_ << std::endl;
-        // Select a mother (contraints: same location, TO DO: ideally at least
-        // 15 and at most 40 years older)
+        // Select a mother, at same location as child 
+        // TO DO AM: ideally, mother is at least 15 and at most 40 years older than child
         person->mother_ = env->GetRamdomMotherFromLocation(person->location_);
         // Check that mother and child have the same location
         if (person->location_ != person->mother_->location_) {
@@ -224,16 +240,21 @@ void CategoricalEnvironment::UpdateImplementation() {
   }
   // TO DO: Assign regular partners to men (or women)
 
+  auto* sim = Simulation::GetActive();
+  auto* param = sim->GetParam();
+  const auto* sparam =
+  param->Get<SimParam>();  // AM : Needed to get location mixing matrix
+  
+  // AM : Update probability matrix to select migration/relocation destination given year and origin location 
+  UpdateMigrationLocationProbability(sparam->migration_year_transition, sparam->migration_matrix);
+
   // AM : Update probability matrix to select female mate
   // given location, age and socio-behaviour of male agent
   mate_compound_category_distribution_.clear();
   mate_compound_category_distribution_.resize(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
 
-  auto* sim = Simulation::GetActive();
-  auto* param = sim->GetParam();
-  const auto* sparam =
-      param->Get<SimParam>();  // AM : Needed to get location mixing matrix
+  
 
   for (int i = 0;
        i < no_locations_ * no_age_categories_ * no_sociobehavioural_categories_;
@@ -356,6 +377,64 @@ void CategoricalEnvironment::UpdateImplementation() {
   }
 };
 
+void CategoricalEnvironment::UpdateMigrationLocationProbability(size_t year_index, std::vector<std::vector<std::vector<float>>> migration_matrix) {
+  migration_location_distribution_.clear();
+  int nb_migration_year_transitions = migration_year_transition.size();
+  migration_location_distribution_.resize(nb_migration_year_transitions);
+  for (int y = 0; y < nb_migration_year_transitions; y++) {
+    migration_location_distribution_[y].resize(no_locations_);
+    for (int i = 0; i < no_locations_; i++) {
+      migration_location_distribution_[y][i].resize(no_locations_);
+      // Compute Denominator for Normalization
+      float sum = 0.0;
+      for (int j = 0; j < no_locations_; j++) {
+        // Weight migration_matrix with population size per destination
+        migration_location_distribution_[y][i][j] = migration_matrix[y][i][j] * GetNumAdultsAtLocation(j);
+        sum += migration_location_distribution_[y][i][j];
+      }
+      // Normalize and Cumulate
+      for (int j = 0; j < no_locations_; j++) {
+        if (j == 0) {
+          migration_location_distribution_[y][i][j] =
+              migration_location_distribution_[y][i][j] / sum;
+        } else {
+          migration_location_distribution_[y][i][j] =
+              migration_location_distribution_[y][i][j - 1] +
+              migration_location_distribution_[y][i][j] / sum;
+        }
+      }
+      // Check that we do end with 1.0 (not 0.99999, or 1.00001)
+      auto last_cumul_proba = migration_location_distribution_[y][i][no_locations_ - 1];
+      // Go looking backward
+      for (size_t j = no_locations_ - 1; j >= 0; j--) {
+        if (migration_location_distribution_[y][i][j] == last_cumul_proba) {
+          migration_location_distribution_[y][i][j] = 1.0;
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  /*std::cout << "migration_location_distribution_ = " << std::endl;
+  for (int i = 0; i < no_locations; i++) {
+    for (int j = 0; j < no_locations; j++) {
+        std::cout << migration_location_distribution_[0][i][j] << ", ";
+    }
+    std::cout << std::endl;
+  }*/
+};
+
+void CategoricalEnvironment::AddAdultToLocation(AgentPointer<Person> agent, size_t location) {
+  assert(location >= 0 and location < no_locations_);
+
+  if (location >= adults_.size()) {
+    Log::Fatal("CategoricalEnvironment::AddAgentToIndex()",
+               "Location index is out of bounds. Received (loc ", location, ") and adults_.size(): ", adults_.size());
+  }
+  adults_[location].AddAgent(agent);
+}
+
 void CategoricalEnvironment::AddAgentToIndex(AgentPointer<Person> agent,
                                              size_t location, size_t age,
                                              size_t sb) {
@@ -438,6 +517,11 @@ size_t CategoricalEnvironment::GetNumAgentsAtIndex(size_t location, size_t age,
   return female_agents_[compound_index].GetNumAgents();
 }
 
+size_t CategoricalEnvironment::GetNumAdultsAtLocation(size_t location) {
+  assert(location < adults_.size());
+  return adults_[location].GetNumAgents();
+}
+
 size_t CategoricalEnvironment::GetNumAgentsAtLocationAge(size_t location,
                                                          size_t age) {
   size_t sum = 0;
@@ -479,6 +563,11 @@ CategoricalEnvironment::GetMateCompoundCategoryDistribution(size_t loc,
   size_t compound_index = ComputeCompoundIndex(loc, age_category, sociobehav);
   return mate_compound_category_distribution_[compound_index];
 };
+
+const std::vector<float>&
+CategoricalEnvironment::GetMigrationLocDistribution(size_t year_index, size_t loc){
+    return migration_location_distribution_[year_index][loc];
+}
 
 void CategoricalEnvironment::SetMinAge(int min_age) {
   if (min_age >= 0 && min_age <= 120) {

@@ -35,7 +35,7 @@ class SimParam : public ParamGroup {
   int start_year = 1975;  // 1975;//1960;
 
   // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-  uint64_t number_of_iterations = 20;  // 20; //45;//5;// 60;// (1960-2020)
+  uint64_t number_of_iterations = 45;  // 20; //45;//5;// 60;// (1960-2020)
 
   // Number of agents that are present at the first iteration of the simulation
   uint64_t initial_population_size = 53020;  // 3600000;//5302000;
@@ -69,8 +69,6 @@ class SimParam : public ParamGroup {
   const std::vector<int> migration_year_transition{1960};
   // AM: Migration Matrix. Year index x Location x Location
   std::vector<std::vector<std::vector<float>>> migration_matrix;
-  // AM: Migration Location Probability Matrix. Year index x Location x Location
-  std::vector<std::vector<std::vector<float>>> migration_location_probability;
 
   // Years where number of mates per socio-behavioural factors changes
   const std::vector<int> no_mates_year_transition{1960, 1990, 2000};
@@ -224,7 +222,6 @@ class SimParam : public ParamGroup {
     SetLocationMixingMatrix();
     SetHivTransitionMatrix();
     SetMigrationMatrix();
-    SetMigrationLocationProbability();
   };
 
   // Resizes matrix to (nb_age_categories x nb_sociobehav_categories) and fills

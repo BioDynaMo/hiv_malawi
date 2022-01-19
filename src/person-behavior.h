@@ -33,6 +33,7 @@ struct RandomMigration : public Behavior {
 
   void Run(Agent* agent) override {
     auto* sim = Simulation::GetActive();
+    auto* env = bdm_static_cast<CategoricalEnvironment*>(sim->GetEnvironment());
     auto* random = sim->GetRandom();
     auto* person = bdm_static_cast<Person*>(agent);
     auto* param = sim->GetParam();
@@ -58,10 +59,12 @@ struct RandomMigration : public Behavior {
       // AM: Sample migration location. It depends on the current year and
       // current location
       float rand_num_loc = static_cast<float>(random->Uniform());
+      // Get (cumulative) probability distribution that agent relocates the current year, to each location
+      const std::vector<float> migration_location_distribution_ = env->GetMigrationLocDistribution(year_index, person->location_);
+
       int new_location = SampleLocation(
           rand_num_loc,
-          sparam
-              ->migration_location_probability[year_index][person->location_]);
+          migration_location_distribution_);
       //int old_location = person->location_;
       person->location_ = new_location;
 

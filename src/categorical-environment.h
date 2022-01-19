@@ -59,36 +59,42 @@ class CategoricalEnvironment : public Environment {
   int min_age_;
   // maximal age for sexual interaction
   int max_age_;
-  // Number of age categories in the female_agent_index
+  // Number of age categories in the female_agent_ index
   size_t no_age_categories_;
-  // Number of locations in the female_agent_index
+  // Number of locations in the female_agent_, mothers_, and adults_ indexes
   size_t no_locations_;
   // Number of socialbehavioural categories in the female_agent_index
   size_t no_sociobehavioural_categories_;
-  // Vector to store all female agents of within a certain age interval
+  // Vector to store all female agents within a certain age interval
   // [min_age_, max_age_].
   std::vector<AgentVector> female_agents_;
-  // AM: Vector to store all potential mothers within a certain age interval
-  // [min_age_, max_age_], indexed by location only.
+  // AM: Vector to store all potential mothers (female between 15 and 40yo) by location only.
   std::vector<AgentVector> mothers_;
+  // Vector to store all adult agents (male and female) by location. Used to estimate population size per location, and attractiveness.
+  std::vector<AgentVector> adults_;
   // We only assign mother in the first update.
   bool mothers_are_assiged_;
 
   // AM: Matrix to store cumulative probability to select a female mate (casual partner) from one
-  // location given male agent location
-  // std::vector<std::vector<float>> mate_location_distribution_;
+  // compound category (location x age category x sociobehaviour category) given male agent compound category
   std::vector<std::vector<float>> mate_compound_category_distribution_;
   // AM: DEBUG Matrix to store the locations of selected mates
   std::vector<std::vector<float>> mate_location_frequencies_;
+  // AM: Matrix to store the cumulative probability to relocate/migrate from one origin to one destination location. 
+  // Year index x Location x Location
+  std::vector<std::vector<std::vector<float>>> migration_location_distribution_;
 
  protected:
   // This is the update function, the is called automatically by BioDynaMo for
   // every simulation step. We delete the previous information and store a
   // vector of AgentPointers for each location.
-  // AM TO DO: Update probability to select a female mate from each location.
-  // Depends on static mixing matrix and update number of female agents per
-  // location
+  // AM: Update probability to select a female mate from each Location x Age Category x Sociobehvioural category.
+  // Depends on static mixing matrices and updated number of female agents per
+  // compound category
   void UpdateImplementation() override;
+
+  void UpdateMigrationLocationProbability(const std::vector<int> migration_year_transition, std::vector<std::vector<std::vector<float>>> migration_matrix);
+
 
  public:
   // Constructor
@@ -135,20 +141,22 @@ class CategoricalEnvironment : public Environment {
     return (int)i / (no_age_categories_ * no_locations_);
   }
 
-  // Add an agent pointer to a certain location, age group, and sb category
+  // Add an agent pointer to a certain location, age group, and sb category in female_agents_ index.
   void AddAgentToIndex(AgentPointer<Person> agent, size_t location, size_t age,
                        size_t sb);
+  // Add an adult agent pointer to a certain location in adults_ index
+  void AddAdultToLocation(AgentPointer<Person> agent, size_t location);
 
-  // Add an agent pointer to a certain location, age group, and sb category
+  // Add an agent pointer to a certain location in mothers_ index
   void AddMotherToLocation(AgentPointer<Person> agent, size_t location);
 
   // Returns a random AgentPointer at a specific location, age group, and sb
-  // category
+  // category in female_agents_
   AgentPointer<Person> GetRamdomAgentFromIndex(size_t location, size_t age,
                                                size_t sb);
 
   // Returns a random AgentPointer at a specific compound category (location,
-  // age group, and sb category)
+  // age group, and sb category) in female_agents_
   AgentPointer<Person> GetRamdomAgentFromIndex(size_t compound_index);
 
   // Returns a random Potential Mother (AgentPointer) at a specific location
@@ -159,13 +167,16 @@ class CategoricalEnvironment : public Environment {
   // max_age_.
   void DescribePopulation();
 
-  // Get number of agents at location, age_category, and sb category
+  // Get number of female agents at location, age_category, and sb category
   size_t GetNumAgentsAtIndex(size_t location, size_t age, size_t sb);
 
-  // Get number of agents at location
+  // Get number of adults at location from adults_ index
+  size_t GetNumAdultsAtLocation(size_t location);
+
+  // Get number of female agents at location from female_agents_ index
   size_t GetNumAgentsAtLocation(size_t location);
 
-  // Get number of agents at location and age_category
+  // Get number of female agents at location and age_category from female_agents_ index
   size_t GetNumAgentsAtLocationAge(size_t location, size_t age);
 
   // Setter functions to access private member variables
@@ -184,6 +195,10 @@ class CategoricalEnvironment : public Environment {
   // AM: Getter of mate_compound_category_distribution_
   const std::vector<float>& GetMateCompoundCategoryDistribution(
       size_t loc, size_t age_category, size_t sociobehav);
+
+  // AM: Getter of migration_location_distribution_
+  const std::vector<float>& GetMigrationLocDistribution(
+      size_t year_index, size_t loc);
 
   // The remaining public functions are inherited from Environment but not
   // needed here.

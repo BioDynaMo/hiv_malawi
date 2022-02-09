@@ -81,6 +81,10 @@ int PlotAndSaveTimeseries() {
          1.0, 10);
   g3.Add("prevalence_men", "Prevalence - Men", "L", kBlue, 1.0, 3, 1, kBlue,
          1.0, 10);
+         
+  g3.Add("prevalence_15_49", "Prevalence (15-49)", "L", kOrange, 1.0, 1, 1);
+  g3.Add("prevalence_women_15_49", "Prevalence - Women (15-49)", "L", kRed, 1.0, 1, 1);
+  g3.Add("prevalence_men_15_49", "Prevalence - Men (15-49)", "L", kBlue, 1.0, 1, 1);
 
   g3.Add("incidence", "Incidence", "L", kRed, 1.0, 3, 1, kRed, 1.0, 5);
 
@@ -88,6 +92,7 @@ int PlotAndSaveTimeseries() {
   g3.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
                    "/simulation_hiv_prevalence_incidence"),
             {".svg", ".png"});
+
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g4(ts, "my result", "Time", "Proportion", true);

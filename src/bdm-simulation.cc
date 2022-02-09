@@ -132,12 +132,28 @@ int Simulate(int argc, const char** argv) {
     return static_cast<double>(bdm::experimental::Count(sim, cond_infected)) /
            static_cast<double>(bdm::experimental::Count(sim, cond_all));
   };
+
+  // AM: Define how to compute general prevalence
+  auto pct_prevalence_15_49 = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_infected = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()) && person->age_ >= 15 && person->age_ <= 49;
+    });
+    auto cond_all = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->age_ >= 15 && person->age_ <= 49;
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond_infected)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_all));
+  };
+
   // AM: Define how to compute prevalence among women
   auto pct_prevalence_women = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
     auto cond_infected_women = L2F([](Agent* a) {
       auto* person = bdm_static_cast<Person*>(a);
-      return !(person->IsHealthy()) and person->IsFemale();
+      return !(person->IsHealthy()) && person->IsFemale();
     });
     auto cond_women = L2F([](Agent* a) {
       auto* person = bdm_static_cast<Person*>(a);
@@ -147,6 +163,23 @@ int Simulate(int argc, const char** argv) {
                bdm::experimental::Count(sim, cond_infected_women)) /
            static_cast<double>(bdm::experimental::Count(sim, cond_women));
   };
+
+  // AM: Define how to compute prevalence among women
+  auto pct_prevalence_women_15_49 = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_infected_women = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()) && person->IsFemale() && person->age_ >= 15 && person->age_ <= 49;
+    });
+    auto cond_women = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->IsFemale() && person->age_ >= 15 && person->age_ <= 49;
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_infected_women)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_women));
+  };
+
   // AM: Define how to compute prevalence among men
   auto pct_prevalence_men = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
@@ -162,6 +195,23 @@ int Simulate(int argc, const char** argv) {
                bdm::experimental::Count(sim, cond_infected_men)) /
            static_cast<double>(bdm::experimental::Count(sim, cond_men));
   };
+
+  // AM: Define how to compute prevalence among men
+  auto pct_prevalence_men_15_49 = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_infected_men = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return !(person->IsHealthy()) && person->IsMale() && person->age_ >= 15 && person->age_ <= 49;
+    });
+    auto cond_men = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->IsMale() && person->age_ >= 15 && person->age_ <= 49;
+    });
+    return static_cast<double>(
+               bdm::experimental::Count(sim, cond_infected_men)) /
+           static_cast<double>(bdm::experimental::Count(sim, cond_men));
+  };
+
   // AM: Define how to compute general incidence
   auto pct_incidence = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
@@ -330,6 +380,10 @@ int Simulate(int argc, const char** argv) {
   ts->AddCollector("prevalence", pct_prevalence, get_year);
   ts->AddCollector("prevalence_women", pct_prevalence_women, get_year);
   ts->AddCollector("prevalence_men", pct_prevalence_men, get_year);
+
+  ts->AddCollector("prevalence_15_49", pct_prevalence_15_49, get_year);
+  ts->AddCollector("prevalence_women_15_49", pct_prevalence_women_15_49, get_year);
+  ts->AddCollector("prevalence_men_15_49", pct_prevalence_men_15_49, get_year);
 
   ts->AddCollector("incidence", pct_incidence, get_year);
 

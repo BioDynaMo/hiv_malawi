@@ -86,7 +86,7 @@ class SimParam : public ParamGroup {
   // Gaussian distribution defining the number of casual partners per year
   // depending on year (see no_mates_year_transition) and socio-behaviour
   const std::vector<std::vector<float>> no_mates_mean {{80.0,80.0},
-                                                        {60.0,60.0},
+                                                        {80.0,80.0},
                                                         {40.0,40.0}};
       //  {{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
       //{{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};

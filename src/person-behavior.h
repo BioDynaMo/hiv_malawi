@@ -114,7 +114,6 @@ struct MatingBehaviour : public Behavior {
     }
 
     // This line of code should never be reached
-    std::cout << std::endl;
     Log::Warning("SampleCompoundCategory()",
                  "Could not sample the category. Recieved inputs: ", rand_num,
                  ". Use location 0.");
@@ -172,7 +171,7 @@ struct MatingBehaviour : public Behavior {
         // AM: Choose a random female mate at the selected mate compound
         // category (location, age group and sociobehavioral category
         AgentPointer<Person> mate =
-            env->GetRamdomAgentFromIndex(mate_compound_category);
+            env->GetRandomCasualFemaleFromIndex(mate_compound_category);
 
         if (mate == nullptr) {
           Log::Fatal("MatingBehaviour()",
@@ -232,6 +231,39 @@ struct MatingBehaviour : public Behavior {
   }
 };
 
+// This is the regular partnership behaviour. The Behavior
+// is only executed by male agents. For each single male agent, we determine
+// whether he wants to engage in a regular partnership with a certain probability. 
+// For each male in regular partnership, we determine if he will separate from partner.
+struct RegularPartnershipBehaviour : public Behavior {
+  BDM_BEHAVIOR_HEADER(RegularPartnershipBehaviour, Behavior, 1);
+
+  RegularPartnershipBehaviour() {}
+
+  void Run(Agent* agent) override {
+    auto* sim = Simulation::GetActive();
+    auto* random = sim->GetRandom();
+    auto* param = sim->GetParam();
+    const auto* sparam = param->Get<SimParam>();
+    auto* person = bdm_static_cast<Person*>(agent);
+
+    // Adult men in regular partnership can break up (symmetric for female) 
+    if (person->IsAdult() && person->hasPartner() && random->Uniform() <= sparam->break_up_probability){
+      // Set female partner to single
+      person->partner_->partner_ = AgentPointer<Person>();
+      // Set male agent to single
+      person->partner_ = AgentPointer<Person>();
+    } 
+
+    // Adult single men can decide to engage in a regular partnership
+    if (person->IsAdult() && !person->hasPartner() && random->Uniform() <= sparam->regular_partnership_probability){
+      person->seek_regular_partnership_ = true;
+    } else{
+      person->seek_regular_partnership_ = false;
+    }
+  }
+};
+
 // The GetOlder behavior describes all things that happen to an agent while
 // getting older such as for instance having a greater chance to die.
 struct GetOlder : public Behavior {
@@ -266,7 +298,7 @@ struct GetOlder : public Behavior {
     const auto* sparam = param->Get<SimParam>();
     auto* person = bdm_static_cast<Person*>(agent);
 
-    // If between min_age and max_age, assign or reassign risk factors
+    // Assign or reassign risk factors
     if (floor(person->age_) == sparam->min_age) {  // Assign potentially high risk
                                             // factor at first year of adulthood
       // Probability of being at high risk depends on year and HIV status
@@ -486,6 +518,7 @@ struct GiveBirth : public Behavior {
       child->AddBehavior(new GiveBirth());
     } else {
       child->AddBehavior(new MatingBehaviour());
+      child->AddBehavior(new RegularPartnershipBehaviour());
     }
     child->AddBehavior(new GetOlder());
 
@@ -502,7 +535,7 @@ struct GiveBirth : public Behavior {
 
     // Each potential mother gives birth with a certain probability.
     if (random->Uniform() < sparam->give_birth_probability &&
-        mother->age_ <= sparam->max_age && mother->age_ >= sparam->min_age) {
+        mother->age_ <= sparam->max_age_birth && mother->age_ >= sparam->min_age) {
       // Create a child
       auto* new_child = CreateChild(random, mother, sparam);
 

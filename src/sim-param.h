@@ -48,9 +48,11 @@ class SimParam : public ParamGroup {
   // birth, infect, or get infected
   int min_age = 15;
 
-  // Age when agents stop to engage in sexual activities, e.g. possibly give
-  // birth, infect, or get infected
-  int max_age = 40;
+  // Age when agents stop to engage in casual sexual activities
+  int max_age = 50;
+
+  // Age when agents stop to give birth
+  int max_age_birth = 40;
 
   // Maximum age that an agent can reach. Once the simulation is calibrated and
   // the parameters are fitted, one may consider removing all healthy agents
@@ -76,6 +78,12 @@ class SimParam : public ParamGroup {
   const std::vector<int> migration_year_transition{1960};
   // AM: Migration Matrix. Year index x Location x Location
   std::vector<std::vector<std::vector<float>>> migration_matrix;
+
+  // AM: Probability that a single man wants to engage in regular partnership
+  float regular_partnership_probability = 1.0;
+
+  // AM: Probability that a couple in regular partnership separate
+  float break_up_probability = 1.0;
 
   // Years where number of mates per socio-behavioural factors changes
   const std::vector<int> no_mates_year_transition{1960, 1990, 2000};
@@ -149,12 +157,19 @@ class SimParam : public ParamGroup {
   // AM: Age Mixing Matrix used for casual partner selection. Age Category -> Age Category
   std::vector<std::vector<float>> age_mixing_matrix;
 
+// AM: Age Mixing Matrix used for regular partner selection. Age Category -> Age Category
+  std::vector<std::vector<float>> reg_partner_age_mixing_matrix;
+
   // AM: Number of socio-behavioural categories
   int nb_sociobehav_categories = 2;
 
   // AM: Socio-behavioural Mixing Matrix used for casual partner selection. 
   // Socio-beahioural Category -> Socio-behavioural Category
   std::vector<std::vector<float>> sociobehav_mixing_matrix;
+
+  // AM: Socio-behavioural Mixing Matrix used for regular partner selection. 
+  // Socio-beahioural Category -> Socio-behavioural Category
+  std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix;
 
   // AM: Probability for agent to be healthy or at a certain HIV progression
   // state at beginning of simulation. Given in a summed up/cumulative form.
@@ -227,6 +242,10 @@ class SimParam : public ParamGroup {
     SetSociobehavMixingMatrix();
     SetAgeMixingMatrix();
     SetLocationMixingMatrix();
+
+    SetRegPartnerSociobehavMixingMatrix();
+    SetRegPartnerAgeMixingMatrix();
+    
     SetHivTransitionMatrix();
     SetMigrationMatrix();
   };
@@ -242,6 +261,14 @@ class SimParam : public ParamGroup {
   // Resizes matrix to (nb_locations x nb_locations) and fills with
   // ones.
   void SetLocationMixingMatrix();
+
+  // Resizes matrix to (nb_age_categories x nb_sociobehav_categories) and fills
+  // with ones.
+  void SetRegPartnerSociobehavMixingMatrix();
+
+  // Resizes matrix to (nb_age_categories x nb_age_categories) and fills with
+  // ones.
+  void SetRegPartnerAgeMixingMatrix();
 
   // Computes "index" representing the year and population category.
   // Used in hiv_transition_matrix

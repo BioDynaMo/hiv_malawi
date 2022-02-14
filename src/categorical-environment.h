@@ -43,6 +43,9 @@ class AgentVector {
   // Get a radom agent from the vector agents_
   AgentPointer<Person> GetRandomAgent();
 
+  // Get a agent at given index in the vector agents_
+  AgentPointer<Person> GetAgentAtIndex(size_t i);
+
   // Add an AgentPointer to the vector agents_
   void AddAgent(AgentPointer<Person> agent);
 
@@ -66,11 +69,16 @@ class CategoricalEnvironment : public Environment {
   // Number of socialbehavioural categories in the female_agent_index
   size_t no_sociobehavioural_categories_;
   // Vector to store all female agents within a certain age interval
-  // [min_age_, max_age_].
-  std::vector<AgentVector> female_agents_;
-  // AM: Vector to store all potential mothers (female between 15 and 40yo) by location only.
+  // [min_age_, max_age_], indexed by location x age x sociobehaviours.
+  std::vector<AgentVector> casual_female_agents_;
+  // Vector to store all adult female agents, indexed by location x age x sociobehaviours.
+  std::vector<AgentVector> regular_female_agents_;
+  // Vector to store all adult single men looking for a regular female partner,
+  // indexed by the location x age x sociobehaviours of their potential partner.
+  std::vector<AgentVector> male_agents_;
+  // AM: Vector to store all potential mothers (female between min_age_ and max_age_), indexed by location only.
   std::vector<AgentVector> mothers_;
-  // Vector to store all adult agents (male and female) by location. Used to estimate population size per location, and attractiveness.
+  // Vector to store all adult agents (male and female older than min_age_), indexed by location. Used to estimate population size per location, and attractiveness.
   std::vector<AgentVector> adults_;
   // We only assign mother in the first update.
   bool mothers_are_assiged_;
@@ -78,6 +86,11 @@ class CategoricalEnvironment : public Environment {
   // AM: Matrix to store cumulative probability to select a female mate (casual partner) from one
   // compound category (location x age category x sociobehaviour category) given male agent compound category
   std::vector<std::vector<float>> mate_compound_category_distribution_;
+
+  // AM: Matrix to store cumulative probability to select a female regular partner from one
+  // compound category (location x age category x sociobehaviour category) given male agent compound category
+  std::vector<std::vector<float>> reg_partner_compound_category_distribution_;
+
   // AM: DEBUG Matrix to store the locations of selected mates
   std::vector<std::vector<float>> mate_location_frequencies_;
   // AM: Matrix to store the current (year) cumulative probability to relocate/migrate from one origin to one destination location 
@@ -103,6 +116,10 @@ class CategoricalEnvironment : public Environment {
   void UpdateCasualPartnerCategoryDistribution(std::vector<std::vector<float>> location_mixing_matrix,
                                               std::vector<std::vector<float>> age_mixing_matrix,
                                               std::vector<std::vector<float>> sociobehav_mixing_matrix);
+
+  void UpdateRegularPartnerCategoryDistribution(std::vector<std::vector<float>> reg_partner_age_mixing_matrix,
+                                              std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix);
+
  public:
   // Constructor
   CategoricalEnvironment(int min_age = 15, int max_age = 40,
@@ -111,7 +128,7 @@ class CategoricalEnvironment : public Environment {
                          size_t no_sociobehavioural_categories = 1);
 
   // Mapping from (location, age_category, socialbehaviour) to the appropriate
-  // position in the female_agents_ index.
+  // position in the female_agents_ and male_agents_ index.
   inline size_t ComputeCompoundIndex(size_t location, size_t age_category,
                                      size_t sb) {
     assert(location < no_locations_);
@@ -121,7 +138,7 @@ class CategoricalEnvironment : public Environment {
            (no_age_categories_ * no_locations_) * sb;
   }
 
-  // Mapping from position in the female_agents_ index to the appropriate
+  // Mapping from position in the female_agents_ and male_agents_ index to the appropriate
   // location.
   inline size_t ComputeLocationFromCompoundIndex(size_t i) {
     assert(i < no_locations_ * no_age_categories_ *
@@ -130,7 +147,7 @@ class CategoricalEnvironment : public Environment {
     return (int)(i % (no_age_categories_ * no_locations_)) / no_age_categories_;
   }
 
-  // Mapping from position in the female_agents_ index to the appropriate age
+  // Mapping from position in the female_agents_ and male_agents_ index to the appropriate age
   // category.
   inline size_t ComputeAgeFromCompoundIndex(size_t i) {
     assert(i < no_locations_ * no_age_categories_ *
@@ -139,7 +156,7 @@ class CategoricalEnvironment : public Environment {
     return (int)(i % (no_age_categories_ * no_locations_)) % no_age_categories_;
   }
 
-  // Mapping from position in the female_agents_ index to the appropriate
+  // Mapping from position in the female_agents_ and male_agents_ index to the appropriate
   // Socio-behavioural category.
   inline size_t ComputeSociobehaviourFromCompoundIndex(size_t i) {
     assert(i < no_locations_ * no_age_categories_ *
@@ -147,10 +164,17 @@ class CategoricalEnvironment : public Environment {
 
     return (int)i / (no_age_categories_ * no_locations_);
   }
-
-  // Add an agent pointer to a certain location, age group, and sb category in female_agents_ index.
-  void AddAgentToIndex(AgentPointer<Person> agent, size_t location, size_t age,
+  
+  // Add an agent pointer to a certain location, age group, and sb category in casual_female_agents_ index.
+  void AddCasualFemaleToIndex(AgentPointer<Person> agent, size_t location, size_t age,
                        size_t sb);
+  // Add an agent pointer to a certain location, age group, and sb category in regular_female_agents_ index.
+  void AddRegularFemaleToIndex(AgentPointer<Person> agent, size_t location, size_t age,
+                       size_t sb);
+
+  // Add a male agent pointer to a certain compound index (location x age group x sb) category in male_agents_ index.
+  void AddMaleToIndex(AgentPointer<Person> agent, size_t index);
+
   // Add an adult agent pointer to a certain location in adults_ index
   void AddAdultToLocation(AgentPointer<Person> agent, size_t location);
 
@@ -158,33 +182,50 @@ class CategoricalEnvironment : public Environment {
   void AddMotherToLocation(AgentPointer<Person> agent, size_t location);
 
   // Returns a random AgentPointer at a specific location, age group, and sb
-  // category in female_agents_
-  AgentPointer<Person> GetRamdomAgentFromIndex(size_t location, size_t age,
+  // category in casual_female_agents_
+  AgentPointer<Person> GetRandomCasualFemaleFromIndex(size_t location, size_t age,
+                                               size_t sb);
+  // Returns a random AgentPointer at a specific location, age group, and sb
+  // category in regular_female_agents_
+  AgentPointer<Person> GetRandomRegularFemaleFromIndex(size_t location, size_t age,
                                                size_t sb);
 
   // Returns a random AgentPointer at a specific compound category (location,
-  // age group, and sb category) in female_agents_
-  AgentPointer<Person> GetRamdomAgentFromIndex(size_t compound_index);
+  // age group, and sb category) in casual_female_agents_
+  AgentPointer<Person> GetRandomCasualFemaleFromIndex(size_t compound_index);
+
+  // Returns a random AgentPointer at a specific compound category (location,
+  // age group, and sb category) in regular_female_agents_
+  AgentPointer<Person> GetRandomRegularFemaleFromIndex(size_t compound_index);
 
   // Returns a random Potential Mother (AgentPointer) at a specific location
-  AgentPointer<Person> GetRamdomMotherFromLocation(size_t location);
+  AgentPointer<Person> GetRandomMotherFromLocation(size_t location);
 
-  // Prints how many females are at a certain location, age group, and sb
-  // category. Note that by population we refer to women between min_age_ and
+  // Prints how many potential casual female partners are at a certain location, age group, and sb
+  // category. Note that by population we refer to adult women between min_age_ and
   // max_age_.
   void DescribePopulation();
 
-  // Get number of female agents at location, age_category, and sb category
-  size_t GetNumAgentsAtIndex(size_t location, size_t age, size_t sb);
+  // Get number of potential casual female partners at location, age_category, and sb category
+  size_t GetNumCasualFemalesAtIndex(size_t location, size_t age, size_t sb);
+
+  // Get number of potential regular female partners at location, age_category, and sb category
+  size_t GetNumRegularFemalesAtIndex(size_t location, size_t age, size_t sb);
+
+  // Get number of potential casual female partners at location from casual_female_agents_ index
+  size_t GetNumCasualFemalesAtLocation(size_t location);
+
+  // Get number of potential regular female partners at location from regular_female_agents_ index
+  size_t GetNumRegularFemalesAtLocation(size_t location);
+
+  // Get number of female agents at location and age_category from casual_female_agents_ index
+  size_t GetNumCasualFemalesAtLocationAge(size_t location, size_t age);
+
+  // Get number of female agents at location and age_category from regular_female_agents_ index
+  size_t GetNumRegularFemalesAtLocationAge(size_t location, size_t age);
 
   // Get number of adults at location from adults_ index
   size_t GetNumAdultsAtLocation(size_t location);
-
-  // Get number of female agents at location from female_agents_ index
-  size_t GetNumAgentsAtLocation(size_t location);
-
-  // Get number of female agents at location and age_category from female_agents_ index
-  size_t GetNumAgentsAtLocationAge(size_t location, size_t age);
 
   // Setter functions to access private member variables
   void SetMinAge(int min_age);

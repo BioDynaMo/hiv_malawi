@@ -54,6 +54,10 @@ class Person : public Cell {
   // The associated member functions LockProtection, UnlockProtection, and
   // IsProtected appear in the GiveBirth and GetOlder Behaviors.
   bool protected_;
+  // Single adult men can seek for a regular partnership. All male seeking 
+  // for regular partnership are then indexed, select the compound category of their partner,
+  // and are mapped to females corresponding to the selected category
+  bool seek_regular_partnership_;
 
   ///! The aguments below are currently either not used or repetitive.
   // // Stores if an agent is infected or not
@@ -138,6 +142,25 @@ class Person : public Cell {
                    " Age mother:", this->age_,
                    " Num children:", children_.size());
     }
+  }
+
+  void SetPartner(AgentPointer<Person> partner){
+    partner_ = partner;
+    // Symetric relation
+    partner_->partner_=this->GetAgentPtr<Person>();
+  }
+
+  void SeparateFromPartner(){
+    if (hasPartner()){
+      // Symetric relation. Start with partner while not nullptr
+      partner_->partner_=AgentPointer<Person>();
+      // Set partner to nullptr
+      partner_ = AgentPointer<Person>();
+    } else {
+      Log::Warning("Person::SeparateFromPartner()",
+                   "Person is single");
+    }
+
   }
 
   bool IsParentOf(AgentPointer<Person> child) {

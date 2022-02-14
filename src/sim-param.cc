@@ -14,6 +14,18 @@ void SimParam::SetSociobehavMixingMatrix() {
   }
 };
 
+void SimParam::SetRegPartnerSociobehavMixingMatrix() {
+  reg_partner_sociobehav_mixing_matrix.clear();
+  reg_partner_sociobehav_mixing_matrix.resize(nb_age_categories);
+
+  for (int i = 0; i < nb_sociobehav_categories; i++) {
+    reg_partner_sociobehav_mixing_matrix[i].resize(nb_sociobehav_categories);
+    // Fill all elements with 1.0. Homogeneous socio-behavioural mixing.
+    fill(reg_partner_sociobehav_mixing_matrix[i].begin(), reg_partner_sociobehav_mixing_matrix[i].end(),
+         1.0);
+  }
+};
+
 void SimParam::SetAgeMixingMatrix() {
   age_mixing_matrix.clear();
   age_mixing_matrix.resize(nb_age_categories);
@@ -22,6 +34,17 @@ void SimParam::SetAgeMixingMatrix() {
     age_mixing_matrix[i].resize(nb_age_categories);
     // Fill all elements with 1.0. Homogeneous age mixing.
     fill(age_mixing_matrix[i].begin(), age_mixing_matrix[i].end(), 1.0);
+  }
+};
+
+void SimParam::SetRegPartnerAgeMixingMatrix() {
+  reg_partner_age_mixing_matrix.clear();
+  reg_partner_age_mixing_matrix.resize(nb_age_categories);
+
+  for (int i = 0; i < nb_age_categories; i++) {
+    reg_partner_age_mixing_matrix[i].resize(nb_age_categories);
+    // Fill all elements with 1.0. Homogeneous age mixing.
+    fill(reg_partner_age_mixing_matrix[i].begin(), reg_partner_age_mixing_matrix[i].end(), 1.0);
   }
 };
 

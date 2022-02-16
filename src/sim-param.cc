@@ -55,11 +55,11 @@ void SimParam::SetLocationMixingMatrix() {
   for (int i = 0; i < nb_locations; i++) {
     location_mixing_matrix[i].resize(nb_locations);
     // Fill all elements with 0.0 except diagonal with 1.0.
-    /*fill(location_mixing_matrix[i].begin(),location_mixing_matrix[i].end(),
-    0.0); location_mixing_matrix[i][i]=1.0;*/
+    fill(location_mixing_matrix[i].begin(),location_mixing_matrix[i].end(),
+    0.0); location_mixing_matrix[i][i]=1.0;
     // Fill all elements with 1.0 (Homogeneous mixing)
-    fill(location_mixing_matrix[i].begin(), location_mixing_matrix[i].end(),
-         1.0);
+    /*fill(location_mixing_matrix[i].begin(), location_mixing_matrix[i].end(),
+         1.0);*/
   }
   // DEBUG
   /*std::cout << "nb_locations = " << nb_locations << std::endl;

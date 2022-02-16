@@ -118,6 +118,37 @@ int Simulate(int argc, const char** argv) {
     });
     return static_cast<double>(bdm::experimental::Count(sim, cond));
   };
+
+  // AM: Define how to count the individuals infected at birth
+  auto count_MTC_transmission = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_MTCT = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->MTCTransmission();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond_MTCT));
+  };
+
+  // AM: Define how to count the individuals infected through casual mating
+  auto count_casual_transmission = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_casual= L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->CasualTransmission();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond_casual));
+  };
+
+  // AM: Define how to count the individuals infected through regular mating
+  auto count_regular_transmission = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond_regular= L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->RegularTransmission();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond_regular));
+  };
+
   // AM: Define how to compute general prevalence
   auto pct_prevalence = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
@@ -376,6 +407,10 @@ int Simulate(int argc, const char** argv) {
   ts->AddCollector("chronic_agents", count_chronic, get_year);
   ts->AddCollector("treated_agents", count_treated, get_year);
   ts->AddCollector("failing_agents", count_failing, get_year);
+
+  ts->AddCollector("mtct_agents", count_MTC_transmission, get_year);
+  ts->AddCollector("casual_transmission_agents", count_casual_transmission, get_year);
+  ts->AddCollector("regular_transmission_agents", count_regular_transmission, get_year);
 
   ts->AddCollector("prevalence", pct_prevalence, get_year);
   ts->AddCollector("prevalence_women", pct_prevalence_women, get_year);

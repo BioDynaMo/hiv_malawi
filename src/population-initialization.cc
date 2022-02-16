@@ -143,6 +143,12 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   person->state_ =
       ComputeState(rand_num[4], person->age_, sparam->min_age, sparam->max_age,
                    sparam->initial_infection_probability);
+
+  // If the person is infected at initialisation, set that it got infected through casual partnership.
+  if (person->state_ != GemsState::kHealthy){
+    person->transmission_type_ = TransmissionType::kCasualPartner;
+  }
+
   // Compute risk factors.
   // AM: social_behaviour_factor_ depends on the age and health/hiv state
   person->social_behaviour_factor_ = ComputeSociobehavioural(
@@ -166,6 +172,7 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
     person->AddBehavior(new GiveBirth());
   } else {
     person->AddBehavior(new MatingBehaviour());
+    person->AddBehavior(new RegularMatingBehaviour());
     person->AddBehavior(new RegularPartnershipBehaviour());
   }
   person->AddBehavior(new GetOlder());

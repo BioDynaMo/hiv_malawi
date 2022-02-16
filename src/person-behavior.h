@@ -41,7 +41,8 @@ struct RandomMigration : public Behavior {
 
     // Probability to migrate
     float rand_num = static_cast<float>(random->Uniform());
-    if (person->age_ >= 15 && rand_num <= sparam->migration_probability) {
+    // Adult men and adult single women can initiate migration
+    if (rand_num <= sparam->migration_probability && person->age_ >= 15 && ((person->sex_ == Sex::kMale) || (person->sex_ == Sex::kFemale && !person->hasPartner()))) {
       // Randomly determine the migration location
       // AM: Sample migration location. It depends on the current year and
       // current location
@@ -52,44 +53,8 @@ struct RandomMigration : public Behavior {
       int new_location = SampleLocation(
           rand_num_loc,
           migration_location_distribution_);
-      //int old_location = person->location_;
-      person->location_ = new_location;
 
-      if (person->sex_ == Sex::kFemale) {
-        int nb_children = person->GetNumberOfChildren();
-        // std::cout << "I am a woman with "<< nb_children << " children and I
-        // migrated to location " << person->location_<< std::endl;
-        for (int c = 0; c < nb_children; c++) {
-          if (person->children_[c]->age_ < 15) {
-            /*if (old_location != person->children_[c]->location_){
-                Log::Warning("RandomMigration::Run()", "child and mother had
-            different locations BEFORE MIGRATION. Child's age = ",
-            person->children_[c]->age_, " ==> ", old_location, " vs. ",
-            person->children_[c]->location_);
-            }*/
-            // std::cout << " ==> I am a child (" << person->children_[c]->age_
-            // << ") and I will migrate with my mother from location " <<
-            // person->children_[c]->location_ << " to " << person->location_ <<
-            // std::endl;
-            person->children_[c]->location_ = person->location_;
-          }
-        }
-        // DEBUG : Check that all children migrated with Mother
-        for (int c = 0; c < nb_children; c++) {
-          if (person->children_[c]->age_ < 15) {
-            if (person->children_[c]->location_ != person->location_) {
-              Log::Warning("RandomMigration::Run()",
-                           "DEBUG: child and mother have different locations "
-                           "AFTER MIGRATION. Child's age = ",
-                           person->children_[c]->age_);
-            }
-          }
-        }
-      }
-
-      // TO DO : 1) IF Single woman migrates, her (potential) child migrates
-      // too, 2) If a Man migrates, his (potential) "regular female partner",
-      // and her (potential) child migrate too
+      person->Relocate(new_location);
     }
   }
 };
@@ -182,18 +147,21 @@ struct MatingBehaviour : public Behavior {
             person->state_ == GemsState::kHealthy &&
             random->Uniform() < sparam->infection_probability_acute_fm) {
           person->state_ = GemsState::kAcute;
+          person->transmission_type_ = TransmissionType::kCasualPartner;
         }
         // Scenario healthy male has intercourse with infected chronic female
         else if (mate->state_ == GemsState::kChronic &&
                  person->state_ == GemsState::kHealthy &&
                  random->Uniform() < sparam->infection_probability_chronic_fm) {
           person->state_ = GemsState::kAcute;
+          person->transmission_type_ = TransmissionType::kCasualPartner;
         }
         // Scenario healthy male has intercourse with infected treated female
         else if (mate->state_ == GemsState::kTreated &&
                  person->state_ == GemsState::kHealthy &&
                  random->Uniform() < sparam->infection_probability_treated_fm) {
           person->state_ = GemsState::kAcute;
+          person->transmission_type_ = TransmissionType::kCasualPartner;
         }
         // Scenario healthy male has intercourse with infected failing treatment
         // female
@@ -201,28 +169,33 @@ struct MatingBehaviour : public Behavior {
                  person->state_ == GemsState::kHealthy &&
                  random->Uniform() < sparam->infection_probability_failing_fm) {
           person->state_ = GemsState::kAcute;
+          person->transmission_type_ = TransmissionType::kCasualPartner;
         }
         // Scenario infected acute male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
                  person->state_ == GemsState::kAcute &&
                  random->Uniform() < sparam->infection_probability_acute_mf) {
           mate->state_ = GemsState::kAcute;
+          mate->transmission_type_ = TransmissionType::kCasualPartner;
         }  // Scenario infected chronic male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
                  person->state_ == GemsState::kChronic &&
                  random->Uniform() < sparam->infection_probability_chronic_mf) {
           mate->state_ = GemsState::kAcute;
+          mate->transmission_type_ = TransmissionType::kCasualPartner;
         }  // Scenario infected treated male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
                  person->state_ == GemsState::kTreated &&
                  random->Uniform() < sparam->infection_probability_treated_mf) {
           mate->state_ = GemsState::kAcute;
+          mate->transmission_type_ = TransmissionType::kCasualPartner;
         }  // Scenario infected failing treatment male has intercourse with
            // healthy female
         else if (mate->state_ == GemsState::kHealthy &&
                  person->state_ == GemsState::kFailing &&
                  random->Uniform() < sparam->infection_probability_failing_mf) {
           mate->state_ = GemsState::kAcute;
+          mate->transmission_type_ = TransmissionType::kCasualPartner;
         } else {
           ;  // if both are infected or both are healthy, do nothing
         }
@@ -260,6 +233,84 @@ struct RegularPartnershipBehaviour : public Behavior {
       person->seek_regular_partnership_ = true;
     } else{
       person->seek_regular_partnership_ = false;
+    }
+  }
+};
+
+// This is the regular mating behaviour. The Behavior
+// is only executed by male agents. In serodiscordant regular partners, 
+// the infected partner transmits HIV to his healthy partner with a certain probability.
+struct RegularMatingBehaviour : public Behavior {
+  BDM_BEHAVIOR_HEADER(RegularMatingBehaviour, Behavior, 1);
+
+  RegularMatingBehaviour() {}
+
+  void Run(Agent* agent) override {
+    auto* sim = Simulation::GetActive();
+    auto* env = bdm_static_cast<CategoricalEnvironment*>(sim->GetEnvironment());
+    auto* random = sim->GetRandom();
+    auto* param = sim->GetParam();
+    const auto* sparam = param->Get<SimParam>();
+    auto* person = bdm_static_cast<Person*>(agent);
+
+    if (person->hasPartner() && person->age_ < env->GetMaxAge()){
+      // Scenario healthy male has intercourse with infected acute female partner
+      if (person->partner_->state_ == GemsState::kAcute &&
+          person->state_ == GemsState::kHealthy &&
+          random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_acute_fm,sparam->no_regular_acts_mean))) {
+        person->state_ = GemsState::kAcute;
+        person->transmission_type_ = TransmissionType::kRegularPartner;
+      }
+      // Scenario healthy male has intercourse with infected chronic female partner
+      else if (person->partner_->state_ == GemsState::kChronic &&
+                person->state_ == GemsState::kHealthy &&
+                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_chronic_fm, sparam->no_regular_acts_mean))) {
+        person->state_ = GemsState::kAcute;
+        person->transmission_type_ = TransmissionType::kRegularPartner;
+      }
+      // Scenario healthy male has intercourse with infected treated female partner
+      else if (person->partner_->state_ == GemsState::kTreated &&
+                person->state_ == GemsState::kHealthy &&
+                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_treated_fm, sparam->no_regular_acts_mean))) {
+        person->state_ = GemsState::kAcute;
+        person->transmission_type_ = TransmissionType::kRegularPartner;
+      }
+      // Scenario healthy male has intercourse with infected failing treatment
+      // female partner
+      else if (person->partner_->state_ == GemsState::kFailing &&
+                person->state_ == GemsState::kHealthy &&
+                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_failing_fm, sparam->no_regular_acts_mean))) {
+        person->state_ = GemsState::kAcute;
+        person->transmission_type_ = TransmissionType::kRegularPartner;
+      }
+      // Scenario infected acute male has intercourse with healthy female partner
+      else if (person->partner_->state_ == GemsState::kHealthy &&
+                person->state_ == GemsState::kAcute &&
+                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_acute_mf, sparam->no_regular_acts_mean))) {
+        person->partner_->state_ = GemsState::kAcute;
+        person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+      }  // Scenario infected chronic male has intercourse with healthy female partner
+      else if (person->partner_->state_ == GemsState::kHealthy &&
+                person->state_ == GemsState::kChronic &&
+                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_chronic_mf, sparam->no_regular_acts_mean))) {
+        person->partner_->state_ = GemsState::kAcute;
+        person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+      }  // Scenario infected treated male has intercourse with healthy female partner
+      else if (person->partner_->state_ == GemsState::kHealthy &&
+                person->state_ == GemsState::kTreated &&
+                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_treated_mf, sparam->no_regular_acts_mean))) {
+        person->partner_->state_ = GemsState::kAcute;
+        person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+      }  // Scenario infected failing treatment male has intercourse with
+          // healthy female partner
+      else if (person->partner_->state_ == GemsState::kHealthy &&
+                person->state_ == GemsState::kFailing &&
+                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_failing_mf, sparam->no_regular_acts_mean))) {
+        person->partner_->state_ = GemsState::kAcute;
+        person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+      } else {
+        ;  // if both are infected or both are healthy, do nothing
+      }
     }
   }
 };
@@ -425,6 +476,10 @@ struct GetOlder : public Behavior {
     }
 
     if (!stay_alive) {
+      // If has regular partner, end partnership
+      if (person->hasPartner()){
+        person->SeparateFromPartner();
+      }
       // If mother dies, children have no mother anymore
       if (person->sex_ == Sex::kFemale && person->GetNumberOfChildren() > 0) {
         for (int c = 0; c < person->GetNumberOfChildren(); c++) {
@@ -460,7 +515,7 @@ struct GiveBirth : public Behavior {
 
   // Helper function to create a single child
   Person* CreateChild(Random* random_generator, Person* mother,
-                      const SimParam* sparam) {
+                      const SimParam* sparam, size_t year) {
     // Create new child
     Person* child = new Person();
     // Assign sex
@@ -481,23 +536,32 @@ struct GiveBirth : public Behavior {
       // // Store the year when the agent got infected
       // child->year_of_infection_ = std::numeric_limits<float>::max();
     }
-
     ///! The aguments below are currently either not used or repetitive.
     // // year of infection to present year, Question: Ask Lukas how to get
     // iter child->year_of_infection_ = 2000;
     //}
-    // AM: birth infection probability depends on whether mother is treated
+    // AM: birth infection probability depends on whether mother is treated and current year
     else if (mother->state_ == GemsState::kTreated) {
       if (random_generator->Uniform() <
           sparam->birth_infection_probability_treated) {
         child->state_ = GemsState::kAcute;
+        child->transmission_type_ = TransmissionType::kMotherToChild;
       } else {
         child->state_ = GemsState::kHealthy;
       }
-    } else {  // AM: Mother is not healthy and not treated
+    } else if (year < 2003 || mother->state_ == GemsState::kFailing){  // AM: Mother is not healthy and not treated
       if (random_generator->Uniform() <
           sparam->birth_infection_probability_untreated) {
         child->state_ = GemsState::kAcute;
+        child->transmission_type_ = TransmissionType::kMotherToChild;
+      } else {
+        child->state_ = GemsState::kHealthy;
+      }
+    } else {
+      if (random_generator->Uniform() <
+          sparam->birth_infection_probability_prophylaxis) {
+        child->state_ = GemsState::kAcute;
+        child->transmission_type_ = TransmissionType::kMotherToChild;
       } else {
         child->state_ = GemsState::kHealthy;
       }
@@ -518,6 +582,7 @@ struct GiveBirth : public Behavior {
       child->AddBehavior(new GiveBirth());
     } else {
       child->AddBehavior(new MatingBehaviour());
+      child->AddBehavior(new RegularMatingBehaviour());
       child->AddBehavior(new RegularPartnershipBehaviour());
     }
     child->AddBehavior(new GetOlder());
@@ -536,8 +601,14 @@ struct GiveBirth : public Behavior {
     // Each potential mother gives birth with a certain probability.
     if (random->Uniform() < sparam->give_birth_probability &&
         mother->age_ <= sparam->max_age_birth && mother->age_ >= sparam->min_age) {
+
+      // The probability of the child to be infected depends on the current year (ex. prophylaxis)
+      int year = static_cast<int>(
+      sparam->start_year +
+      sim->GetScheduler()->GetSimulatedSteps());  // Current year
+
       // Create a child
-      auto* new_child = CreateChild(random, mother, sparam);
+      auto* new_child = CreateChild(random, mother, sparam, year);
 
       // BioDynaMo API: Add agent (child) to simulation
       ctxt->AddAgent(new_child);

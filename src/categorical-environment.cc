@@ -201,6 +201,7 @@ void CategoricalEnvironment::UpdateImplementation() {
                    "person is nullptr");
       }
 
+      // TO DO AM: Change to MaxAgeBirth
       if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge() && 
           person->age_ <= env->GetMaxAge()) {
         AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();

@@ -39,6 +39,10 @@ class Person : public Cell {
 
   /// Stores the current GemsState of the person.
   int state_;
+  // Stores how the agent was infected.
+  int transmission_type_;
+  // Stores the state of the agent who infected them.
+  int infection_origin_state_;
   // Stores the age of the agent
   float age_;
   // Stores the sex of the agent
@@ -85,6 +89,14 @@ class Person : public Cell {
   bool IsTreated() { return state_ == GemsState::kTreated; }
   // Returns True if the agent is infected in failing treatement state
   bool IsFailing() { return state_ == GemsState::kFailing; }
+
+  // Return True if infected at birth
+  bool MTCTransmission() {return IsAcute() && transmission_type_ == TransmissionType::kMotherToChild;}
+  // Return True if infected during casual mating
+  bool CasualTransmission() {return IsAcute() && transmission_type_ == TransmissionType::kCasualPartner;}
+  // Return True if infected during regular mating
+  bool RegularTransmission() {return IsAcute() && transmission_type_ == TransmissionType::kRegularPartner;}
+
   // Returns True if the agent has high-risk socio-behaviours
   bool HasHighRiskSocioBehav() { return social_behaviour_factor_ == 1; }
   // Returns True if the agent is at low-risk socio-behaviours
@@ -161,6 +173,46 @@ class Person : public Cell {
                    "Person is single");
     }
 
+  }
+
+  void Relocate(size_t new_location){
+    location_ = new_location;
+
+    if (sex_ == Sex::kFemale) {
+      // Children (under 15yo) migrate with their mother
+      int nb_children = GetNumberOfChildren();
+      // std::cout << "I am a woman with "<< nb_children << " children and I
+      // migrated to location " << location_<< std::endl;
+      for (int c = 0; c < nb_children; c++) {
+        if (children_[c]->age_ < 15) {
+          /*if (old_location != children_[c]->location_){
+              Log::Warning("RandomMigration::Run()", "child and mother had
+          different locations BEFORE MIGRATION. Child's age = ",
+          children_[c]->age_, " ==> ", old_location, " vs. ",
+          children_[c]->location_);
+          }*/
+          // std::cout << " ==> I am a child (" << children_[c]->age_
+          // << ") and I will migrate with my mother from location " <<
+          // children_[c]->location_ << " to " << location_ <<
+          // std::endl;
+          children_[c]->location_ = location_;
+        }
+      }
+      // DEBUG : Check that all children migrated with Mother
+      for (int c = 0; c < nb_children; c++) {
+        if (children_[c]->age_ < 15) {
+          if (children_[c]->location_ != location_) {
+            Log::Warning("RandomMigration::Run()",
+                          "DEBUG: child and mother have different locations "
+                          "AFTER MIGRATION. Child's age = ",
+                          children_[c]->age_);
+          }
+        }
+      }
+    } else if (hasPartner()){
+      // If a man engaged in a regular partnership relocates, his female partner relocates too.
+      partner_->Relocate(new_location);
+    }
   }
 
   bool IsParentOf(AgentPointer<Person> child) {

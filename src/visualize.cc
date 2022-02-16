@@ -62,16 +62,26 @@ int PlotAndSaveTimeseries() {
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2(ts, "my result", "Time", "Number of agents",
                                   true);
-  g2.Add("healthy_agents", "Healthy", "L", kBlue, 1.0, 1);
+  //g2.Add("healthy_agents", "Healthy", "L", kBlue, 1.0, 1);
   g2.Add("infected_agents", "HIV", "L", kOrange, 1.0, 1);
   g2.Add("acute_agents", "Acute", "L", kRed, 1.0, 10);
   g2.Add("chronic_agents", "Chronic", "L", kMagenta, 1.0, 10);
   g2.Add("treated_agents", "Treated", "L", kGreen, 1.0, 10);
   g2.Add("failing_agents", "Failing", "L", kGray, 1.0, 10);
-
   g2.Draw();
   g2.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
                    "/simulation_hiv_with_states"),
+            {".svg", ".png"});
+
+  // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g2_2(ts, "my result", "Time", "Number of agents",
+                                  true);
+  g2_2.Add("mtct_agents", "MTCT", "L", kGreen, 1.0, 3);
+  g2_2.Add("casual_transmission_agents", "Casual Transmission", "L", kRed, 1.0, 3);
+  g2_2.Add("regular_transmission_agents", "Regular Transmission", "L", kBlue, 1.0, 3);
+  g2_2.Draw();
+  g2_2.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+                   "/simulation_transmission_types"),
             {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data

@@ -35,7 +35,7 @@ ParamGroupUid GetUid() const override { return kUid; }
 int start_year = 1975;  // 1975;//1960;
 
 // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-uint64_t number_of_iterations = 45;  // 20; //45;//5;// 60;// (1960-2020)
+uint64_t number_of_iterations = 25;  // 20; //45;//5;// 60;// (1960-2020)
 
 // Number of agents that are present at the first iteration of the simulation
 uint64_t initial_population_size = 53020;  // 3600000;//5302000;
@@ -105,7 +105,7 @@ const std::vector<std::vector<float>> no_mates_sigma /*{{100.0,100.0},
     {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
 
 // Mean number of sexual acts with regular partner per year.
-const float no_regular_acts_mean = 50.0;
+const float no_regular_acts_mean = 150.0; // 50;
 
 // AM: Mortality rate depending on HIV state, i.e. Acute, Chronic, Treated,
 // Failing (Cumulative probabilities)
@@ -180,13 +180,23 @@ std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix;
 // Healthy. x2 = p_Healthy + p_Acute, x3 = p_Healthy + p_Acute + p_Chronic, x4
 // = p_Healthy + p_Acute + p_Chronic + p_Treated, x5 = p_Healthy + p_Acute +
 // p_Chronic + p_Treated + p_Failing
-const std::vector<float> initial_infection_probability{
+/*const std::vector<float> initial_infection_probability{
     9985e-4, 9988e-4, 1, 1,
-    1,       1};  // AM: We want to start with a 0.07% prevalence among total
+    1,       1}; */ // AM: We want to start with a 0.075% prevalence among total
                 // population, while infecting only 15-50 years old, who
                 // represent ~50% of the population ==> 0.15% prevalence
                 // among 15-50 yo. 1/5 of HIV+ (~0.03% of total) are in
-                // acute phase, others (0.11%) are chronic.
+                // acute phase, others (0.12%) are chronic.
+// AM: In subset of locations representing 57.7% of population, prev. 0.26%.
+// 0.05% acute and 0.21% chronic
+const std::vector<float> initial_infection_probability{
+    9974e-4, 9979e-4, 1, 1,
+    1,       1}; 
+
+const std::vector<bool> seed_districts { 
+    false, true, false, false, false, false, false, false, false, false,
+    true, false, true, false, true, true, true, true, true, true,
+    true, true, true, true, true, true, true, true, false}; 
 
 // Parameter 0.18 is chosen because our GiveBirth Behaviour is based on a
 // Bernoulli experiment. A binomial distribuition peaks at around 6 for 25

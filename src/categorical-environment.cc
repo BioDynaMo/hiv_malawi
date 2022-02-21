@@ -63,7 +63,9 @@ CategoricalEnvironment::CategoricalEnvironment(
                      no_sociobehavioural_categories),
       regular_female_agents_(no_age_categories * no_locations *
                      no_sociobehavioural_categories),
-      male_agents_(no_age_categories * no_locations *
+      casual_male_agents_(no_age_categories * no_locations *
+                     no_sociobehavioural_categories),
+      regular_male_agents_(no_age_categories * no_locations *
                      no_sociobehavioural_categories),
       mothers_(no_locations),
       adults_(no_locations),
@@ -90,8 +92,12 @@ void CategoricalEnvironment::UpdateImplementation() {
   regular_female_agents_.resize(no_age_categories_ * no_locations_ *
                         no_sociobehavioural_categories_);
 
-  male_agents_.clear();
-  male_agents_.resize(no_age_categories_ * no_locations_ *
+  casual_male_agents_.clear();
+  casual_male_agents_.resize(no_age_categories_ * no_locations_ *
+                        no_sociobehavioural_categories_);
+
+  regular_male_agents_.clear();
+  regular_male_agents_.resize(no_age_categories_ * no_locations_ *
                         no_sociobehavioural_categories_);
   adults_.clear();
   adults_.resize(no_locations_);
@@ -113,30 +119,34 @@ void CategoricalEnvironment::UpdateImplementation() {
                  "person is nullptr");
     }
 
-    // Index adult women (potential partners >=15yo) by location x age x sociobhevioural risk
-    if (person->sex_ == Sex::kFemale && person->age_ >= env->GetMinAge()){
-      // Adult women under max_age_ are potential casual partners
+    // Adults
+    if (person->age_ >= env->GetMinAge()){
+      AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
+      if (person_ptr == nullptr) {
+        Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
+                   "person_ptr is nullptr");
+      }
+      // Under max_age_
       if (person->age_ <= env->GetMaxAge()) {
-        AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
-        if (person_ptr == nullptr) {
-          Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
-                    "person_ptr is nullptr");
-        }
-        // Compute age category of female agent
+        // Compute age category of agent
         size_t age_category =
-            person->GetAgeCategory(env->GetMinAge(), env->GetNoAgeCategories());
-        // Add female agent to the right index, based on her location, age
-        // category and socio-behavioural category
-        env->AddCasualFemaleToIndex(person_ptr, person->location_, age_category,
-                            person->social_behaviour_factor_);
+              person->GetAgeCategory(env->GetMinAge(), env->GetNoAgeCategories());
+        // Adult women under max_age_ are potential casual partners
+        if (person->sex_ == Sex::kFemale){
+          // Add female agent to the right index, based on her location, age
+          // category and socio-behavioural category
+          env->AddCasualFemaleToIndex(person_ptr, person->location_, age_category,
+                              person->social_behaviour_factor_);
+        } else {
+          // Adult male under max_age_ are potential casual partners
+          // Add male agent to the right index, based on his location, age
+          // category and socio-behavioural category
+          env->AddCasualMaleToIndex(person_ptr, person->location_, age_category,
+                              person->social_behaviour_factor_);
+        }
       }
       // Adult single women are potential regular partners
-      if (person->hasPartner() == false) {
-        AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
-        if (person_ptr == nullptr) {
-          Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
-                    "person_ptr is nullptr");
-        }
+      if (person->sex_ == Sex::kFemale && person->hasPartner() == false) {
         // Compute age category of female agent
         size_t age_category =
             person->GetAgeCategory(env->GetMinAge(), env->GetNoAgeCategories());
@@ -145,17 +155,11 @@ void CategoricalEnvironment::UpdateImplementation() {
         env->AddRegularFemaleToIndex(person_ptr, person->location_, age_category,
                             person->social_behaviour_factor_);
       }
-    };
-
-    // Index adults by location (for location attractivity)
-    if (person->age_ >= env->GetMinAge()) {
-      AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
-      if (person_ptr == nullptr) {
-        Log::Fatal("CategoricalEnvironment::UpdateImplementation()",
-                   "person_ptr is nullptr");
-      }
+      // Index adults by location (for location attractivity)
       env->AddAdultToLocation(person_ptr, person->location_);
     };
+
+    
 
     // DEBUG: ARE NEW-BORN RECOGNIZED BY THEIR MOTHERS'
     /*if (person->age_ < 1){
@@ -309,7 +313,7 @@ void CategoricalEnvironment::UpdateImplementation() {
         bool indexed = false;
         for (size_t j = 0; j < partner_category_distribution.size(); j++) {
           if (rand_num <= partner_category_distribution[j]) {
-            env->AddMaleToIndex(person_ptr,j);
+            env->AddRegularMaleToIndex(person_ptr,j);
             indexed = true;
             break;
           }
@@ -322,8 +326,8 @@ void CategoricalEnvironment::UpdateImplementation() {
       }
   });
   // AM: Map regular partners for each compound category
-  for (size_t cat = 0; cat < male_agents_.size(); cat++){
-    size_t no_males = male_agents_[cat].GetNumAgents();
+  for (size_t cat = 0; cat < regular_male_agents_.size(); cat++){
+    size_t no_males = regular_male_agents_[cat].GetNumAgents();
     size_t no_females = regular_female_agents_[cat].GetNumAgents();
     /*std::cout << "Coumpound Category " << i << " - Number of male seeking partner = " << no_males << 
     ", Number of single females = " << no_females << std::endl;*/
@@ -338,8 +342,8 @@ void CategoricalEnvironment::UpdateImplementation() {
         std::shuffle(v.begin(), v.end(),g);
         // Male select Females
         for (size_t i = 0; i < no_males; i++){
-          male_agents_[cat].GetAgentAtIndex(i)->SetPartner(regular_female_agents_[cat].GetAgentAtIndex(v[i]));
-          if (male_agents_[cat].GetAgentAtIndex(i)->partner_->partner_ != male_agents_[cat].GetAgentAtIndex(i)){
+          regular_male_agents_[cat].GetAgentAtIndex(i)->SetPartner(regular_female_agents_[cat].GetAgentAtIndex(v[i]));
+          if (regular_male_agents_[cat].GetAgentAtIndex(i)->partner_->partner_ != regular_male_agents_[cat].GetAgentAtIndex(i)){
             Log::Warning("CategoricalEnvironment::UpdateImplementation()",
                  "Regular Partnership (male selects female) is ASYMMETRICAL");
           }
@@ -354,7 +358,7 @@ void CategoricalEnvironment::UpdateImplementation() {
         std::shuffle(v.begin(), v.end(),g);
         // Females select Males
         for (size_t i = 0; i < no_females; i++){
-          regular_female_agents_[cat].GetAgentAtIndex(i)->SetPartner(male_agents_[cat].GetAgentAtIndex(v[i]));
+          regular_female_agents_[cat].GetAgentAtIndex(i)->SetPartner(regular_male_agents_[cat].GetAgentAtIndex(v[i]));
           // Check Symmetry
           if (regular_female_agents_[cat].GetAgentAtIndex(i)->partner_->partner_ != regular_female_agents_[cat].GetAgentAtIndex(i)){
             Log::Warning("CategoricalEnvironment::UpdateImplementation()",
@@ -748,15 +752,32 @@ void CategoricalEnvironment::AddRegularFemaleToIndex(AgentPointer<Person> agent,
   regular_female_agents_[compound_index].AddAgent(agent);
 };
 
-void CategoricalEnvironment::AddMaleToIndex(AgentPointer<Person> agent,  
+void CategoricalEnvironment::AddRegularMaleToIndex(AgentPointer<Person> agent,  
                                             size_t index){
-  if (index >= male_agents_.size()) {
-    Log::Fatal("CategoricalEnvironment::AddMaleToIndex()",
+  if (index >= regular_male_agents_.size()) {
+    Log::Fatal("CategoricalEnvironment::AddRegularMaleToIndex()",
                "Compound index is out of bounds. Received compound index: ",
                index,
-               " and male_agents_.size(): ", male_agents_.size());
+               " and regular_male_agents_.size(): ", regular_male_agents_.size());
   }
-  male_agents_[index].AddAgent(agent);
+  regular_male_agents_[index].AddAgent(agent);
+};
+
+void CategoricalEnvironment::AddCasualMaleToIndex(AgentPointer<Person> agent,
+                                             size_t location, size_t age,
+                                             size_t sb) {
+  assert(location >= 0 and location < no_locations_);
+  assert(age >= 0 and age < no_age_categories_);
+  assert(sb >= 0 and sb < no_sociobehavioural_categories_);
+
+  size_t compound_index = ComputeCompoundIndex(location, age, sb);
+  if (compound_index >= casual_male_agents_.size()) {
+    Log::Fatal("CategoricalEnvironment::AddCasualMaleToIndex()",
+               "Location index is out of bounds. Received compound index: ",
+               compound_index, " (loc ", location, ", age ", age, ", sb ", sb,
+               ") casual_male_agents_.size(): ", casual_male_agents_.size());
+  }
+  casual_male_agents_[compound_index].AddAgent(agent);
 };
 
 void CategoricalEnvironment::AddMotherToLocation(AgentPointer<Person> agent,

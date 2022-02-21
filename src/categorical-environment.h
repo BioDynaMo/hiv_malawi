@@ -73,9 +73,12 @@ class CategoricalEnvironment : public Environment {
   std::vector<AgentVector> casual_female_agents_;
   // Vector to store all adult female agents, indexed by location x age x sociobehaviours.
   std::vector<AgentVector> regular_female_agents_;
+  // Vector to store all male agents within a certain age interval
+  // [min_age_, max_age_], indexed by location x age x sociobehaviours.
+  std::vector<AgentVector> casual_male_agents_;
   // Vector to store all adult single men looking for a regular female partner,
   // indexed by the location x age x sociobehaviours of their potential partner.
-  std::vector<AgentVector> male_agents_;
+  std::vector<AgentVector> regular_male_agents_;
   // AM: Vector to store all potential mothers (female between min_age_ and max_age_), indexed by location only.
   std::vector<AgentVector> mothers_;
   // Vector to store all adult agents (male and female older than min_age_), indexed by location. Used to estimate population size per location, and attractiveness.
@@ -172,8 +175,11 @@ class CategoricalEnvironment : public Environment {
   void AddRegularFemaleToIndex(AgentPointer<Person> agent, size_t location, size_t age,
                        size_t sb);
 
-  // Add a male agent pointer to a certain compound index (location x age group x sb) category in male_agents_ index.
-  void AddMaleToIndex(AgentPointer<Person> agent, size_t index);
+  // Add an agent pointer to a certain location, age group, and sb category in casual_male_agents_ index.
+  void AddCasualMaleToIndex(AgentPointer<Person> agent, size_t location, size_t age,
+                       size_t sb);
+  // Add a male agent pointer to a certain compound index (location x age group x sb) category in regular_male_agents_ index.
+  void AddRegularMaleToIndex(AgentPointer<Person> agent, size_t index);
 
   // Add an adult agent pointer to a certain location in adults_ index
   void AddAdultToLocation(AgentPointer<Person> agent, size_t location);

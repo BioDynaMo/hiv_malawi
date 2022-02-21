@@ -90,12 +90,21 @@ class Person : public Cell {
   // Returns True if the agent is infected in failing treatement state
   bool IsFailing() { return state_ == GemsState::kFailing; }
 
-  // Return True if infected at birth
+  // Return True if recently infected at birth
   bool MTCTransmission() {return IsAcute() && transmission_type_ == TransmissionType::kMotherToChild;}
-  // Return True if infected during casual mating
+  // Return True if recently infected during casual mating
   bool CasualTransmission() {return IsAcute() && transmission_type_ == TransmissionType::kCasualPartner;}
-  // Return True if infected during regular mating
+  // Return True if recently infected during regular mating
   bool RegularTransmission() {return IsAcute() && transmission_type_ == TransmissionType::kRegularPartner;}
+
+  // Return True if recently infected by an acute partner/mother
+  bool AcuteTransmission() {return IsAcute() && transmission_type_ == GemsState::kAcute;}
+  // Return True if recently infected by an chronic partner/mother
+  bool ChronicTransmission() {return IsAcute() && transmission_type_ == GemsState::kChronic;}
+  // Return True if recently infected by an treated partner/mother
+  bool TreatedTransmission() {return IsAcute() && transmission_type_ == GemsState::kTreated;}
+  // Return True if recently infected by an failing partner/mother
+  bool FailingTransmission() {return IsAcute() && transmission_type_ == GemsState::kFailing;}
 
   // Returns True if the agent has high-risk socio-behaviours
   bool HasHighRiskSocioBehav() { return social_behaviour_factor_ == 1; }

@@ -132,7 +132,7 @@ int Simulate(int argc, const char** argv) {
   // AM: Define how to count the individuals infected through casual mating
   auto count_casual_transmission = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
-    auto cond_casual= L2F([](Agent* a) {
+    auto cond_casual = L2F([](Agent* a) {
       auto* person = bdm_static_cast<Person*>(a);
       return person->CasualTransmission();
     });
@@ -142,11 +142,51 @@ int Simulate(int argc, const char** argv) {
   // AM: Define how to count the individuals infected through regular mating
   auto count_regular_transmission = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
-    auto cond_regular= L2F([](Agent* a) {
+    auto cond_regular = L2F([](Agent* a) {
       auto* person = bdm_static_cast<Person*>(a);
       return person->RegularTransmission();
     });
     return static_cast<double>(bdm::experimental::Count(sim, cond_regular));
+  };
+
+  // AM: Define how to count the individuals that were infected by an Acute HIV partner/Mother
+  auto count_acute_transmission = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->AcuteTransmission();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  };
+
+  // AM: Define how to count the individuals that were infected by an Chronic HIV partner/Mother
+  auto count_chronic_transmission = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->ChronicTransmission();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  };
+
+// AM: Define how to count the individuals that were infected by an Treated HIV partner/Mother
+  auto count_treated_transmission = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->TreatedTransmission();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  };
+
+  // AM: Define how to count the individuals that were infected by an Failing HIV partner/Mother
+  auto count_failing_transmission = [](Simulation* sim) {
+    // Condition for Count operation, e.g. check if person is infected.
+    auto cond = L2F([](Agent* a) {
+      auto* person = bdm_static_cast<Person*>(a);
+      return person->FailingTransmission();
+    });
+    return static_cast<double>(bdm::experimental::Count(sim, cond));
   };
 
   // AM: Define how to compute general prevalence
@@ -411,6 +451,11 @@ int Simulate(int argc, const char** argv) {
   ts->AddCollector("mtct_agents", count_MTC_transmission, get_year);
   ts->AddCollector("casual_transmission_agents", count_casual_transmission, get_year);
   ts->AddCollector("regular_transmission_agents", count_regular_transmission, get_year);
+
+  ts->AddCollector("acute_transmission", count_acute_transmission, get_year);
+  ts->AddCollector("chronic_transmission", count_chronic_transmission, get_year);
+  ts->AddCollector("treated_transmission", count_treated_transmission, get_year);
+  ts->AddCollector("failing_transmission", count_failing_transmission, get_year);
 
   ts->AddCollector("prevalence", pct_prevalence, get_year);
   ts->AddCollector("prevalence_women", pct_prevalence_women, get_year);

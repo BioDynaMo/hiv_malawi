@@ -148,6 +148,7 @@ struct MatingBehaviour : public Behavior {
             random->Uniform() < sparam->infection_probability_acute_fm) {
           person->state_ = GemsState::kAcute;
           person->transmission_type_ = TransmissionType::kCasualPartner;
+          person->infection_origin_state_ = mate->state_;
         }
         // Scenario healthy male has intercourse with infected chronic female
         else if (mate->state_ == GemsState::kChronic &&
@@ -155,6 +156,7 @@ struct MatingBehaviour : public Behavior {
                  random->Uniform() < sparam->infection_probability_chronic_fm) {
           person->state_ = GemsState::kAcute;
           person->transmission_type_ = TransmissionType::kCasualPartner;
+          person->infection_origin_state_ = mate->state_;
         }
         // Scenario healthy male has intercourse with infected treated female
         else if (mate->state_ == GemsState::kTreated &&
@@ -162,6 +164,7 @@ struct MatingBehaviour : public Behavior {
                  random->Uniform() < sparam->infection_probability_treated_fm) {
           person->state_ = GemsState::kAcute;
           person->transmission_type_ = TransmissionType::kCasualPartner;
+          person->infection_origin_state_ = mate->state_;
         }
         // Scenario healthy male has intercourse with infected failing treatment
         // female
@@ -170,6 +173,7 @@ struct MatingBehaviour : public Behavior {
                  random->Uniform() < sparam->infection_probability_failing_fm) {
           person->state_ = GemsState::kAcute;
           person->transmission_type_ = TransmissionType::kCasualPartner;
+          person->infection_origin_state_ = mate->state_;
         }
         // Scenario infected acute male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
@@ -177,18 +181,21 @@ struct MatingBehaviour : public Behavior {
                  random->Uniform() < sparam->infection_probability_acute_mf) {
           mate->state_ = GemsState::kAcute;
           mate->transmission_type_ = TransmissionType::kCasualPartner;
+          mate->infection_origin_state_ = person->state_;
         }  // Scenario infected chronic male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
                  person->state_ == GemsState::kChronic &&
                  random->Uniform() < sparam->infection_probability_chronic_mf) {
           mate->state_ = GemsState::kAcute;
           mate->transmission_type_ = TransmissionType::kCasualPartner;
+          mate->infection_origin_state_ = person->state_;
         }  // Scenario infected treated male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
                  person->state_ == GemsState::kTreated &&
                  random->Uniform() < sparam->infection_probability_treated_mf) {
           mate->state_ = GemsState::kAcute;
           mate->transmission_type_ = TransmissionType::kCasualPartner;
+          mate->infection_origin_state_ = person->state_;
         }  // Scenario infected failing treatment male has intercourse with
            // healthy female
         else if (mate->state_ == GemsState::kHealthy &&
@@ -196,6 +203,7 @@ struct MatingBehaviour : public Behavior {
                  random->Uniform() < sparam->infection_probability_failing_mf) {
           mate->state_ = GemsState::kAcute;
           mate->transmission_type_ = TransmissionType::kCasualPartner;
+          mate->infection_origin_state_ = person->state_;
         } else {
           ;  // if both are infected or both are healthy, do nothing
         }
@@ -260,6 +268,7 @@ struct RegularMatingBehaviour : public Behavior {
           random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_acute_fm,sparam->no_regular_acts_mean))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
+        person->infection_origin_state_ = person->partner_->state_;
       }
       // Scenario healthy male has intercourse with infected chronic female partner
       else if (person->partner_->state_ == GemsState::kChronic &&
@@ -267,6 +276,7 @@ struct RegularMatingBehaviour : public Behavior {
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_chronic_fm, sparam->no_regular_acts_mean))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
+        person->infection_origin_state_ = person->partner_->state_;
       }
       // Scenario healthy male has intercourse with infected treated female partner
       else if (person->partner_->state_ == GemsState::kTreated &&
@@ -274,6 +284,7 @@ struct RegularMatingBehaviour : public Behavior {
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_treated_fm, sparam->no_regular_acts_mean))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
+        person->infection_origin_state_ = person->partner_->state_;
       }
       // Scenario healthy male has intercourse with infected failing treatment
       // female partner
@@ -282,6 +293,7 @@ struct RegularMatingBehaviour : public Behavior {
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_failing_fm, sparam->no_regular_acts_mean))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
+        person->infection_origin_state_ = person->partner_->state_;
       }
       // Scenario infected acute male has intercourse with healthy female partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
@@ -289,18 +301,21 @@ struct RegularMatingBehaviour : public Behavior {
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_acute_mf, sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+        person->partner_->infection_origin_state_ = person->state_;
       }  // Scenario infected chronic male has intercourse with healthy female partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
                 person->state_ == GemsState::kChronic &&
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_chronic_mf, sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+         person->partner_->infection_origin_state_ = person->state_;
       }  // Scenario infected treated male has intercourse with healthy female partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
                 person->state_ == GemsState::kTreated &&
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_treated_mf, sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+         person->partner_->infection_origin_state_ = person->state_;
       }  // Scenario infected failing treatment male has intercourse with
           // healthy female partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
@@ -308,6 +323,7 @@ struct RegularMatingBehaviour : public Behavior {
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_failing_mf, sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+         person->partner_->infection_origin_state_ = person->state_;
       } else {
         ;  // if both are infected or both are healthy, do nothing
       }
@@ -546,6 +562,7 @@ struct GiveBirth : public Behavior {
           sparam->birth_infection_probability_treated) {
         child->state_ = GemsState::kAcute;
         child->transmission_type_ = TransmissionType::kMotherToChild;
+        child->infection_origin_state_ = mother->state_;
       } else {
         child->state_ = GemsState::kHealthy;
       }
@@ -554,6 +571,7 @@ struct GiveBirth : public Behavior {
           sparam->birth_infection_probability_untreated) {
         child->state_ = GemsState::kAcute;
         child->transmission_type_ = TransmissionType::kMotherToChild;
+        child->infection_origin_state_ = mother->state_;
       } else {
         child->state_ = GemsState::kHealthy;
       }
@@ -562,6 +580,7 @@ struct GiveBirth : public Behavior {
           sparam->birth_infection_probability_prophylaxis) {
         child->state_ = GemsState::kAcute;
         child->transmission_type_ = TransmissionType::kMotherToChild;
+        child->infection_origin_state_ = mother->state_;
       } else {
         child->state_ = GemsState::kHealthy;
       }

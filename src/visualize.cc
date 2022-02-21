@@ -85,6 +85,17 @@ int PlotAndSaveTimeseries() {
             {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g2_3(ts, "my result", "Time", "Number of agents",
+                                  true);
+  g2_3.Add("acute_transmission", "Infected by Acute", "L", kRed, 1.0, 10);
+  g2_3.Add("chronic_transmission", "Infected by Chronic", "L", kMagenta, 1.0, 10);
+  g2_3.Add("treated_transmission", "Infected by Treated", "L", kGreen, 1.0, 10);
+  g2_3.Add("failing_transmission", "Infected by Failing", "L", kGray, 1.0, 10);
+  g2_3.Draw();
+  g2_3.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+                   "/simulation_transmission_sources"),
+            {".svg", ".png"});
+  // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g3(ts, "my result", "Time", "", true);
   g3.Add("prevalence", "Prevalence", "L", kOrange, 1.0, 3, 1, kOrange, 1.0, 5);
   g3.Add("prevalence_women", "Prevalence - Women", "L", kRed, 1.0, 3, 1, kRed,

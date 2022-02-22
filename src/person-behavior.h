@@ -94,125 +94,134 @@ struct MatingBehaviour : public Behavior {
     const auto* sparam = param->Get<SimParam>();
     auto* person = bdm_static_cast<Person*>(agent);
 
-    if (!person->IsHealthy()){
-      // Randomly determine the number of mates
-      // AM: Mean and standard deviation of the number of mates depend on the
-      // current year and socio-behavioural category of agent
-      int year = static_cast<int>(
-          sparam->start_year +
-          sim->GetScheduler()->GetSimulatedSteps());  // Current year
-      // If no transition year is higher than current year, then use last
-      // transition year
-      int year_index = sparam->no_mates_year_transition.size() - 1;
-      for (int y = 0; y < sparam->no_mates_year_transition.size() - 1; y++) {
-        if (year < sparam->no_mates_year_transition[y + 1]) {
-          year_index = y;
-          break;
-        }
+    // Randomly determine the number of mates
+    // AM: Mean and standard deviation of the number of mates depend on the
+    // current year and socio-behavioural category of agent
+    int year = static_cast<int>(
+        sparam->start_year +
+        sim->GetScheduler()->GetSimulatedSteps());  // Current year
+    // If no transition year is higher than current year, then use last
+    // transition year
+    int year_index = sparam->no_mates_year_transition.size() - 1;
+    for (int y = 0; y < sparam->no_mates_year_transition.size() - 1; y++) {
+      if (year < sparam->no_mates_year_transition[y + 1]) {
+        year_index = y;
+        break;
       }
-      int no_mates = static_cast<int>(random->Gaus(
-          sparam->no_mates_mean[year_index][person->social_behaviour_factor_],
-          sparam->no_mates_sigma[year_index][person->social_behaviour_factor_]));
+    }
+    int no_mates = static_cast<int>(random->Gaus(
+        sparam->no_mates_mean[year_index][person->social_behaviour_factor_],
+        sparam->no_mates_sigma[year_index][person->social_behaviour_factor_]));
 
-      // This part is only executed for male persons in a certain age group, since
-      // the infection goes into both directions.
-      if (no_mates > 0 && person->sex_ == Sex::kMale &&
-          person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
-        // Compute male agent's age category
-        size_t age_category =
-            person->GetAgeCategory(env->GetMinAge(), env->GetNoAgeCategories());
-        // Get (cumulative) probability distribution that the male agent selects a
-        // female mate from each compound category
-        const std::vector<float> mate_compound_category_distribution =
-            env->GetMateCompoundCategoryDistribution(
-                person->location_, age_category,
-                person->social_behaviour_factor_);
+    // This part is only executed for male persons in a certain age group, since
+    // the infection goes into both directions.
+    if (no_mates > 0 && person->sex_ == Sex::kMale &&
+        person->age_ > env->GetMinAge() && person->age_ <= env->GetMaxAge()) {
+      // Compute male agent's age category
+      size_t age_category =
+          person->GetAgeCategory(env->GetMinAge(), env->GetNoAgeCategories());
+      // Get (cumulative) probability distribution that the male agent selects a
+      // female mate from each compound category
+      const std::vector<float> mate_compound_category_distribution =
+          env->GetMateCompoundCategoryDistribution(
+              person->location_, age_category,
+              person->social_behaviour_factor_);
 
-        for (int i = 0; i < no_mates; i++) {
-          // AM: select compound category of mate
-          float rand_num = static_cast<float>(random->Uniform());
+      for (int i = 0; i < no_mates; i++) {
+        // AM: select compound category of mate
+        float rand_num = static_cast<float>(random->Uniform());
 
-          size_t mate_compound_category = SampleCompoundCategory(
-              rand_num, mate_compound_category_distribution);
+        size_t mate_compound_category = SampleCompoundCategory(
+            rand_num, mate_compound_category_distribution);
 
-          // AM: Choose a random female mate at the selected mate compound
-          // category (location, age group and sociobehavioral category
-          AgentPointer<Person> mate =
-              env->GetRandomCasualFemaleFromIndex(mate_compound_category);
+        // AM: Choose a random female mate at the selected mate compound
+        // category (location, age group and sociobehavioral category
+        AgentPointer<Person> mate =
+            env->GetRandomCasualFemaleFromIndex(mate_compound_category);
 
-          if (mate == nullptr) {
-            Log::Fatal("MatingBehaviour()",
-                      "Received nullptr as AgentPointer mate.");
-          }
-          // Scenario healthy male has intercourse with infected acute female
-          if (mate->state_ == GemsState::kAcute &&
-              person->state_ == GemsState::kHealthy &&
-              random->Uniform() < sparam->infection_probability_acute_fm) {
-            person->state_ = GemsState::kAcute;
-            person->transmission_type_ = TransmissionType::kCasualPartner;
-            person->infection_origin_state_ = mate->state_;
-          }
-          // Scenario healthy male has intercourse with infected chronic female
-          else if (mate->state_ == GemsState::kChronic &&
-                  person->state_ == GemsState::kHealthy &&
-                  random->Uniform() < sparam->infection_probability_chronic_fm) {
-            person->state_ = GemsState::kAcute;
-            person->transmission_type_ = TransmissionType::kCasualPartner;
-            person->infection_origin_state_ = mate->state_;
-          }
-          // Scenario healthy male has intercourse with infected treated female
-          else if (mate->state_ == GemsState::kTreated &&
-                  person->state_ == GemsState::kHealthy &&
-                  random->Uniform() < sparam->infection_probability_treated_fm) {
-            person->state_ = GemsState::kAcute;
-            person->transmission_type_ = TransmissionType::kCasualPartner;
-            person->infection_origin_state_ = mate->state_;
-          }
-          // Scenario healthy male has intercourse with infected failing treatment
-          // female
-          else if (mate->state_ == GemsState::kFailing &&
-                  person->state_ == GemsState::kHealthy &&
-                  random->Uniform() < sparam->infection_probability_failing_fm) {
-            person->state_ = GemsState::kAcute;
-            person->transmission_type_ = TransmissionType::kCasualPartner;
-            person->infection_origin_state_ = mate->state_;
-          }
-          // Scenario infected acute male has intercourse with healthy female
-          else if (mate->state_ == GemsState::kHealthy &&
-                  person->state_ == GemsState::kAcute &&
-                  random->Uniform() < sparam->infection_probability_acute_mf) {
-            mate->state_ = GemsState::kAcute;
-            mate->transmission_type_ = TransmissionType::kCasualPartner;
-            mate->infection_origin_state_ = person->state_;
-          }  // Scenario infected chronic male has intercourse with healthy female
-          else if (mate->state_ == GemsState::kHealthy &&
-                  person->state_ == GemsState::kChronic &&
-                  random->Uniform() < sparam->infection_probability_chronic_mf) {
-            mate->state_ = GemsState::kAcute;
-            mate->transmission_type_ = TransmissionType::kCasualPartner;
-            mate->infection_origin_state_ = person->state_;
-          }  // Scenario infected treated male has intercourse with healthy female
-          else if (mate->state_ == GemsState::kHealthy &&
-                  person->state_ == GemsState::kTreated &&
-                  random->Uniform() < sparam->infection_probability_treated_mf) {
-            mate->state_ = GemsState::kAcute;
-            mate->transmission_type_ = TransmissionType::kCasualPartner;
-            mate->infection_origin_state_ = person->state_;
-          }  // Scenario infected failing treatment male has intercourse with
-            // healthy female
-          else if (mate->state_ == GemsState::kHealthy &&
-                  person->state_ == GemsState::kFailing &&
-                  random->Uniform() < sparam->infection_probability_failing_mf) {
-            mate->state_ = GemsState::kAcute;
-            mate->transmission_type_ = TransmissionType::kCasualPartner;
-            mate->infection_origin_state_ = person->state_;
-          } else {
-            ;  // if both are infected or both are healthy, do nothing
-          }
+        if (mate == nullptr) {
+          Log::Fatal("MatingBehaviour()",
+                     "Received nullptr as AgentPointer mate.");
+        }
+        // Scenario healthy male has intercourse with infected acute female
+        if (mate->state_ == GemsState::kAcute &&
+            person->state_ == GemsState::kHealthy &&
+            random->Uniform() < sparam->infection_probability_acute_fm) {
+          person->state_ = GemsState::kAcute;
+          person->transmission_type_ = TransmissionType::kCasualPartner;
+          person->infection_origin_state_ = mate->state_;
+          // AM: Add MatingBehaviour only when male gets infected
+          person->AddBehavior(new MatingBehaviour());
+          std::cout << "This should not currently happen: AddBehavior(new MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;
+        }
+        // Scenario healthy male has intercourse with infected chronic female
+        else if (mate->state_ == GemsState::kChronic &&
+                 person->state_ == GemsState::kHealthy &&
+                 random->Uniform() < sparam->infection_probability_chronic_fm) {
+          person->state_ = GemsState::kAcute;
+          person->transmission_type_ = TransmissionType::kCasualPartner;
+          person->infection_origin_state_ = mate->state_;
+          // AM: Add MatingBehaviour only when male gets infected
+          person->AddBehavior(new MatingBehaviour());
+          std::cout << "This should not currently happen: AddBehavior(new MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;
+        }
+        // Scenario healthy male has intercourse with infected treated female
+        else if (mate->state_ == GemsState::kTreated &&
+                 person->state_ == GemsState::kHealthy &&
+                 random->Uniform() < sparam->infection_probability_treated_fm) {
+          person->state_ = GemsState::kAcute;
+          person->transmission_type_ = TransmissionType::kCasualPartner;
+          person->infection_origin_state_ = mate->state_;
+          // AM: Add MatingBehaviour only when male gets infected
+          person->AddBehavior(new MatingBehaviour());
+          std::cout << "This should not currently happen: AddBehavior(new MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;
+        }
+        // Scenario healthy male has intercourse with infected failing treatment
+        // female
+        else if (mate->state_ == GemsState::kFailing &&
+                 person->state_ == GemsState::kHealthy &&
+                 random->Uniform() < sparam->infection_probability_failing_fm) {
+          person->state_ = GemsState::kAcute;
+          person->transmission_type_ = TransmissionType::kCasualPartner;
+          person->infection_origin_state_ = mate->state_;
+          // AM: Add MatingBehaviour only when male gets infected
+          person->AddBehavior(new MatingBehaviour());
+          std::cout << "This should not currently happen: AddBehavior(new MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;
+        }
+        // Scenario infected acute male has intercourse with healthy female
+        else if (mate->state_ == GemsState::kHealthy &&
+                 person->state_ == GemsState::kAcute &&
+                 random->Uniform() < sparam->infection_probability_acute_mf) {
+          mate->state_ = GemsState::kAcute;
+          mate->transmission_type_ = TransmissionType::kCasualPartner;
+          mate->infection_origin_state_ = person->state_;
+        }  // Scenario infected chronic male has intercourse with healthy female
+        else if (mate->state_ == GemsState::kHealthy &&
+                 person->state_ == GemsState::kChronic &&
+                 random->Uniform() < sparam->infection_probability_chronic_mf) {
+          mate->state_ = GemsState::kAcute;
+          mate->transmission_type_ = TransmissionType::kCasualPartner;
+          mate->infection_origin_state_ = person->state_;
+        }  // Scenario infected treated male has intercourse with healthy female
+        else if (mate->state_ == GemsState::kHealthy &&
+                 person->state_ == GemsState::kTreated &&
+                 random->Uniform() < sparam->infection_probability_treated_mf) {
+          mate->state_ = GemsState::kAcute;
+          mate->transmission_type_ = TransmissionType::kCasualPartner;
+          mate->infection_origin_state_ = person->state_;
+        }  // Scenario infected failing treatment male has intercourse with
+           // healthy female
+        else if (mate->state_ == GemsState::kHealthy &&
+                 person->state_ == GemsState::kFailing &&
+                 random->Uniform() < sparam->infection_probability_failing_mf) {
+          mate->state_ = GemsState::kAcute;
+          mate->transmission_type_ = TransmissionType::kCasualPartner;
+          mate->infection_origin_state_ = person->state_;
+        } else {
+          ;  // if both are infected or both are healthy, do nothing
         }
       }
     }
-    
   }
 };
 
@@ -273,6 +282,8 @@ struct RegularMatingBehaviour : public Behavior {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
+        // AM: Add MatingBehaviour only when infected
+        person->AddBehavior(new MatingBehaviour());
       }
       // Scenario healthy male has intercourse with infected chronic female partner
       else if (person->partner_->state_ == GemsState::kChronic &&
@@ -281,6 +292,8 @@ struct RegularMatingBehaviour : public Behavior {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
+        // AM: Add MatingBehaviour only when infected
+        person->AddBehavior(new MatingBehaviour());
       }
       // Scenario healthy male has intercourse with infected treated female partner
       else if (person->partner_->state_ == GemsState::kTreated &&
@@ -289,6 +302,8 @@ struct RegularMatingBehaviour : public Behavior {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
+        // AM: Add MatingBehaviour only when infected
+        person->AddBehavior(new MatingBehaviour());
       }
       // Scenario healthy male has intercourse with infected failing treatment
       // female partner
@@ -298,6 +313,8 @@ struct RegularMatingBehaviour : public Behavior {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
+        // AM: Add MatingBehaviour only when infected
+        person->AddBehavior(new MatingBehaviour());
       }
       // Scenario infected acute male has intercourse with healthy female partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
@@ -312,14 +329,14 @@ struct RegularMatingBehaviour : public Behavior {
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_chronic_mf, sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
-         person->partner_->infection_origin_state_ = person->state_;
+        person->partner_->infection_origin_state_ = person->state_;
       }  // Scenario infected treated male has intercourse with healthy female partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
                 person->state_ == GemsState::kTreated &&
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_treated_mf, sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
-         person->partner_->infection_origin_state_ = person->state_;
+        person->partner_->infection_origin_state_ = person->state_;
       }  // Scenario infected failing treatment male has intercourse with
           // healthy female partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
@@ -327,7 +344,7 @@ struct RegularMatingBehaviour : public Behavior {
                 random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_failing_mf, sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
-         person->partner_->infection_origin_state_ = person->state_;
+        person->partner_->infection_origin_state_ = person->state_;
       } else {
         ;  // if both are infected or both are healthy, do nothing
       }
@@ -604,9 +621,13 @@ struct GiveBirth : public Behavior {
     if (child->sex_ == Sex::kFemale) {
       child->AddBehavior(new GiveBirth());
     } else {
-      child->AddBehavior(new MatingBehaviour());
+      //child->AddBehavior(new MatingBehaviour());
+      if (child->state_ != GemsState::kHealthy){
+          child->AddBehavior(new MatingBehaviour());
+      }
       child->AddBehavior(new RegularMatingBehaviour());
       child->AddBehavior(new RegularPartnershipBehaviour());
+
     }
     child->AddBehavior(new GetOlder());
 

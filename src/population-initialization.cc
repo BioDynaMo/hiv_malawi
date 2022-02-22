@@ -175,7 +175,10 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   if (person->sex_ == Sex::kFemale) {
     person->AddBehavior(new GiveBirth());
   } else {
-    person->AddBehavior(new MatingBehaviour());
+    if (person->state_ != GemsState::kHealthy){
+      person->AddBehavior(new MatingBehaviour());
+    }
+    //person->AddBehavior(new MatingBehaviour());
     person->AddBehavior(new RegularMatingBehaviour());
     person->AddBehavior(new RegularPartnershipBehaviour());
   }

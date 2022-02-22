@@ -135,6 +135,16 @@ int PlotAndSaveTimeseries() {
   g4.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
                    "/simulation_sociobehaviours"),
             {".svg", ".png"});
+
+  // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g5(ts, "Casual sex acts", "Time", "Number", true);
+  g5.Add("mean_nocas_men_low_sb", "Mean - Men w/ Low Risk SB", "L", kGreen, 1.0, 2);     
+  g5.Add("mean_nocas_men_high_sb", "Mean - Men w/ High Risk SB", "L", kRed, 1.0, 2);     
+
+  g5.Draw();
+  g5.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+                   "/simulation_casual_mating"),
+            {".svg", ".png"});
   // Print info for user to let him/her know where to find simulation results
   std::string info =
       Concat("<PlotAndSaveTimeseries> ", "Results of simulation were saved to ",

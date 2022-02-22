@@ -35,7 +35,7 @@ ParamGroupUid GetUid() const override { return kUid; }
 int start_year = 1975;  // 1975;//1960;
 
 // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-uint64_t number_of_iterations = 25;  // 20; //45;//5;// 60;// (1960-2020)
+uint64_t number_of_iterations = 5;  // 20; //45;//5;// 60;// (1960-2020)
 
 // Number of agents that are present at the first iteration of the simulation
 uint64_t initial_population_size = 53020;  // 3600000;//5302000;
@@ -73,7 +73,7 @@ std::vector<float> hiv_mortality_rate{0.0,0.0,0.05,0.01,0.1};
 // float migration_mean = 0.0;
 // float migration_sigma = 2.0;
 // AM: Probability to migrate 
-// TO DO AM: Make this probability dependent on the origin location
+// TO DO AM: Make this probability dependent on the origin location?
 float migration_probability = 0.01;
 // AM: Migration year index
 const std::vector<int> migration_year_transition{1960};

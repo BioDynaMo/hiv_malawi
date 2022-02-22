@@ -119,6 +119,9 @@ void CategoricalEnvironment::UpdateImplementation() {
                  "person is nullptr");
     }
 
+    // Reset number of casual partners at the beginning of every year
+    //person->no_casual_partners_ = 0;
+
     // Adults
     if (person->age_ >= env->GetMinAge()){
       AgentPointer<Person> person_ptr = person->GetAgentPtr<Person>();
@@ -397,10 +400,12 @@ void CategoricalEnvironment::UpdateCasualPartnerCategoryDistribution(std::vector
 std::vector<std::vector<float>> age_mixing_matrix,
 std::vector<std::vector<float>> sociobehav_mixing_matrix
 ) {
+  //#pragma omp parallel
   mate_compound_category_distribution_.clear();
   mate_compound_category_distribution_.resize(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
 
+  //#pragma omp for
   for (int i = 0;
        i < no_locations_ * no_age_categories_ * no_sociobehavioural_categories_;
        i++) {  // Loop over male agent compound categories (location x age x
@@ -525,10 +530,12 @@ std::vector<std::vector<float>> sociobehav_mixing_matrix
 void CategoricalEnvironment::UpdateRegularPartnerCategoryDistribution(std::vector<std::vector<float>> reg_partner_age_mixing_matrix,
 std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix
 ) {
+  //#pragma omp parallel
   reg_partner_compound_category_distribution_.clear();
   reg_partner_compound_category_distribution_.resize(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
 
+  //#pragma omp for
   for (int i = 0;
        i < no_locations_ * no_age_categories_ * no_sociobehavioural_categories_;
        i++) {  // Loop over male agent compound categories (location x age x

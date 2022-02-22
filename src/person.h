@@ -33,6 +33,7 @@ class Person : public Cell {
     children_.clear();
     children_.reserve(100);
     protected_ = false;
+    no_casual_partners_ = 0;
   }
   explicit Person(const Double3& position) : Base(position) {}
   virtual ~Person() {}
@@ -62,6 +63,8 @@ class Person : public Cell {
   // for regular partnership are then indexed, select the compound category of their partner,
   // and are mapped to females corresponding to the selected category
   bool seek_regular_partnership_;
+  // Number of casual partners
+  int no_casual_partners_;
 
   ///! The aguments below are currently either not used or repetitive.
   // // Stores if an agent is infected or not

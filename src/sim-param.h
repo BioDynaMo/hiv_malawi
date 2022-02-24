@@ -35,10 +35,10 @@ class SimParam : public ParamGroup {
   int start_year = 1975;  // 1975;//1960;
 
   // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-  uint64_t number_of_iterations = 45;  // 20; //45;//5;// 60;// (1960-2020)
+  uint64_t number_of_iterations = 5;  // 20; //45;//5;// 60;// (1960-2020)
 
   // Number of agents that are present at the first iteration of the simulation
-  uint64_t initial_population_size = 5302000;  // 3600000;//5302000;
+  uint64_t initial_population_size = 53020;  // 3600000;//5302000;
 
   // Activate an additional safety mechanism: protect mothers from death in the
   // year in which they give birth

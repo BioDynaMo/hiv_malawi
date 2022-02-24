@@ -81,12 +81,14 @@ int SampleState(float rand_num,
 }
 
 int ComputeState(float rand_num, int age, int min_age, int max_age,
-                 size_t location,
-                 const std::vector<bool>& seed_districts,
+                 size_t location, const std::vector<bool>& seed_districts,
                  const std::vector<float>& initial_infection_probability) {
-  // Younger than min_age, older than max_age and living outside the subset of seed locations are all healthy.
-  if (age < min_age || age > max_age || (seed_districts[location] == false)) {  // AM: 15 yo is not a child anymore
-    return GemsState::kHealthy;          // Healthy
+  // Younger than min_age, older than max_age and living outside the subset of
+  // seed locations are all healthy.
+  if (age < min_age || age > max_age ||
+      (seed_districts[location] ==
+       false)) {                 // AM: 15 yo is not a child anymore
+    return GemsState::kHealthy;  // Healthy
   }
   // Else, sample the state given the initial infection probability.
   return SampleState(rand_num, initial_infection_probability);
@@ -140,16 +142,16 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   person->location_ =
       SampleLocation(rand_num[3], sparam->location_distribution);
   // Assign the GemsState of the person.
-  // AM: This depends on the person's age and location. HIV+ are only between min_age and
-  // max_age, ans in a subset of locations.
+  // AM: This depends on the person's age and location. HIV+ are only between
+  // min_age and max_age, ans in a subset of locations.
   person->state_ =
       ComputeState(rand_num[4], person->age_, sparam->min_age, sparam->max_age,
-                   person->location_,
-                   sparam->seed_districts,
+                   person->location_, sparam->seed_districts,
                    sparam->initial_infection_probability);
 
-  // If the person is infected at initialisation, set that it got infected through casual partnership.
-  if (person->state_ != GemsState::kHealthy){
+  // If the person is infected at initialisation, set that it got infected
+  // through casual partnership.
+  if (person->state_ != GemsState::kHealthy) {
     person->transmission_type_ = TransmissionType::kCasualPartner;
   }
 

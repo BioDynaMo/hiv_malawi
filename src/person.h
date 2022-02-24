@@ -28,8 +28,10 @@ class Person : public Cell {
 
  public:
   Person() {
-    mother_ = AgentPointer<Person>(); //AgentPointer object representing a nullptr
-    partner_ = AgentPointer<Person>(); //AgentPointer object representing a nullptr
+    mother_ =
+        AgentPointer<Person>();  // AgentPointer object representing a nullptr
+    partner_ =
+        AgentPointer<Person>();  // AgentPointer object representing a nullptr
     children_.clear();
     children_.reserve(100);
     protected_ = false;
@@ -59,9 +61,10 @@ class Person : public Cell {
   // The associated member functions LockProtection, UnlockProtection, and
   // IsProtected appear in the GiveBirth and GetOlder Behaviors.
   bool protected_;
-  // Single adult men can seek for a regular partnership. All male seeking 
-  // for regular partnership are then indexed, select the compound category of their partner,
-  // and are mapped to females corresponding to the selected category
+  // Single adult men can seek for a regular partnership. All male seeking
+  // for regular partnership are then indexed, select the compound category of
+  // their partner, and are mapped to females corresponding to the selected
+  // category
   bool seek_regular_partnership_;
   // Number of casual partners
   int no_casual_partners_;
@@ -77,8 +80,8 @@ class Person : public Cell {
   // Stores the IDs of the children. Useful, when mother migrates, and takes her
   // children. Unlink mother from child, when mother dies
   std::vector<AgentPointer<Person>> children_;
-  // Stores the ID of the regular partner. Useful for infection in 
-  // serodiscordant regular relationships, and family migration. 
+  // Stores the ID of the regular partner. Useful for infection in
+  // serodiscordant regular relationships, and family migration.
   AgentPointer<Person> partner_;
 
   // Returns True if the agent is healthy
@@ -94,20 +97,34 @@ class Person : public Cell {
   bool IsFailing() { return state_ == GemsState::kFailing; }
 
   // Return True if recently infected at birth
-  bool MTCTransmission() {return IsAcute() && transmission_type_ == TransmissionType::kMotherToChild;}
+  bool MTCTransmission() {
+    return IsAcute() && transmission_type_ == TransmissionType::kMotherToChild;
+  }
   // Return True if recently infected during casual mating
-  bool CasualTransmission() {return IsAcute() && transmission_type_ == TransmissionType::kCasualPartner;}
+  bool CasualTransmission() {
+    return IsAcute() && transmission_type_ == TransmissionType::kCasualPartner;
+  }
   // Return True if recently infected during regular mating
-  bool RegularTransmission() {return IsAcute() && transmission_type_ == TransmissionType::kRegularPartner;}
+  bool RegularTransmission() {
+    return IsAcute() && transmission_type_ == TransmissionType::kRegularPartner;
+  }
 
   // Return True if recently infected by an acute partner/mother
-  bool AcuteTransmission() {return IsAcute() && transmission_type_ == GemsState::kAcute;}
+  bool AcuteTransmission() {
+    return IsAcute() && transmission_type_ == GemsState::kAcute;
+  }
   // Return True if recently infected by an chronic partner/mother
-  bool ChronicTransmission() {return IsAcute() && transmission_type_ == GemsState::kChronic;}
+  bool ChronicTransmission() {
+    return IsAcute() && transmission_type_ == GemsState::kChronic;
+  }
   // Return True if recently infected by an treated partner/mother
-  bool TreatedTransmission() {return IsAcute() && transmission_type_ == GemsState::kTreated;}
+  bool TreatedTransmission() {
+    return IsAcute() && transmission_type_ == GemsState::kTreated;
+  }
   // Return True if recently infected by an failing partner/mother
-  bool FailingTransmission() {return IsAcute() && transmission_type_ == GemsState::kFailing;}
+  bool FailingTransmission() {
+    return IsAcute() && transmission_type_ == GemsState::kFailing;
+  }
 
   // Returns True if the agent has high-risk socio-behaviours
   bool HasHighRiskSocioBehav() { return social_behaviour_factor_ == 1; }
@@ -168,26 +185,24 @@ class Person : public Cell {
     }
   }
 
-  void SetPartner(AgentPointer<Person> partner){
+  void SetPartner(AgentPointer<Person> partner) {
     partner_ = partner;
     // Symetric relation
-    partner_->partner_=this->GetAgentPtr<Person>();
+    partner_->partner_ = this->GetAgentPtr<Person>();
   }
 
-  void SeparateFromPartner(){
-    if (hasPartner()){
+  void SeparateFromPartner() {
+    if (hasPartner()) {
       // Symetric relation. Start with partner while not nullptr
-      partner_->partner_=AgentPointer<Person>();
+      partner_->partner_ = AgentPointer<Person>();
       // Set partner to nullptr
       partner_ = AgentPointer<Person>();
     } else {
-      Log::Warning("Person::SeparateFromPartner()",
-                   "Person is single");
+      Log::Warning("Person::SeparateFromPartner()", "Person is single");
     }
-
   }
 
-  void Relocate(size_t new_location){
+  void Relocate(size_t new_location) {
     location_ = new_location;
 
     if (sex_ == Sex::kFemale) {
@@ -215,14 +230,15 @@ class Person : public Cell {
         if (children_[c]->age_ < 15) {
           if (children_[c]->location_ != location_) {
             Log::Warning("RandomMigration::Run()",
-                          "DEBUG: child and mother have different locations "
-                          "AFTER MIGRATION. Child's age = ",
-                          children_[c]->age_);
+                         "DEBUG: child and mother have different locations "
+                         "AFTER MIGRATION. Child's age = ",
+                         children_[c]->age_);
           }
         }
       }
-    } else if (hasPartner()){
-      // If a man engaged in a regular partnership relocates, his female partner relocates too.
+    } else if (hasPartner()) {
+      // If a man engaged in a regular partnership relocates, his female partner
+      // relocates too.
       partner_->Relocate(new_location);
     }
   }
@@ -240,7 +256,7 @@ class Person : public Cell {
 
   bool IsChildOf(AgentPointer<Person> mother) { return mother_ == mother; }
 
-  bool hasPartner() {return partner_ != nullptr;}
+  bool hasPartner() { return partner_ != nullptr; }
   bool IsPartnerOf(AgentPointer<Person> partner) { return partner_ == partner; }
 
   int GetNumberOfChildren() { return children_.size(); }

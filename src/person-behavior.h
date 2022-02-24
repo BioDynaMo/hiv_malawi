@@ -42,17 +42,20 @@ struct RandomMigration : public Behavior {
     // Probability to migrate
     float rand_num = static_cast<float>(random->Uniform());
     // Adult men and adult single women can initiate migration
-    if (rand_num <= sparam->migration_probability && person->age_ >= 15 && ((person->sex_ == Sex::kMale) || (person->sex_ == Sex::kFemale && !person->hasPartner()))) {
+    if (rand_num <= sparam->migration_probability && person->age_ >= 15 &&
+        ((person->sex_ == Sex::kMale) ||
+         (person->sex_ == Sex::kFemale && !person->hasPartner()))) {
       // Randomly determine the migration location
       // AM: Sample migration location. It depends on the current year and
       // current location
       float rand_num_loc = static_cast<float>(random->Uniform());
-      // Get (cumulative) probability distribution that agent relocates the current year, to each location
-      const std::vector<float> migration_location_distribution_ = env->GetMigrationLocDistribution(person->location_);
+      // Get (cumulative) probability distribution that agent relocates the
+      // current year, to each location
+      const std::vector<float> migration_location_distribution_ =
+          env->GetMigrationLocDistribution(person->location_);
 
-      int new_location = SampleLocation(
-          rand_num_loc,
-          migration_location_distribution_);
+      int new_location =
+          SampleLocation(rand_num_loc, migration_location_distribution_);
 
       person->Relocate(new_location);
     }
@@ -86,7 +89,6 @@ struct MatingBehaviour : public Behavior {
   }
 
   void Run(Agent* agent) override {
-  
     auto* sim = Simulation::GetActive();
     auto* env = bdm_static_cast<CategoricalEnvironment*>(sim->GetEnvironment());
     auto* random = sim->GetRandom();
@@ -126,7 +128,7 @@ struct MatingBehaviour : public Behavior {
           env->GetMateCompoundCategoryDistribution(
               person->location_, age_category,
               person->social_behaviour_factor_);
-      // Reset to 0 for this year       
+      // Reset to 0 for this year
       person->no_casual_partners_ = 0;
 
       for (int i = 0; i < no_mates; i++) {
@@ -148,7 +150,7 @@ struct MatingBehaviour : public Behavior {
 
         // Increment number of casual partners for both agents
         person->no_casual_partners_ = person->no_casual_partners_ + 1;
-        //mate->no_casual_partners_ = mate->no_casual_partners_ + 1;
+        // mate->no_casual_partners_ = mate->no_casual_partners_ + 1;
 
         // Scenario healthy male has intercourse with infected acute female
         if (mate->state_ == GemsState::kAcute &&
@@ -159,7 +161,8 @@ struct MatingBehaviour : public Behavior {
           person->infection_origin_state_ = mate->state_;
           // AM: Add MatingBehaviour only when male gets infected
           /*person->AddBehavior(new MatingBehaviour());
-          std::cout << "This should not currently happen: AddBehavior(new MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
+          std::cout << "This should not currently happen: AddBehavior(new
+          MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
         }
         // Scenario healthy male has intercourse with infected chronic female
         else if (mate->state_ == GemsState::kChronic &&
@@ -170,7 +173,8 @@ struct MatingBehaviour : public Behavior {
           person->infection_origin_state_ = mate->state_;
           // AM: Add MatingBehaviour only when male gets infected
           /*person->AddBehavior(new MatingBehaviour());
-          std::cout << "This should not currently happen: AddBehavior(new MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
+          std::cout << "This should not currently happen: AddBehavior(new
+          MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
         }
         // Scenario healthy male has intercourse with infected treated female
         else if (mate->state_ == GemsState::kTreated &&
@@ -181,7 +185,8 @@ struct MatingBehaviour : public Behavior {
           person->infection_origin_state_ = mate->state_;
           // AM: Add MatingBehaviour only when male gets infected
           /*person->AddBehavior(new MatingBehaviour());
-          std::cout << "This should not currently happen: AddBehavior(new MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
+          std::cout << "This should not currently happen: AddBehavior(new
+          MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
         }
         // Scenario healthy male has intercourse with infected failing treatment
         // female
@@ -193,7 +198,8 @@ struct MatingBehaviour : public Behavior {
           person->infection_origin_state_ = mate->state_;
           // AM: Add MatingBehaviour only when male gets infected
           /*person->AddBehavior(new MatingBehaviour());
-          std::cout << "This should not currently happen: AddBehavior(new MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
+          std::cout << "This should not currently happen: AddBehavior(new
+          MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
         }
         // Scenario infected acute male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
@@ -234,8 +240,9 @@ struct MatingBehaviour : public Behavior {
 
 // This is the regular partnership behaviour. The Behavior
 // is only executed by male agents. For each single male agent, we determine
-// whether he wants to engage in a regular partnership with a certain probability. 
-// For each male in regular partnership, we determine if he will separate from partner.
+// whether he wants to engage in a regular partnership with a certain
+// probability. For each male in regular partnership, we determine if he will
+// separate from partner.
 struct RegularPartnershipBehaviour : public Behavior {
   BDM_BEHAVIOR_HEADER(RegularPartnershipBehaviour, Behavior, 1);
 
@@ -248,26 +255,29 @@ struct RegularPartnershipBehaviour : public Behavior {
     const auto* sparam = param->Get<SimParam>();
     auto* person = bdm_static_cast<Person*>(agent);
 
-    // Adult men in regular partnership can break up (symmetric for female) 
-    if (person->IsAdult() && person->hasPartner() && random->Uniform() <= sparam->break_up_probability){
+    // Adult men in regular partnership can break up (symmetric for female)
+    if (person->IsAdult() && person->hasPartner() &&
+        random->Uniform() <= sparam->break_up_probability) {
       // Set female partner to single
       person->partner_->partner_ = AgentPointer<Person>();
       // Set male agent to single
       person->partner_ = AgentPointer<Person>();
-    } 
+    }
 
     // Adult single men can decide to engage in a regular partnership
-    if (person->IsAdult() && !person->hasPartner() && random->Uniform() <= sparam->regular_partnership_probability){
+    if (person->IsAdult() && !person->hasPartner() &&
+        random->Uniform() <= sparam->regular_partnership_probability) {
       person->seek_regular_partnership_ = true;
-    } else{
+    } else {
       person->seek_regular_partnership_ = false;
     }
   }
 };
 
 // This is the regular mating behaviour. The Behavior
-// is only executed by male agents. In serodiscordant regular partners, 
-// the infected partner transmits HIV to his healthy partner with a certain probability.
+// is only executed by male agents. In serodiscordant regular partners,
+// the infected partner transmits HIV to his healthy partner with a certain
+// probability.
 struct RegularMatingBehaviour : public Behavior {
   BDM_BEHAVIOR_HEADER(RegularMatingBehaviour, Behavior, 1);
 
@@ -281,76 +291,102 @@ struct RegularMatingBehaviour : public Behavior {
     const auto* sparam = param->Get<SimParam>();
     auto* person = bdm_static_cast<Person*>(agent);
 
-    if (person->hasPartner() && person->age_ < env->GetMaxAge()){
-      // Scenario healthy male has intercourse with infected acute female partner
+    if (person->hasPartner() && person->age_ < env->GetMaxAge()) {
+      // Scenario healthy male has intercourse with infected acute female
+      // partner
       if (person->partner_->state_ == GemsState::kAcute &&
           person->state_ == GemsState::kHealthy &&
-          random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_acute_fm,sparam->no_regular_acts_mean))) {
+          random->Uniform() <
+              (1.0 - pow(1.0 - sparam->infection_probability_acute_fm,
+                         sparam->no_regular_acts_mean))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
         // AM: Add MatingBehaviour only when infected
-        //person->AddBehavior(new MatingBehaviour());
+        // person->AddBehavior(new MatingBehaviour());
       }
-      // Scenario healthy male has intercourse with infected chronic female partner
+      // Scenario healthy male has intercourse with infected chronic female
+      // partner
       else if (person->partner_->state_ == GemsState::kChronic &&
-                person->state_ == GemsState::kHealthy &&
-                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_chronic_fm, sparam->no_regular_acts_mean))) {
+               person->state_ == GemsState::kHealthy &&
+               random->Uniform() <
+                   (1.0 - pow(1.0 - sparam->infection_probability_chronic_fm,
+                              sparam->no_regular_acts_mean))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
         // AM: Add MatingBehaviour only when infected
-        //person->AddBehavior(new MatingBehaviour());
+        // person->AddBehavior(new MatingBehaviour());
       }
-      // Scenario healthy male has intercourse with infected treated female partner
+      // Scenario healthy male has intercourse with infected treated female
+      // partner
       else if (person->partner_->state_ == GemsState::kTreated &&
-                person->state_ == GemsState::kHealthy &&
-                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_treated_fm, sparam->no_regular_acts_mean))) {
+               person->state_ == GemsState::kHealthy &&
+               random->Uniform() <
+                   (1.0 - pow(1.0 - sparam->infection_probability_treated_fm,
+                              sparam->no_regular_acts_mean))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
         // AM: Add MatingBehaviour only when infected
-        //person->AddBehavior(new MatingBehaviour());
+        // person->AddBehavior(new MatingBehaviour());
       }
       // Scenario healthy male has intercourse with infected failing treatment
       // female partner
       else if (person->partner_->state_ == GemsState::kFailing &&
-                person->state_ == GemsState::kHealthy &&
-                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_failing_fm, sparam->no_regular_acts_mean))) {
+               person->state_ == GemsState::kHealthy &&
+               random->Uniform() <
+                   (1.0 - pow(1.0 - sparam->infection_probability_failing_fm,
+                              sparam->no_regular_acts_mean))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
         // AM: Add MatingBehaviour only when infected
-        //person->AddBehavior(new MatingBehaviour());
+        // person->AddBehavior(new MatingBehaviour());
       }
-      // Scenario infected acute male has intercourse with healthy female partner
+      // Scenario infected acute male has intercourse with healthy female
+      // partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
-                person->state_ == GemsState::kAcute &&
-                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_acute_mf, sparam->no_regular_acts_mean))) {
+               person->state_ == GemsState::kAcute &&
+               random->Uniform() <
+                   (1.0 - pow(1.0 - sparam->infection_probability_acute_mf,
+                              sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
-        person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+        person->partner_->transmission_type_ =
+            TransmissionType::kRegularPartner;
         person->partner_->infection_origin_state_ = person->state_;
-      }  // Scenario infected chronic male has intercourse with healthy female partner
+      }  // Scenario infected chronic male has intercourse with healthy female
+         // partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
-                person->state_ == GemsState::kChronic &&
-                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_chronic_mf, sparam->no_regular_acts_mean))) {
+               person->state_ == GemsState::kChronic &&
+               random->Uniform() <
+                   (1.0 - pow(1.0 - sparam->infection_probability_chronic_mf,
+                              sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
-        person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+        person->partner_->transmission_type_ =
+            TransmissionType::kRegularPartner;
         person->partner_->infection_origin_state_ = person->state_;
-      }  // Scenario infected treated male has intercourse with healthy female partner
+      }  // Scenario infected treated male has intercourse with healthy female
+         // partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
-                person->state_ == GemsState::kTreated &&
-                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_treated_mf, sparam->no_regular_acts_mean))) {
+               person->state_ == GemsState::kTreated &&
+               random->Uniform() <
+                   (1.0 - pow(1.0 - sparam->infection_probability_treated_mf,
+                              sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
-        person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+        person->partner_->transmission_type_ =
+            TransmissionType::kRegularPartner;
         person->partner_->infection_origin_state_ = person->state_;
       }  // Scenario infected failing treatment male has intercourse with
-          // healthy female partner
+         // healthy female partner
       else if (person->partner_->state_ == GemsState::kHealthy &&
-                person->state_ == GemsState::kFailing &&
-                random->Uniform() < (1.0-pow(1.0-sparam->infection_probability_failing_mf, sparam->no_regular_acts_mean))) {
+               person->state_ == GemsState::kFailing &&
+               random->Uniform() <
+                   (1.0 - pow(1.0 - sparam->infection_probability_failing_mf,
+                              sparam->no_regular_acts_mean))) {
         person->partner_->state_ = GemsState::kAcute;
-        person->partner_->transmission_type_ = TransmissionType::kRegularPartner;
+        person->partner_->transmission_type_ =
+            TransmissionType::kRegularPartner;
         person->partner_->infection_origin_state_ = person->state_;
       } else {
         ;  // if both are infected or both are healthy, do nothing
@@ -367,22 +403,24 @@ struct GetOlder : public Behavior {
   GetOlder() {}
 
   // AM : Get mortality rate by age
-  float get_mortality_rate_age(float age, 
-                                std::vector<int> mortality_rate_age_transition, 
-                                std::vector<float> mortality_rate_by_age) {
-    size_t age_index = mortality_rate_by_age.size()-1; 
-    for (size_t i = 0 ; i < mortality_rate_age_transition.size() ; i++){
-        if (age < mortality_rate_age_transition[i]){
-          age_index = i;
-          break;
-        } 
+  float get_mortality_rate_age(float age,
+                               std::vector<int> mortality_rate_age_transition,
+                               std::vector<float> mortality_rate_by_age) {
+    size_t age_index = mortality_rate_by_age.size() - 1;
+    for (size_t i = 0; i < mortality_rate_age_transition.size(); i++) {
+      if (age < mortality_rate_age_transition[i]) {
+        age_index = i;
+        break;
+      }
     }
-    //std::cout << "Age " << age << " => Mortality rate " << mortality_rate_by_age[age_index] << std::endl;
+    // std::cout << "Age " << age << " => Mortality rate " <<
+    // mortality_rate_by_age[age_index] << std::endl;
     return mortality_rate_by_age[age_index];
   }
 
   // AM: Get HIV-related mortality rate
-  float get_mortality_rate_hiv(int state, std::vector<float> hiv_mortality_rate) {
+  float get_mortality_rate_hiv(int state,
+                               std::vector<float> hiv_mortality_rate) {
     return hiv_mortality_rate[state];
   }
 
@@ -394,8 +432,9 @@ struct GetOlder : public Behavior {
     auto* person = bdm_static_cast<Person*>(agent);
 
     // Assign or reassign risk factors
-    if (floor(person->age_) == sparam->min_age) {  // Assign potentially high risk
-                                            // factor at first year of adulthood
+    if (floor(person->age_) ==
+        sparam->min_age) {  // Assign potentially high risk
+                            // factor at first year of adulthood
       // Probability of being at high risk depends on year and HIV status
       int year = static_cast<int>(
           sparam->start_year +
@@ -498,12 +537,15 @@ struct GetOlder : public Behavior {
     // AM: Mortality
     // HIV-related mortality
     float rand_num_hiv = static_cast<float>(random->Uniform());
-    if (rand_num_hiv < get_mortality_rate_hiv(person->state_, sparam->hiv_mortality_rate)) {
+    if (rand_num_hiv <
+        get_mortality_rate_hiv(person->state_, sparam->hiv_mortality_rate)) {
       stay_alive = false;
     }
     // Age-related mortality
     float rand_num_age = static_cast<float>(random->Uniform());
-    if (rand_num_age < get_mortality_rate_age(person->age_, sparam->mortality_rate_age_transition, sparam->mortality_rate_by_age)) {
+    if (rand_num_age < get_mortality_rate_age(
+                           person->age_, sparam->mortality_rate_age_transition,
+                           sparam->mortality_rate_by_age)) {
       stay_alive = false;
     }
 
@@ -521,7 +563,7 @@ struct GetOlder : public Behavior {
 
     if (!stay_alive) {
       // If has regular partner, end partnership
-      if (person->hasPartner()){
+      if (person->hasPartner()) {
         person->SeparateFromPartner();
       }
       // If mother dies, children have no mother anymore
@@ -584,7 +626,8 @@ struct GiveBirth : public Behavior {
     // // year of infection to present year, Question: Ask Lukas how to get
     // iter child->year_of_infection_ = 2000;
     //}
-    // AM: birth infection probability depends on whether mother is treated and current year
+    // AM: birth infection probability depends on whether mother is treated and
+    // current year
     else if (mother->state_ == GemsState::kTreated) {
       if (random_generator->Uniform() <
           sparam->birth_infection_probability_treated) {
@@ -594,7 +637,10 @@ struct GiveBirth : public Behavior {
       } else {
         child->state_ = GemsState::kHealthy;
       }
-    } else if (year < 2003 || mother->state_ == GemsState::kFailing){  // AM: Mother is not healthy and not treated
+    } else if (year < 2003 ||
+               mother->state_ ==
+                   GemsState::kFailing) {  // AM: Mother is not healthy and not
+                                           // treated
       if (random_generator->Uniform() <
           sparam->birth_infection_probability_untreated) {
         child->state_ = GemsState::kAcute;
@@ -634,7 +680,6 @@ struct GiveBirth : public Behavior {
       }*/
       child->AddBehavior(new RegularMatingBehaviour());
       child->AddBehavior(new RegularPartnershipBehaviour());
-
     }
     child->AddBehavior(new GetOlder());
 
@@ -651,12 +696,13 @@ struct GiveBirth : public Behavior {
 
     // Each potential mother gives birth with a certain probability.
     if (random->Uniform() < sparam->give_birth_probability &&
-        mother->age_ <= sparam->max_age_birth && mother->age_ >= sparam->min_age) {
-
-      // The probability of the child to be infected depends on the current year (ex. prophylaxis)
+        mother->age_ <= sparam->max_age_birth &&
+        mother->age_ >= sparam->min_age) {
+      // The probability of the child to be infected depends on the current year
+      // (ex. prophylaxis)
       int year = static_cast<int>(
-      sparam->start_year +
-      sim->GetScheduler()->GetSimulatedSteps());  // Current year
+          sparam->start_year +
+          sim->GetScheduler()->GetSimulatedSteps());  // Current year
 
       // Create a child
       auto* new_child = CreateChild(random, mother, sparam, year);

@@ -62,7 +62,7 @@ int PlotAndSaveTimeseries() {
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2(ts, "my result", "Time", "Number of agents",
                                   true);
-  //g2.Add("healthy_agents", "Healthy", "L", kBlue, 1.0, 1);
+  // g2.Add("healthy_agents", "Healthy", "L", kBlue, 1.0, 1);
   g2.Add("infected_agents", "HIV", "L", kOrange, 1.0, 1);
   g2.Add("acute_agents", "Acute", "L", kRed, 1.0, 10);
   g2.Add("chronic_agents", "Chronic", "L", kMagenta, 1.0, 10);
@@ -75,26 +75,29 @@ int PlotAndSaveTimeseries() {
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_2(ts, "my result", "Time", "Number of agents",
-                                  true);
+                                    true);
   g2_2.Add("mtct_agents", "MTCT", "L", kGreen, 1.0, 3);
-  g2_2.Add("casual_transmission_agents", "Casual Transmission", "L", kRed, 1.0, 3);
-  g2_2.Add("regular_transmission_agents", "Regular Transmission", "L", kBlue, 1.0, 3);
+  g2_2.Add("casual_transmission_agents", "Casual Transmission", "L", kRed, 1.0,
+           3);
+  g2_2.Add("regular_transmission_agents", "Regular Transmission", "L", kBlue,
+           1.0, 3);
   g2_2.Draw();
   g2_2.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
-                   "/simulation_transmission_types"),
-            {".svg", ".png"});
+                     "/simulation_transmission_types"),
+              {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_3(ts, "my result", "Time", "Number of agents",
-                                  true);
+                                    true);
   g2_3.Add("acute_transmission", "Infected by Acute", "L", kRed, 1.0, 10);
-  g2_3.Add("chronic_transmission", "Infected by Chronic", "L", kMagenta, 1.0, 10);
+  g2_3.Add("chronic_transmission", "Infected by Chronic", "L", kMagenta, 1.0,
+           10);
   g2_3.Add("treated_transmission", "Infected by Treated", "L", kGreen, 1.0, 10);
   g2_3.Add("failing_transmission", "Infected by Failing", "L", kGray, 1.0, 10);
   g2_3.Draw();
   g2_3.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
-                   "/simulation_transmission_sources"),
-            {".svg", ".png"});
+                     "/simulation_transmission_sources"),
+              {".svg", ".png"});
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g3(ts, "my result", "Time", "", true);
   g3.Add("prevalence", "Prevalence", "L", kOrange, 1.0, 3, 1, kOrange, 1.0, 5);
@@ -102,10 +105,12 @@ int PlotAndSaveTimeseries() {
          1.0, 10);
   g3.Add("prevalence_men", "Prevalence - Men", "L", kBlue, 1.0, 3, 1, kBlue,
          1.0, 10);
-         
+
   g3.Add("prevalence_15_49", "Prevalence (15-49)", "L", kOrange, 1.0, 1, 1);
-  g3.Add("prevalence_women_15_49", "Prevalence - Women (15-49)", "L", kRed, 1.0, 1, 1);
-  g3.Add("prevalence_men_15_49", "Prevalence - Men (15-49)", "L", kBlue, 1.0, 1, 1);
+  g3.Add("prevalence_women_15_49", "Prevalence - Women (15-49)", "L", kRed, 1.0,
+         1, 1);
+  g3.Add("prevalence_men_15_49", "Prevalence - Men (15-49)", "L", kBlue, 1.0, 1,
+         1);
 
   g3.Add("incidence", "Incidence", "L", kRed, 1.0, 3, 1, kRed, 1.0, 5);
 
@@ -113,7 +118,6 @@ int PlotAndSaveTimeseries() {
   g3.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
                    "/simulation_hiv_prevalence_incidence"),
             {".svg", ".png"});
-
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g4(ts, "my result", "Time", "Proportion", true);
@@ -137,16 +141,22 @@ int PlotAndSaveTimeseries() {
             {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
-  bdm::experimental::LineGraph g5(ts, "Casual sex acts", "Time", "Number", true);
-  g5.Add("mean_nocas_men_low_sb", "Mean - Men w/ Low Risk SB", "L", kGreen, 1.0, 2);     
-  g5.Add("mean_nocas_men_high_sb", "Mean - Men w/ High Risk SB", "L", kRed, 1.0, 2);     
-  g5.Add("mean_nocas_women_low_sb", "Mean - Women w/ Low Risk SB", "L", kGreen, 1.0, 1);     
-  g5.Add("mean_nocas_women_high_sb", "Mean - Women w/ High Risk SB", "L", kRed, 1.0, 1);     
+  bdm::experimental::LineGraph g5(ts, "Casual sex acts", "Time", "Number",
+                                  true);
+        
+  g5.Add("mean_nocas_men_low_sb", "Mean - Men w/ Low Risk SB", "L", kGreen, 1.0,
+         2);
+  g5.Add("mean_nocas_men_high_sb", "Mean - Men w/ High Risk SB", "L", kRed, 1.0,
+         2);
+  g5.Add("mean_nocas_women_low_sb", "Mean - Women w/ Low Risk SB", "L", kGreen, 1.0,
+         1);     
+  g5.Add("mean_nocas_women_high_sb", "Mean - Women w/ High Risk SB", "L", kRed, 1.0,
+         1);     
 
   g5.Draw();
-  g5.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
-                   "/simulation_casual_mating"),
-            {".svg", ".png"});
+  g5.SaveAs(
+      Concat(sim->GetOutputDir(), "/", time_stamp, "/simulation_casual_mating"),
+      {".svg", ".png"});
   // Print info for user to let him/her know where to find simulation results
   std::string info =
       Concat("<PlotAndSaveTimeseries> ", "Results of simulation were saved to ",

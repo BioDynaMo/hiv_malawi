@@ -1,0 +1,22 @@
+name: repository-check
+
+on:
+  push:
+
+jobs:
+  code-style:
+    runs-on: ubuntu-20.04
+
+    steps:
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install clang-format
+
+    - name: Checkout this repository
+      uses: actions/checkout@v2
+
+    - name: Run code style check
+      run: |
+        ./style_check.sh

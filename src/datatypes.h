@@ -66,7 +66,12 @@ enum Location {
 };
 
 // Possible transmission types. Leave the kTransmissionLast at the End.
-enum TransmissionType {kMotherToChild, kCasualPartner, kRegularPartner, kTransmissionLast};
+enum TransmissionType {
+  kMotherToChild,
+  kCasualPartner,
+  kRegularPartner,
+  kTransmissionLast
+};
 
 }  // namespace bdm
 

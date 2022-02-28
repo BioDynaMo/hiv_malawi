@@ -199,6 +199,7 @@ int Simulate(int argc, const char** argv) {
     // Sum agents data
     auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
       *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
+      bdm_static_cast<Person*>(agent)->no_casual_partners_ = 0.0;
     });
     SumReduction<uint64_t> combine_tl_results;
     return static_cast<double>(bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond))/
@@ -215,6 +216,7 @@ int Simulate(int argc, const char** argv) {
     // Sum agents data
     auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
       *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
+      bdm_static_cast<Person*>(agent)->no_casual_partners_ = 0.0;
     });
     SumReduction<uint64_t> combine_tl_results;
     return static_cast<double>(bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond))/
@@ -231,6 +233,7 @@ int Simulate(int argc, const char** argv) {
     // Sum agents data
     auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
       *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
+      bdm_static_cast<Person*>(agent)->no_casual_partners_ = 0.0;
     });
     SumReduction<uint64_t> combine_tl_results;
     return static_cast<double>(bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond))/
@@ -247,6 +250,7 @@ int Simulate(int argc, const char** argv) {
     // Sum agents data
     auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
       *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
+      bdm_static_cast<Person*>(agent)->no_casual_partners_ = 0.0;
     });
     SumReduction<uint64_t> combine_tl_results;
     return static_cast<double>(bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond))/

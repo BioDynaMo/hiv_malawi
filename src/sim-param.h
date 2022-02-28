@@ -35,7 +35,7 @@ ParamGroupUid GetUid() const override { return kUid; }
 int start_year = 1975;  // 1975;//1960;
 
 // The number of iterations that BioDynaMo simulates. (#iterations = #years)
-uint64_t number_of_iterations = 5;  // 20; //45;//5;// 60;// (1960-2020)
+uint64_t number_of_iterations = 25;  // 20; //45;//5;// 60;// (1960-2020)
 
 // Number of agents that are present at the first iteration of the simulation
 uint64_t initial_population_size = 53020;  // 3600000;//5302000;
@@ -97,13 +97,23 @@ const std::vector<int> no_mates_year_transition{1960, 1990, 2000};
 const std::vector<std::vector<float>> no_mates_mean /*{{40.0,80.0},
                                                     {30.0,60.0},
                                                     {20.0,40.0}};*/
-    {{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
+    //{{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
+    {{2.0, 7.0}, {2.0, 5.0}, {1.0, 4.0}};
 
 const std::vector<std::vector<float>> no_mates_sigma /*{{100.0,100.0},
                                                     {100.0,100.0},
                                                     {100.0,100.0}};*/
     {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
 
+// We sample the number of sex acts with each female sex partner per year 
+// from a Gaussian distribution.
+const std::vector<std::vector<float>> no_acts_mean 
+    //{{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
+    {{10.0, 10.0}, {10.0, 10.0}, {10.0, 10.0}};
+
+const std::vector<std::vector<float>> no_acts_sigma
+    {{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
+    
 // Mean number of sexual acts with regular partner per year.
 const float no_regular_acts_mean = 150.0; // 50;
 

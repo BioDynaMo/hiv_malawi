@@ -140,6 +140,8 @@ int PlotAndSaveTimeseries() {
   bdm::experimental::LineGraph g5(ts, "Casual sex acts", "Time", "Number", true);
   g5.Add("mean_nocas_men_low_sb", "Mean - Men w/ Low Risk SB", "L", kGreen, 1.0, 2);     
   g5.Add("mean_nocas_men_high_sb", "Mean - Men w/ High Risk SB", "L", kRed, 1.0, 2);     
+  g5.Add("mean_nocas_women_low_sb", "Mean - Women w/ Low Risk SB", "L", kGreen, 1.0, 1);     
+  g5.Add("mean_nocas_women_high_sb", "Mean - Women w/ High Risk SB", "L", kRed, 1.0, 1);     
 
   g5.Draw();
   g5.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,

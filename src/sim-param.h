@@ -38,7 +38,7 @@ class SimParam : public ParamGroup {
   uint64_t number_of_iterations = 25;  // 20; //45;//5;// 60;// (1960-2020)
 
   // Number of agents that are present at the first iteration of the simulation
-  uint64_t initial_population_size = 53020;  // 3600000;//5302000;
+  uint64_t initial_population_size = 530200;  // 3600000;//5302000;
 
   // Activate an additional safety mechanism: protect mothers from death in the
   // year in which they give birth
@@ -99,7 +99,7 @@ class SimParam : public ParamGroup {
                                                       {30.0,60.0},
                                                       {20.0,40.0}};*/
       //{{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
-      {{2.0, 7.0}, {2.0, 5.0}, {1.0, 4.0}};
+      {{2.0, 8.0}, {1.0, 4.0}, {1.0, 4.0}};
 
   const std::vector<std::vector<float>> no_mates_sigma /*{{100.0,100.0},
                                                     {100.0,100.0},
@@ -182,7 +182,10 @@ class SimParam : public ParamGroup {
 
   // AM: Socio-behavioural Mixing Matrix used for casual partner selection.
   // Socio-beahioural Category -> Socio-behavioural Category
-  std::vector<std::vector<float>> sociobehav_mixing_matrix;
+  std::vector<std::vector<float>> sociobehav_mixing_matrix{
+    {1.0, 4.0},
+    {1.0, 4.0}
+  };
 
   // AM: Socio-behavioural Mixing Matrix used for regular partner selection.
   // Socio-beahioural Category -> Socio-behavioural Category
@@ -269,7 +272,7 @@ class SimParam : public ParamGroup {
   // Defines the right sizes for the matrices, for some fills it's entries, and
   // is called in constructor.
   void Initialize() {
-    SetSociobehavMixingMatrix();
+    //SetSociobehavMixingMatrix();
     SetAgeMixingMatrix();
     SetLocationMixingMatrix();
 

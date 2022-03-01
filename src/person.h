@@ -111,19 +111,19 @@ class Person : public Cell {
 
   // Return True if recently infected by an acute partner/mother
   bool AcuteTransmission() {
-    return IsAcute() && transmission_type_ == GemsState::kAcute;
+    return IsAcute() && infection_origin_state_ == GemsState::kAcute;
   }
   // Return True if recently infected by an chronic partner/mother
   bool ChronicTransmission() {
-    return IsAcute() && transmission_type_ == GemsState::kChronic;
+    return IsAcute() && infection_origin_state_ == GemsState::kChronic;
   }
   // Return True if recently infected by an treated partner/mother
   bool TreatedTransmission() {
-    return IsAcute() && transmission_type_ == GemsState::kTreated;
+    return IsAcute() && infection_origin_state_ == GemsState::kTreated;
   }
   // Return True if recently infected by an failing partner/mother
   bool FailingTransmission() {
-    return IsAcute() && transmission_type_ == GemsState::kFailing;
+    return IsAcute() && infection_origin_state_ == GemsState::kFailing;
   }
 
   // Returns True if the agent has high-risk socio-behaviours

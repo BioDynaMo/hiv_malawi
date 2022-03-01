@@ -261,6 +261,9 @@ class Person : public Cell {
 
   int GetNumberOfChildren() { return children_.size(); }
 
+  // Restet the counter of casual partners to zero
+  void ResetCasualPartners() { no_casual_partners_ = 0; }
+
   // Activates the protection of an agent against death.
   void LockProtection() { protected_ = true; }
   // Deactivates the protection of an agent against death.

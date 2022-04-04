@@ -88,7 +88,7 @@ class Person : public Cell {
   // related agents. (Tread safety)
   virtual void CriticalRegion(std::vector<AgentUid>* uids) override {
     uids->push_back(GetUid());
-    if (partner_) {
+    if (partner_ != nullptr) {
       uids->push_back(partner_->GetUid());
     }
     // Additional statements may be introduced for mother-child relationships

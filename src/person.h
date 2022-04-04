@@ -84,6 +84,18 @@ class Person : public Cell {
   // serodiscordant regular relationships, and family migration.
   AgentPointer<Person> partner_;
 
+  // The following function is used to avoid simultaneous modification of
+  // related agents. (Tread safety)
+  virtual void CriticalRegion(std::vector<AgentUid>* uids) override {
+    uids->push_back(GetUid());
+    if (partner_) {
+      uids->push_back(partner_->GetUid());
+    }
+    // Additional statements may be introduced for mother-child relationships
+    // but this seems to slow down the simulation quite a bit and is
+    // therefore not implemented at the moment.
+  }
+
   // Returns True if the agent is healthy
   bool IsHealthy() { return state_ == GemsState::kHealthy; }
   // AM: Added below functions for more detailed follow up of HIV state

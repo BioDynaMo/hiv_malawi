@@ -89,7 +89,13 @@ class Person : public Cell {
   virtual void CriticalRegion(std::vector<AgentUid>* uids) override {
     uids->push_back(GetUid());
     if (partner_ != nullptr) {
-      uids->push_back(partner_->GetUid());
+      uids->push_back(partner_.GetUid());
+    }
+    for (auto& child : children_) {
+      uids->push_back(child.GetUid());
+    }
+    if (mother_ != nullptr) {
+      uids->push_back(mother_.GetUid());
     }
     // Additional statements may be introduced for mother-child relationships
     // but this seems to slow down the simulation quite a bit and is

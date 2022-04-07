@@ -183,10 +183,8 @@ class SimParam : public ParamGroup {
 
   // AM: Socio-behavioural Mixing Matrix used for casual partner selection.
   // Socio-beahioural Category -> Socio-behavioural Category
-  std::vector<std::vector<float>> sociobehav_mixing_matrix{
-    {1.0, 4.0},
-    {1.0, 4.0}
-  };
+  std::vector<std::vector<float>> sociobehav_mixing_matrix{{1.0, 4.0},
+                                                           {1.0, 4.0}};
 
   // AM: Socio-behavioural Mixing Matrix used for regular partner selection.
   // Socio-beahioural Category -> Socio-behavioural Category
@@ -273,7 +271,7 @@ class SimParam : public ParamGroup {
   // Defines the right sizes for the matrices, for some fills it's entries, and
   // is called in constructor.
   void Initialize() {
-    //SetSociobehavMixingMatrix();
+    // SetSociobehavMixingMatrix();
     SetAgeMixingMatrix();
     SetLocationMixingMatrix();
 

@@ -228,8 +228,8 @@ inline int Simulate(int argc, const char** argv) {
       *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
     });
     SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(bdm::experimental::Reduce(
-               sim, sum_data, combine_tl_results, &cond));
+    return static_cast<double>(
+        bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond));
   };
 
   // Define how to compute mean number of casual partners for males with
@@ -267,8 +267,8 @@ inline int Simulate(int argc, const char** argv) {
       *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
     });
     SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(bdm::experimental::Reduce(
-               sim, sum_data, combine_tl_results, &cond));
+    return static_cast<double>(
+        bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond));
   };
 
   // Define how to compute mean number of casual partners for females with
@@ -306,8 +306,8 @@ inline int Simulate(int argc, const char** argv) {
       *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
     });
     SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(bdm::experimental::Reduce(
-               sim, sum_data, combine_tl_results, &cond));
+    return static_cast<double>(
+        bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond));
   };
 
   // Define how to compute mean number of casual partners for females with
@@ -345,8 +345,8 @@ inline int Simulate(int argc, const char** argv) {
       *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
     });
     SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(bdm::experimental::Reduce(
-               sim, sum_data, combine_tl_results, &cond));
+    return static_cast<double>(
+        bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond));
   };
   // AM: Define how to compute general prevalence
   auto pct_prevalence = [](Simulation* sim) {
@@ -603,15 +603,15 @@ inline int Simulate(int argc, const char** argv) {
     });
     auto cond_healthy_women = L2F([](Agent* a) {
       auto* person = bdm_static_cast<Person*>(a);
-      return person->IsHealthy() and person->IsAdult() and
-             person->IsFemale();
+      return person->IsHealthy() and person->IsAdult() and person->IsFemale();
     });
     return static_cast<double>(
                bdm::experimental::Count(sim, cond_high_risk_healthy_women)) /
-           static_cast<double>(bdm::experimental::Count(sim, cond_healthy_women));
+           static_cast<double>(
+               bdm::experimental::Count(sim, cond_healthy_women));
   };
-  // AM: Define how to compute proportion of low-risk socio-beahviours among healthy
-  // adult women
+  // AM: Define how to compute proportion of low-risk socio-beahviours among
+  // healthy adult women
   auto pct_low_risk_healthy_women = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
     auto cond_low_risk_healthy_women = L2F([](Agent* a) {
@@ -621,12 +621,12 @@ inline int Simulate(int argc, const char** argv) {
     });
     auto cond_healthy_women = L2F([](Agent* a) {
       auto* person = bdm_static_cast<Person*>(a);
-      return person->IsHealthy() and person->IsAdult() and
-             person->IsFemale();
+      return person->IsHealthy() and person->IsAdult() and person->IsFemale();
     });
     return static_cast<double>(
                bdm::experimental::Count(sim, cond_low_risk_healthy_women)) /
-           static_cast<double>(bdm::experimental::Count(sim, cond_healthy_women));
+           static_cast<double>(
+               bdm::experimental::Count(sim, cond_healthy_women));
   };
   // AM: Define how to compute proportion of high-risk socio-beahviours among
   // healthy adult men
@@ -645,8 +645,8 @@ inline int Simulate(int argc, const char** argv) {
                bdm::experimental::Count(sim, cond_high_risk_healthy_men)) /
            static_cast<double>(bdm::experimental::Count(sim, cond_healthy_men));
   };
-  // AM: Define how to compute proportion of low-risk socio-beahviours among healthy
-  // adult men
+  // AM: Define how to compute proportion of low-risk socio-beahviours among
+  // healthy adult men
   auto pct_low_risk_healthy_men = [](Simulation* sim) {
     // Condition for Count operation, e.g. check if person is infected.
     auto cond_low_risk_healthy_men = L2F([](Agent* a) {
@@ -702,7 +702,8 @@ inline int Simulate(int argc, const char** argv) {
                    get_year);
 
   ts->AddCollector("total_nocas_men_low_sb", total_nocas_men_low_sb, get_year);
-  ts->AddCollector("total_nocas_men_high_sb", total_nocas_men_high_sb, get_year);
+  ts->AddCollector("total_nocas_men_high_sb", total_nocas_men_high_sb,
+                   get_year);
   ts->AddCollector("total_nocas_women_low_sb", total_nocas_women_low_sb,
                    get_year);
   ts->AddCollector("total_nocas_women_high_sb", total_nocas_women_high_sb,
@@ -730,11 +731,15 @@ inline int Simulate(int argc, const char** argv) {
   ts->AddCollector("high_risk_sb_hiv_men", pct_high_risk_hiv_men, get_year);
   ts->AddCollector("low_risk_sb_hiv_men", pct_low_risk_hiv_men, get_year);
 
-  ts->AddCollector("high_risk_sb_healthy_women", pct_high_risk_healthy_women, get_year);
-  ts->AddCollector("low_risk_sb_healthy_women", pct_low_risk_healthy_women, get_year);
+  ts->AddCollector("high_risk_sb_healthy_women", pct_high_risk_healthy_women,
+                   get_year);
+  ts->AddCollector("low_risk_sb_healthy_women", pct_low_risk_healthy_women,
+                   get_year);
 
-  ts->AddCollector("high_risk_sb_healthy_men", pct_high_risk_healthy_men, get_year);
-  ts->AddCollector("low_risk_sb_healthy_men", pct_low_risk_healthy_men, get_year);
+  ts->AddCollector("high_risk_sb_healthy_men", pct_high_risk_healthy_men,
+                   get_year);
+  ts->AddCollector("low_risk_sb_healthy_men", pct_low_risk_healthy_men,
+                   get_year);
 
   // Unschedule some default operations
   auto* scheduler = simulation.GetScheduler();
@@ -805,4 +810,3 @@ inline int Simulate(int argc, const char** argv) {
 }  // namespace bdm
 
 #endif  // BDM_SIMULAION_H_
-

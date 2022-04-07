@@ -2,6 +2,11 @@
 
 namespace bdm {
 
+// Initialize parameter group Uid, part of the BioDynaMo API, needs to be part
+// of a cc file, depends on #include "sim-param.h". With this, we can access the
+// simulation parameters anywhere in the simulation.
+const ParamGroupUid SimParam::kUid = ParamGroupUidGenerator::Get()->NewUid();
+
 void SimParam::SetSociobehavMixingMatrix() {
   sociobehav_mixing_matrix.clear();
   sociobehav_mixing_matrix.resize(nb_age_categories);

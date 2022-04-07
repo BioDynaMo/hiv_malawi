@@ -23,9 +23,9 @@ namespace hiv_malawi {
 // BioDynaMo's Agent / Individual
 ////////////////////////////////////////////////////////////////////////////////
 
-class Person : public Cell {
+class Person : public Agent {
   // BioDynaMo API
-  BDM_AGENT_HEADER(Person, Cell, 1);
+  BDM_AGENT_HEADER(Person, Agent, 1);
 
  public:
   Person() {
@@ -38,8 +38,23 @@ class Person : public Cell {
     protected_ = false;
     no_casual_partners_ = 0;
   }
-  explicit Person(const Double3& position) : Base(position) {}
   virtual ~Person() {}
+
+  // Overwrite abstract methods from Base class
+  Shape GetShape() const override { return Shape::kSphere; }
+  double GetDiameter() const override { return 0; }
+  const Double3& GetPosition() const override {
+    static Double3 kDefault{0, 0, 0};
+    return kDefault;
+  }
+  void SetDiameter(double diameter) override {}
+  void SetPosition(const Double3& position) override {}
+  Double3 CalculateDisplacement(const InteractionForce* force,
+                                double squared_radius, double dt) override {
+    return {0, 0, 0};
+  }
+  void ApplyDisplacement(const Double3& displacement) override {}
+  // Overwrite end
 
   /// Stores the current GemsState of the person.
   int state_;

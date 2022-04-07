@@ -26,6 +26,7 @@
 #include "visualize.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's main simulation
@@ -800,6 +801,7 @@ inline int Simulate(int argc, const char** argv) {
   return 0;
 }
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // BDM_SIMULAION_H_

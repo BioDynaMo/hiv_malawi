@@ -18,6 +18,7 @@
 #include "person.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 /// Operation to reset the number of casual partner for each agent (in parallel)
 struct ResetCasualPartners : public StandaloneOperationImpl {
@@ -70,6 +71,7 @@ struct CombinePopulationData
       const SharedData<PopulationData>& tl_populations) override;
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // CUSTOM_OPERATIONS_H_

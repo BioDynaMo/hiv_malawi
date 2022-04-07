@@ -18,6 +18,7 @@
 #include "datatypes.h"  //AM: Added to access GemState Enum
 
 namespace bdm {
+namespace hiv_malawi {
 
 /// This class defines parameters that are specific to this simulation.
 class SimParam : public ParamGroup {
@@ -320,6 +321,7 @@ class SimParam : public ParamGroup {
   void SetMigrationLocationProbability();
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // SIM_PARAM_H_

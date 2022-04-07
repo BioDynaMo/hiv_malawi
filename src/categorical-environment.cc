@@ -14,6 +14,7 @@
 #include "biodynamo.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 ////////////////////////////////////////////////////////////////////////////////
 // AgentVector
@@ -1030,4 +1031,5 @@ CategoricalEnvironment::GetNeighborMutexBuilder() {
   return nullptr;
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm

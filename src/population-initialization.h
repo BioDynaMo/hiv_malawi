@@ -17,6 +17,7 @@
 #include "sim-param.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helper functions to initialize the entire popluation at the beginning of the
@@ -52,6 +53,7 @@ auto CreatePerson(Random* random_generator, SimParam* sparam);
 // Initialize an entire population for the BDM simulation
 void InitializePopulation();
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // POPULATION_INITIALIZATION_H_

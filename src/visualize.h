@@ -17,11 +17,13 @@
 #include "datatypes.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 // This functions retrieves the collected time series from the active
 // simulation, saves the results as a JSON file, and plots the results.
 int PlotAndSaveTimeseries();
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // VISUALIZE_H_

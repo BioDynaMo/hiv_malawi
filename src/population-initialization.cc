@@ -22,6 +22,7 @@
 // All hard-coded numbers are taken from Janne's work (Parameters_D1.R)
 
 namespace bdm {
+namespace hiv_malawi {
 
 float SampleAge(float rand_num_1, float rand_num_2, int sex,
                 const std::vector<float>& age_distribution) {
@@ -207,4 +208,5 @@ void InitializePopulation() {
   }
 }
 
+}  // namespace hiv_malawi
 }  // namespace bdm

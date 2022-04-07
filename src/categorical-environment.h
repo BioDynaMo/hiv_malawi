@@ -27,6 +27,7 @@
 #include <random>
 
 namespace bdm {
+namespace hiv_malawi {
 
 // This is a small helper class that wraps a vector of Agent pointers. It's a
 // building block of the CategoricalEnvironment because we store a vector of
@@ -303,6 +304,7 @@ class CategoricalEnvironment : public Environment {
   Environment::NeighborMutexBuilder* GetNeighborMutexBuilder() override;
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // CATEGORICAL_ENVIRONMENT_H_

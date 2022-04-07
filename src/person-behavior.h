@@ -19,6 +19,7 @@
 #include "population-initialization.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's Agent / Individual Behaviors
@@ -755,6 +756,7 @@ struct GiveBirth : public Behavior {
   }
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // PERSON_BEHAVIOR_H_

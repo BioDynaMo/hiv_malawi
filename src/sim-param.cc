@@ -1,6 +1,7 @@
 #include "sim-param.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 // Initialize parameter group Uid, part of the BioDynaMo API, needs to be part
 // of a cc file, depends on #include "sim-param.h". With this, we can access the
@@ -171,4 +172,5 @@ void SimParam::SetMigrationMatrix() {
   }
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm

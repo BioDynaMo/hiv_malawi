@@ -13,6 +13,7 @@
 #include "custom-operations.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 void ResetCasualPartners::operator()() {
   // L2F converts a lambda call to a bdm::functor. We introduce this functor
@@ -99,4 +100,6 @@ PopulationData CombinePopulationData::operator()(
   }
   return total_pop;
 }
+
+}  // namespace hiv_malawi
 }  // namespace bdm

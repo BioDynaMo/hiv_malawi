@@ -18,6 +18,7 @@
 #include "datatypes.h"
 
 namespace bdm {
+namespace hiv_malawi {
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's Agent / Individual
 ////////////////////////////////////////////////////////////////////////////////
@@ -290,6 +291,7 @@ class Person : public Cell {
   bool IsProtected() { return protected_; }
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // PERSON_H_

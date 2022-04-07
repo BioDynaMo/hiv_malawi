@@ -26,6 +26,7 @@
 #include "core/util/log.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 int PlotAndSaveTimeseries() {
   // Get pointers for simulation and TimeSeries data
@@ -193,4 +194,5 @@ int PlotAndSaveTimeseries() {
   return 0;
 }
 
+}  // namespace hiv_malawi
 }  // namespace bdm

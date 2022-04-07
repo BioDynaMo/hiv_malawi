@@ -26,7 +26,7 @@
 int main(int argc, const char** argv) {
   PrintHeader();
 
-  bdm::Simulate(argc, argv);
+  bdm::hiv_malawi::Simulate(argc, argv);
 
   PrintClosing();
   return 0;

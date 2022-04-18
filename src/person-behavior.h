@@ -589,14 +589,12 @@ struct GetOlder : public Behavior {
         person->SeparateFromPartner();
       }
       // If mother dies, children have no mother anymore
-      if (person->sex_ == Sex::kFemale && person->GetNumberOfChildren() > 0) {
-        for (int c = 0; c < person->GetNumberOfChildren(); c++) {
-          person->children_[c]->mother_ = AgentPointer<Person>();
-        }
+      for (int c = 0; c < person->GetNumberOfChildren(); c++) {
+        person->children_[c]->mother_ = AgentPointer<Person>();
       }
       // If a child dies and has a mother, remove him from mother's list of
       // children
-      if (person->age_ < 15 && person->mother_ != nullptr) {
+      if (person->mother_ != nullptr) {
         // std::cout << "A Child dies" << std::endl;
         person->mother_->RemoveChild(person->GetAgentPtr<Person>());
         // std::cout << " ==> Removed from mother's list of children" <<

@@ -19,6 +19,10 @@
 namespace bdm {
 namespace hiv_malawi {
 
+// This functions defines which data should be extracted from the simulation
+// and collected for each time step using the `TimeSeries` object.
+void DefineAndRegisterCollectors();
+
 // This functions retrieves the collected time series from the active
 // simulation, saves the results as a JSON file, and plots the results.
 int PlotAndSaveTimeseries();

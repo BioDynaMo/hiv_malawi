@@ -200,7 +200,7 @@ find in the different file names.
 
   Some print statements that are not of great importance.
 
-* **visualize (.h/.cc)**
+* **analyze (.h/.cc)**
 
-  Contains functions for visualizing the simulation results with ROOT, 
+  Contains functions for collecting and visualizing the simulation results with ROOT, 
   a famous CERN package integrated in BioDynaMo.

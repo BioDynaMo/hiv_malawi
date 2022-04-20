@@ -92,32 +92,29 @@ class Person : public Agent {
   // float year_of_infection_;
   // Stores the ID of the mother. Useful to unlink child from mother, when child
   // dies.
-  AgentPointer<Person> mother_;
+  AgentPointer<Person> mother_ = AgentPointer<Person>();
   // Stores the IDs of the children. Useful, when mother migrates, and takes her
   // children. Unlink mother from child, when mother dies
   std::vector<AgentPointer<Person>> children_;
   // Stores the ID of the regular partner. Useful for infection in
   // serodiscordant regular relationships, and family migration.
-  AgentPointer<Person> partner_;
+  AgentPointer<Person> partner_ = AgentPointer<Person>();
 
   // The following function is used to avoid simultaneous modification of
   // related agents. (Tread safety)
-  virtual void CriticalRegion(std::vector<AgentUid>* uids) override {
-    uids->push_back(GetUid());
+  virtual void CriticalRegion(std::vector<AgentPointer<Agent>>* aptrs) override {
+    aptrs->push_back(GetAgentPtr<Agent>());
     if (partner_ != nullptr) {
-      uids->push_back(partner_.GetUid());
+      aptrs->push_back(partner_);
     }
     for (auto& child : children_) {
-      uids->push_back(child.GetUid());
+      aptrs->push_back(child);
     }
     if (mother_ != nullptr) {
-      uids->push_back(mother_.GetUid());
+      aptrs->push_back(mother_);
     }
-    // Additional statements may be introduced for mother-child relationships
-    // but this seems to slow down the simulation quite a bit and is
-    // therefore not implemented at the moment.
   }
-
+  
   // Returns True if the agent is healthy
   bool IsHealthy() { return state_ == GemsState::kHealthy; }
   // AM: Added below functions for more detailed follow up of HIV state

@@ -31,6 +31,7 @@ namespace bdm {
 namespace hiv_malawi {
 
 using experimental::Counter;
+using experimental::GenericReducer;
 
 void DefineAndRegisterCollectors() {
   // Get population statistics, i.e. extract data from simulation
@@ -149,204 +150,172 @@ void DefineAndRegisterCollectors() {
 
   // Define how to compute mean number of casual partners for males with
   // low-risk sociobehaviours
+  //
+  // Define how to count adult males younger than 50 with low risk social behavior 
+  auto adult_male_age_lt50_low_sb = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (person->IsMale() && person->IsAdult() && person->age_ < 50 &&
+            person->HasLowRiskSocioBehav());
+  };
+  ts->AddCollector("adult_male_age_lt50_low_sb", 
+                   new Counter<double>(adult_male_age_lt50_low_sb),
+                   get_year);
+
+  // Sum all casual partners for adult_male_age_lt50_low_sb
+  auto sum_casual_partners = [](Agent* agent, uint64_t* tl_result) {
+    *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
+  };
+  auto sum_tl_results = [](const SharedData<uint64_t>& tl_results) {
+    uint64_t result = 0;
+    for (auto& el : tl_results) {
+      result += el;
+    }
+    return result;
+  };
+  ts->AddCollector("total_nocas_men_low_sb", 
+                   new GenericReducer<uint64_t, double>(sum_casual_partners, sum_tl_results, 
+                                                        adult_male_age_lt50_low_sb),
+                   get_year);
+  
   auto mean_nocas_men_low_sb = [](Simulation* sim) {
-    // Condition for Count operation, check if the person is a male with
-    // low-risk behaviours.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return (person->IsMale() && person->IsAdult() && person->age_ < 50 &&
-              person->HasLowRiskSocioBehav());
-    });
-    // Sum agents data
-    auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
-      *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
-    });
-    SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(bdm::experimental::Reduce(
-               sim, sum_data, combine_tl_results, &cond)) /
-           static_cast<double>(bdm::experimental::Count(sim, cond));
+    auto* ts = sim->GetTimeSeries();
+    auto num_casual = ts->GetYValues("total_nocas_men_low_sb").back();
+    auto agents = ts->GetYValues("adult_male_age_lt50_low_sb").back();
+    return num_casual / agents;
   };
-
-  // Define how to compute total number of casual partners for males with
-  // low-risk sociobehaviours
-  auto total_nocas_men_low_sb = [](Simulation* sim) {
-    // Condition for Count operation, check if the person is a male with
-    // low-risk behaviours.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return (person->IsMale() && person->IsAdult() && person->age_ < 50 &&
-              person->HasLowRiskSocioBehav());
-    });
-    // Sum agents data
-    auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
-      *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
-    });
-    SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(
-        bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond));
-  };
+  ts->AddCollector("mean_nocas_men_low_sb", mean_nocas_men_low_sb, get_year);
 
   // Define how to compute mean number of casual partners for males with
-  // lhighow-risk sociobehaviours
+  // high-risk sociobehaviours
+  //
+  // Define how to count adult males younger than 50 with high risk social behavior 
+  auto adult_male_age_lt50_high_sb = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (person->IsMale() && person->IsAdult() && person->age_ < 50 &&
+            person->HasHighRiskSocioBehav());
+  };
+  ts->AddCollector("adult_male_age_lt50_high_sb", 
+                   new Counter<double>(adult_male_age_lt50_high_sb),
+                   get_year);
+  
+  // Sum all casual partners for adult_male_age_lt50_high_sb
+  ts->AddCollector("total_nocas_men_high_sb", 
+                   new GenericReducer<uint64_t, double>(sum_casual_partners, sum_tl_results, 
+                                                        adult_male_age_lt50_high_sb),
+                   get_year);
+
   auto mean_nocas_men_high_sb = [](Simulation* sim) {
-    // Condition for Count operation, check if the person is a male with
-    // high-risk behaviours.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return (person->IsMale() && person->IsAdult() && person->age_ < 50 &&
-              person->HasHighRiskSocioBehav());
-    });
-    // Sum agents data
-    auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
-      *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
-    });
-    SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(bdm::experimental::Reduce(
-               sim, sum_data, combine_tl_results, &cond)) /
-           static_cast<double>(bdm::experimental::Count(sim, cond));
+    auto* ts = sim->GetTimeSeries();
+    auto num_casual = ts->GetYValues("total_nocas_men_high_sb").back();
+    auto agents = ts->GetYValues("adult_male_age_lt50_high_sb").back();
+    return num_casual / agents;
   };
-
-  // Define how to compute mean number of casual partners for males with
-  // high-risk sociobehaviours
-  auto total_nocas_men_high_sb = [](Simulation* sim) {
-    // Condition for Count operation, check if the person is a male with
-    // high-risk behaviours.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return (person->IsMale() && person->IsAdult() && person->age_ < 50 &&
-              person->HasHighRiskSocioBehav());
-    });
-    // Sum agents data
-    auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
-      *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
-    });
-    SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(
-        bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond));
-  };
+  ts->AddCollector("mean_nocas_men_high_sb", mean_nocas_men_high_sb, get_year);
 
   // Define how to compute mean number of casual partners for females with
   // low-risk sociobehaviours
+  //
+  // Define how to count adult females younger than 50 with low risk social behavior 
+  auto adult_female_age_lt50_low_sb = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
+            person->HasLowRiskSocioBehav());
+  };
+  ts->AddCollector("adult_female_age_lt50_low_sb", 
+                   new Counter<double>(adult_female_age_lt50_low_sb),
+                   get_year);
+
+  // Sum all casual partners for adult_female_age_lt50_low_sb
+  ts->AddCollector("total_nocas_women_low_sb", 
+                   new GenericReducer<uint64_t, double>(sum_casual_partners, sum_tl_results, 
+                                                        adult_female_age_lt50_low_sb),
+                   get_year);
+  
   auto mean_nocas_women_low_sb = [](Simulation* sim) {
-    // Condition for Count operation, check if the person is a male with
-    // low-risk behaviours.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return (person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
-              person->HasLowRiskSocioBehav());
-    });
-    // Sum agents data
-    auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
-      *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
-    });
-    SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(bdm::experimental::Reduce(
-               sim, sum_data, combine_tl_results, &cond)) /
-           static_cast<double>(bdm::experimental::Count(sim, cond));
+    auto* ts = sim->GetTimeSeries();
+    auto num_casual = ts->GetYValues("total_nocas_women_low_sb").back();
+    auto agents = ts->GetYValues("adult_female_age_lt50_low_sb").back();
+    return num_casual / agents;
   };
-
-  // Define how to compute mean number of casual partners for males with
-  // low-risk sociobehaviours
-  auto total_nocas_women_low_sb = [](Simulation* sim) {
-    // Condition for Count operation, check if the person is a male with
-    // low-risk behaviours.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return (person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
-              person->HasLowRiskSocioBehav());
-    });
-    // Sum agents data
-    auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
-      *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
-    });
-    SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(
-        bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond));
-  };
+  ts->AddCollector("mean_nocas_women_low_sb", mean_nocas_women_low_sb, get_year);
 
   // Define how to compute mean number of casual partners for females with
   // high-risk sociobehaviours
-  auto mean_nocas_women_high_sb = [](Simulation* sim) {
-    // Condition for Count operation, check if the person is a male with
-    // high-risk behaviours.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return (person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
-              person->HasHighRiskSocioBehav());
-    });
-    // Sum agents data
-    auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
-      *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
-    });
-    SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(bdm::experimental::Reduce(
-               sim, sum_data, combine_tl_results, &cond)) /
-           static_cast<double>(bdm::experimental::Count(sim, cond));
+  //
+  // Define how to count adult females younger than 50 with high risk social behavior 
+  auto adult_female_age_lt50_high_sb = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
+            person->HasHighRiskSocioBehav());
   };
+  ts->AddCollector("adult_female_age_lt50_high_sb", 
+                   new Counter<double>(adult_female_age_lt50_high_sb),
+                   get_year);
 
-  // Define how to compute mean number of casual partners for males with
-  // lhighow-risk sociobehaviours
-  auto total_nocas_women_high_sb = [](Simulation* sim) {
-    // Condition for Count operation, check if the person is a female with
-    // high-risk behaviours.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return (person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
-              person->HasHighRiskSocioBehav());
-    });
-    // Sum agents data
-    auto sum_data = L2F([](Agent* agent, uint64_t* tl_result) {
-      *tl_result += bdm_static_cast<Person*>(agent)->no_casual_partners_;
-    });
-    SumReduction<uint64_t> combine_tl_results;
-    return static_cast<double>(
-        bdm::experimental::Reduce(sim, sum_data, combine_tl_results, &cond));
+  // Sum all casual partners for adult_female_age_lt50_high_sb
+  ts->AddCollector("total_nocas_women_high_sb", 
+                   new GenericReducer<uint64_t, double>(sum_casual_partners, sum_tl_results, 
+                                                        adult_female_age_lt50_high_sb),
+                   get_year);
+  
+  auto mean_nocas_women_high_sb = [](Simulation* sim) {
+    auto* ts = sim->GetTimeSeries();
+    auto num_casual = ts->GetYValues("total_nocas_women_high_sb").back();
+    auto agents = ts->GetYValues("adult_female_age_lt50_high_sb").back();
+    return num_casual / agents;
   };
+  ts->AddCollector("mean_nocas_women_high_sb", mean_nocas_women_high_sb, get_year);
+
+
   // AM: Define how to compute general prevalence
   auto pct_prevalence = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond_infected = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return !(person->IsHealthy());
-    });
-    auto cond_all = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return !(person->IsHealthy()) or person->IsHealthy();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond_infected)) /
-           static_cast<double>(bdm::experimental::Count(sim, cond_all));
+    auto* ts = sim->GetTimeSeries();
+    auto infected = ts->GetYValues("infected_agents").back();
+    return infected / sim->GetResourceManager()->GetNumAgents();
   };
+  ts->AddCollector("prevalence", pct_prevalence, get_year);
 
-  // AM: Define how to compute general prevalence
-  auto pct_prevalence_15_49 = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond_infected = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return !(person->IsHealthy()) && person->age_ >= 15 && person->age_ <= 49;
-    });
-    auto cond_all = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->age_ >= 15 && person->age_ <= 49;
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond_infected)) /
-           static_cast<double>(bdm::experimental::Count(sim, cond_all));
+  // AM: Define how to compute prevalence between 15 and 49 year olds
+  auto infected_15_49 = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return !(person->IsHealthy()) && person->age_ >= 15 && person->age_ <= 49;
   };
+  ts->AddCollector("infected_15_49", new Counter<double>(infected_15_49), get_year);
+  
+  auto all_15_49 = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->age_ >= 15 && person->age_ <= 49;
+  };
+  ts->AddCollector("all_15_49", new Counter<double>(all_15_49), get_year);
+
+  auto pct_prevalence_15_49 = [](Simulation* sim) {
+    auto* ts = sim->GetTimeSeries();
+    auto infected = ts->GetYValues("infected_15_49").back();
+    auto all = ts->GetYValues("all_15_49").back();
+    return infected / all;
+  };
+  ts->AddCollector("prevalence_15_49", pct_prevalence_15_49, get_year);
 
   // AM: Define how to compute prevalence among women
-  auto pct_prevalence_women = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond_infected_women = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return !(person->IsHealthy()) && person->IsFemale();
-    });
-    auto cond_women = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->IsFemale();
-    });
-    return static_cast<double>(
-               bdm::experimental::Count(sim, cond_infected_women)) /
-           static_cast<double>(bdm::experimental::Count(sim, cond_women));
+  auto infected_women = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return !(person->IsHealthy()) && person->IsFemale();
   };
+  ts->AddCollector("infected_women", new Counter<double>(infected_women), get_year);
+
+  auto women = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsFemale();
+  };
+  ts->AddCollector("women", new Counter<double>(women), get_year);
+
+  auto pct_prevalence_women = [](Simulation* sim) {
+    auto* ts = sim->GetTimeSeries();
+    auto infected = ts->GetYValues("infected_women").back();
+    auto all = ts->GetYValues("women").back();
+    return infected / all;
+  };
+  ts->AddCollector("prevalence_women", pct_prevalence_women, get_year);
 
   // AM: Define how to compute prevalence among women
   auto pct_prevalence_women_15_49 = [](Simulation* sim) {
@@ -619,29 +588,8 @@ void DefineAndRegisterCollectors() {
 
   
   // AM: Added detailed follow up of HIV states time series
-  
-  
-  
-  ts->AddCollector("mean_nocas_men_low_sb", mean_nocas_men_low_sb, get_year);
-  ts->AddCollector("mean_nocas_men_high_sb", mean_nocas_men_high_sb, get_year);
-  ts->AddCollector("mean_nocas_women_low_sb", mean_nocas_women_low_sb,
-                   get_year);
-  ts->AddCollector("mean_nocas_women_high_sb", mean_nocas_women_high_sb,
-                   get_year);
-  
-  ts->AddCollector("total_nocas_men_low_sb", total_nocas_men_low_sb, get_year);
-  ts->AddCollector("total_nocas_men_high_sb", total_nocas_men_high_sb,
-                   get_year);
-  ts->AddCollector("total_nocas_women_low_sb", total_nocas_women_low_sb,
-                   get_year);
-  ts->AddCollector("total_nocas_women_high_sb", total_nocas_women_high_sb,
-                   get_year);
-  
-  ts->AddCollector("prevalence", pct_prevalence, get_year);
-  ts->AddCollector("prevalence_women", pct_prevalence_women, get_year);
   ts->AddCollector("prevalence_men", pct_prevalence_men, get_year);
   
-  ts->AddCollector("prevalence_15_49", pct_prevalence_15_49, get_year);
   ts->AddCollector("prevalence_women_15_49", pct_prevalence_women_15_49,
                    get_year);
   ts->AddCollector("prevalence_men_15_49", pct_prevalence_men_15_49, get_year);

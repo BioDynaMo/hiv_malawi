@@ -30,138 +30,122 @@
 namespace bdm {
 namespace hiv_malawi {
 
+using experimental::Counter;
+
 void DefineAndRegisterCollectors() {
   // Get population statistics, i.e. extract data from simulation
   // Get the pointer to the TimeSeries
   auto* ts = Simulation::GetActive()->GetTimeSeries();
+  
+  // Define how to get the time values of the TimeSeries
+  auto get_year = [](Simulation* sim) {
+    // AM: Starting Year Variable set in sim_params
+    int start_year = sim->GetParam()->Get<SimParam>()->start_year;
+
+    return static_cast<double>(start_year +
+                               sim->GetScheduler()->GetSimulatedSteps());
+  };
+  
   // Define how to count the healthy individuals
-  auto count_healthy = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is healhy.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->IsHealthy();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto healthy = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsHealthy();
   };
+  ts->AddCollector("healthy_agents", new Counter<double>(healthy), get_year);
+
   // Define how to count the infected individuals
-  auto count_infected = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return !(person->IsHealthy());
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto infected = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return !(person->IsHealthy());
   };
+  ts->AddCollector("infected_agents", new Counter<double>(infected), get_year);
+
   // AM: Define how to count the infected acute individuals
-  auto count_acute = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->IsAcute();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto acute = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsAcute();
   };
+  ts->AddCollector("acute_agents", new Counter<double>(acute), get_year);
+  
   // AM: Define how to count the infected chronic individuals
-  auto count_chronic = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->IsChronic();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto chronic = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsChronic();
   };
+  ts->AddCollector("chronic_agents", new Counter<double>(chronic), get_year);
+  
   // AM: Define how to count the infected treated individuals
-  auto count_treated = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->IsTreated();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto treated = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsTreated();
   };
+  ts->AddCollector("treated_agents", new Counter<double>(treated), get_year);
+
   // AM: Define how to count the infected failing individuals
-  auto count_failing = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->IsFailing();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto failing = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsFailing();
   };
+  ts->AddCollector("failing_agents", new Counter<double>(failing), get_year);
 
   // AM: Define how to count the individuals infected at birth
-  auto count_MTC_transmission = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond_MTCT = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->MTCTransmission();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond_MTCT));
+  auto mtct = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->MTCTransmission();
   };
+  ts->AddCollector("mtct_agents", new Counter<double>(mtct), get_year);
 
   // AM: Define how to count the individuals infected through casual mating
-  auto count_casual_transmission = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond_casual = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->CasualTransmission();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond_casual));
+  auto casual = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->CasualTransmission();
   };
+  ts->AddCollector("casual_transmission_agents", new Counter<double>(casual),
+                   get_year);
 
   // AM: Define how to count the individuals infected through regular mating
-  auto count_regular_transmission = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond_regular = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->RegularTransmission();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond_regular));
+  auto regular = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->RegularTransmission();
   };
+  ts->AddCollector("regular_transmission_agents", new Counter<double>(regular),
+                   get_year);
 
   // AM: Define how to count the individuals that were infected by an Acute HIV
   // partner/Mother
-  auto count_acute_transmission = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->AcuteTransmission();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto acute_transmission = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->AcuteTransmission();
   };
+  ts->AddCollector("acute_transmission", new Counter<double>(acute_transmission), 
+                   get_year);
 
   // AM: Define how to count the individuals that were infected by an Chronic
   // HIV partner/Mother
-  auto count_chronic_transmission = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->ChronicTransmission();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto chronic_transmission = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->ChronicTransmission();
   };
+  ts->AddCollector("chronic_transmission", new Counter<double>(chronic_transmission),
+                   get_year);
 
   // AM: Define how to count the individuals that were infected by an Treated
   // HIV partner/Mother
-  auto count_treated_transmission = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->TreatedTransmission();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto treated_transmission = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->TreatedTransmission();
   };
+  ts->AddCollector("treated_transmission", new Counter<double>(treated_transmission),
+                   get_year);
 
   // AM: Define how to count the individuals that were infected by an Failing
   // HIV partner/Mother
-  auto count_failing_transmission = [](Simulation* sim) {
-    // Condition for Count operation, e.g. check if person is infected.
-    auto cond = L2F([](Agent* a) {
-      auto* person = bdm_static_cast<Person*>(a);
-      return person->FailingTransmission();
-    });
-    return static_cast<double>(bdm::experimental::Count(sim, cond));
+  auto failing_transmission = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->FailingTransmission();
   };
+  ts->AddCollector("failing_transmission", new Counter<double>(failing_transmission),
+                   get_year);
 
   // Define how to compute mean number of casual partners for males with
   // low-risk sociobehaviours
@@ -633,36 +617,10 @@ void DefineAndRegisterCollectors() {
            static_cast<double>(bdm::experimental::Count(sim, cond_healthy_men));
   };
 
-  // Define how to get the time values of the TimeSeries
-  auto get_year = [](Simulation* sim) {
-    // AM: Starting Year Variable set in sim_params
-    int start_year = sim->GetParam()->Get<SimParam>()->start_year;
-
-    return static_cast<double>(start_year +
-                               sim->GetScheduler()->GetSimulatedSteps());
-  };
-  ts->AddCollector("healthy_agents", count_healthy, get_year);
-  ts->AddCollector("infected_agents", count_infected, get_year);
   
   // AM: Added detailed follow up of HIV states time series
-  ts->AddCollector("acute_agents", count_acute, get_year);
-  ts->AddCollector("chronic_agents", count_chronic, get_year);
-  ts->AddCollector("treated_agents", count_treated, get_year);
-  ts->AddCollector("failing_agents", count_failing, get_year);
   
-  ts->AddCollector("mtct_agents", count_MTC_transmission, get_year);
-  ts->AddCollector("casual_transmission_agents", count_casual_transmission,
-                   get_year);
-  ts->AddCollector("regular_transmission_agents", count_regular_transmission,
-                   get_year);
   
-  ts->AddCollector("acute_transmission", count_acute_transmission, get_year);
-  ts->AddCollector("chronic_transmission", count_chronic_transmission,
-                   get_year);
-  ts->AddCollector("treated_transmission", count_treated_transmission,
-                   get_year);
-  ts->AddCollector("failing_transmission", count_failing_transmission,
-                   get_year);
   
   ts->AddCollector("mean_nocas_men_low_sb", mean_nocas_men_low_sb, get_year);
   ts->AddCollector("mean_nocas_men_high_sb", mean_nocas_men_high_sb, get_year);

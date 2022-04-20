@@ -624,6 +624,9 @@ struct GiveBirth : public Behavior {
                       const SimParam* sparam, size_t year) {
     // Create new child
     Person* child = new Person();
+    // BioDynaMo API: Add agent (child) to simulation
+    Simulation::GetActive()->GetExecutionContext()->AddAgent(child);
+
     // Assign sex
     child->sex_ =
         SampleSex(random_generator->Uniform(), sparam->probability_male);
@@ -680,6 +683,9 @@ struct GiveBirth : public Behavior {
       }
     }
 
+    // Register child with mother
+    mother->AddChild(child->GetAgentPtr<Person>());
+
     // Assign mother to child. When, the child becomes adult, break the link.
     child->mother_ = mother->GetAgentPtr<Person>();
 
@@ -726,12 +732,6 @@ struct GiveBirth : public Behavior {
 
       // Create a child
       auto* new_child = CreateChild(random, mother, sparam, year);
-
-      // BioDynaMo API: Add agent (child) to simulation
-      ctxt->AddAgent(new_child);
-
-      // Register child with mother
-      mother->AddChild(new_child->GetAgentPtr<Person>());
 
       // Protect mother from death.
       if (sparam->protect_mothers_at_birth) {

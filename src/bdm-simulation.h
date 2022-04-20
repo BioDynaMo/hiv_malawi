@@ -36,9 +36,11 @@ inline int Simulate(int argc, const char** argv) {
   Param::RegisterParamGroup(new SimParam());
 
   // Initialize the Simulation
+  gAgentPointerMode = AgentPointerMode::kDirect;
   auto set_param = [&](Param* param) {
     param->show_simulation_step = 1;
     param->remove_output_dir_contents = false;
+    param->statistics = true;
   };
   Simulation simulation(argc, argv, set_param);
 

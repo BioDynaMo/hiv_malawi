@@ -718,23 +718,8 @@ int PlotAndSaveTimeseries() {
   auto sim = Simulation::GetActive();
   auto *ts = sim->GetTimeSeries();
 
-  // Create a new folder (build/)output/<data_time> to store the results of
-  // the specific simulation run.
-  time_t rawtime;
-  struct tm *timeinfo;
-  char buffer[80];
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-  strftime(buffer, sizeof(buffer), "%Y-%m-%d-%H:%M:%S", timeinfo);
-  std::string time_stamp(buffer);
-  // Define create_folder command for ROOT
-  std::string create_folder =
-      Concat("mkdir ", sim->GetOutputDir(), "/", time_stamp);
-  // Create folder with ROOT
-  gSystem->Exec(&create_folder[0]);
-
   // Save the TimeSeries Data as JSON to the folder <date_time>
-  ts->SaveJson(Concat(sim->GetOutputDir(), "/", time_stamp, "/data.json"));
+  ts->SaveJson(Concat(sim->GetOutputDir(), "/data.json"));
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g(ts, "Population - Healthy/Infected", "Time",
@@ -742,7 +727,7 @@ int PlotAndSaveTimeseries() {
   g.Add("healthy_agents", "Healthy", "L", kBlue, 1.0);
   g.Add("infected_agents", "HIV", "L", kRed, 1.0);
   g.Draw();
-  g.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp, "/simulation_hiv"),
+  g.SaveAs(Concat(sim->GetOutputDir(), "/simulation_hiv"),
            {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
@@ -755,7 +740,7 @@ int PlotAndSaveTimeseries() {
   g2.Add("treated_agents", "Treated", "L", kGreen, 1.0, 10);
   g2.Add("failing_agents", "Failing", "L", kGray, 1.0, 10);
   g2.Draw();
-  g2.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+  g2.SaveAs(Concat(sim->GetOutputDir(),
                    "/simulation_hiv_with_states"),
             {".svg", ".png"});
 
@@ -768,7 +753,7 @@ int PlotAndSaveTimeseries() {
   g2_2.Add("regular_transmission_agents", "Regular Transmission", "L", kBlue,
            1.0, 3);
   g2_2.Draw();
-  g2_2.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+  g2_2.SaveAs(Concat(sim->GetOutputDir(),
                      "/simulation_transmission_types"),
               {".svg", ".png"});
 
@@ -781,7 +766,7 @@ int PlotAndSaveTimeseries() {
   g2_3.Add("treated_transmission", "Infected by Treated", "L", kGreen, 1.0, 10);
   g2_3.Add("failing_transmission", "Infected by Failing", "L", kGray, 1.0, 10);
   g2_3.Draw();
-  g2_3.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+  g2_3.SaveAs(Concat(sim->GetOutputDir(),
                      "/simulation_transmission_sources"),
               {".svg", ".png"});
   // Create a bdm LineGraph that visualizes the TimeSeries data
@@ -801,7 +786,7 @@ int PlotAndSaveTimeseries() {
   g3.Add("incidence", "Incidence", "L", kRed, 1.0, 3, 1, kRed, 1.0, 5);
 
   g3.Draw();
-  g3.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+  g3.SaveAs(Concat(sim->GetOutputDir(),
                    "/simulation_hiv_prevalence_incidence"),
             {".svg", ".png"});
 
@@ -830,7 +815,7 @@ int PlotAndSaveTimeseries() {
   g4.Add("low_risk_sb_healthy_men", "Low Risk SB - Healthy Men", "L", kGreen,
          1.0, 2);
   g4.Draw();
-  g4.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+  g4.SaveAs(Concat(sim->GetOutputDir(),
                    "/simulation_sociobehaviours"),
             {".svg", ".png"});
 
@@ -848,7 +833,7 @@ int PlotAndSaveTimeseries() {
          1.0, 1);
 
   g5.Draw();
-  g5.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+  g5.SaveAs(Concat(sim->GetOutputDir(),
                    "/simulation_casual_mating_mean"),
             {".svg", ".png"});
 
@@ -866,14 +851,14 @@ int PlotAndSaveTimeseries() {
          kRed, 1.0, 1);
 
   g6.Draw();
-  g6.SaveAs(Concat(sim->GetOutputDir(), "/", time_stamp,
+  g6.SaveAs(Concat(sim->GetOutputDir(),
                    "/simulation_casual_mating_total"),
             {".svg", ".png"});
 
   // Print info for user to let him/her know where to find simulation results
   std::string info =
       Concat("<PlotAndSaveTimeseries> ", "Results of simulation were saved to ",
-             sim->GetOutputDir(), "/", time_stamp, "/");
+             sim->GetOutputDir(), "/");
   std::cout << "Info: " << info << std::endl;
 
   return 0;

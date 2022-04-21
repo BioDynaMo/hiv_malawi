@@ -281,9 +281,9 @@ struct RegularPartnershipBehaviour : public Behavior {
     if (person->IsAdult() && person->hasPartner() &&
         random->Uniform() <= sparam->break_up_probability) {
       // Set female partner to single
-      person->partner_->partner_ = AgentPointer<Person>();
+      person->partner_->partner_ = nullptr;
       // Set male agent to single
-      person->partner_ = AgentPointer<Person>();
+      person->partner_ = nullptr;
     }
 
     // Adult single men can decide to engage in a regular partnership
@@ -590,7 +590,7 @@ struct GetOlder : public Behavior {
       }
       // If mother dies, children have no mother anymore
       for (int c = 0; c < person->GetNumberOfChildren(); c++) {
-        person->children_[c]->mother_ = AgentPointer<Person>();
+        person->children_[c]->mother_ = nullptr;
       }
       // If a child dies and has a mother, remove him from mother's list of
       // children
@@ -692,8 +692,8 @@ struct GiveBirth : public Behavior {
     ///! The aguments below are currently either not used or repetitive.
     // // NOTE: we do not assign a specific mother or partner at the moment. Use
     // // nullptr instead.
-    // child->mother_id_ = AgentPointer<Person>();
-    // child->partner_id_ = AgentPointer<Person>();
+    // child->mother_id_ = nullptr;
+    // child->partner_id_ = nullptr;
 
     // BioDynaMo API: Add the behaviors to the Agent
     child->AddBehavior(new RandomMigration());

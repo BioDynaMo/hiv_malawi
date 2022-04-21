@@ -952,7 +952,7 @@ AgentPointer<Person> CategoricalEnvironment::GetRandomMotherFromLocation(
   if (mothers_[location].GetNumAgents() == 0) {
     Log::Warning("CategoricalEnvironment::GetRandomMotherFromLocation()",
                  "Mothers empty. Received location: ", location);
-    return AgentPointer<Person>();  // nullptr
+    return nullptr;
   }
   return mothers_[location].GetRandomAgent();
 }

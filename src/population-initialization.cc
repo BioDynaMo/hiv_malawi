@@ -170,8 +170,8 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   // // NOTE: we do not assign a specific mother or partner during the
   // population
   // // initialization. Use nullptr.
-  // person->mother_id_ = AgentPointer<Person>();
-  // person->partner_id_ = AgentPointer<Person>();
+  // person->mother_id_ = nullptr;
+  // person->partner_id_ = nullptr;
 
   // BioDynaMo API: Add the behaviors to the Agent
   person->AddBehavior(new RandomMigration());

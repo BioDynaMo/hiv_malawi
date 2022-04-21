@@ -241,6 +241,9 @@ void CategoricalEnvironment::UpdateImplementation() {
         // TO DO AM: ideally, mother is at least 15 and at most 40 years older
         // than child
         person->mother_ = env->GetRandomMotherFromLocation(person->location_);
+        if (!person->mother_) {
+          return;
+        }
         // Check that mother and child have the same location
         if (person->location_ != person->mother_->location_) {
           Log::Warning("CategoricalEnvironment::UpdateImplementation()",

@@ -106,7 +106,7 @@ struct MatingBehaviour : public Behavior {
     // If no transition year is higher than current year, then use last
     // transition year
     int year_index = sparam->no_mates_year_transition.size() - 1;
-    for (int y = 0; y < sparam->no_mates_year_transition.size() - 1; y++) {
+    for (size_t y = 0; y < sparam->no_mates_year_transition.size() - 1; y++) {
       if (year < sparam->no_mates_year_transition[y + 1]) {
         year_index = y;
         break;
@@ -465,7 +465,7 @@ struct GetOlder : public Behavior {
       // If no sociobehavioural risk transition year is higher than current
       // year, then use last transition year
       int year_index = sparam->sociobehavioural_risk_year_transition.size() - 1;
-      for (int y = 0;
+      for (size_t y = 0;
            y < sparam->sociobehavioural_risk_year_transition.size() - 1; y++) {
         if (year < sparam->sociobehavioural_risk_year_transition[y + 1]) {
           year_index = y;
@@ -714,7 +714,6 @@ struct GiveBirth : public Behavior {
 
   void Run(Agent* agent) override {
     auto* sim = Simulation::GetActive();
-    auto* ctxt = sim->GetExecutionContext();
     auto* random = sim->GetRandom();
     auto* param = sim->GetParam();
     const auto* sparam = param->Get<SimParam>();

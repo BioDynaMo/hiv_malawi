@@ -401,7 +401,7 @@ void CategoricalEnvironment::UpdateImplementation() {
   // If no transition year is higher than current year, then use last
   // transition year
   int year_index = sparam->migration_year_transition.size() - 1;
-  for (int y = 0; y < sparam->migration_year_transition.size() - 1; y++) {
+  for (size_t y = 0; y < sparam->migration_year_transition.size() - 1; y++) {
     if (year < sparam->migration_year_transition[y + 1]) {
       year_index = y;
       break;
@@ -428,7 +428,7 @@ void CategoricalEnvironment::UpdateCasualPartnerCategoryDistribution(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
 
   //#pragma omp for
-  for (int i = 0;
+  for (size_t i = 0;
        i < no_locations_ * no_age_categories_ * no_sociobehavioural_categories_;
        i++) {  // Loop over male agent compound categories (location x age x
                // socio-behaviour)
@@ -558,7 +558,7 @@ void CategoricalEnvironment::UpdateRegularPartnerCategoryDistribution(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
 
   //#pragma omp for
-  for (int i = 0;
+  for (size_t i = 0;
        i < no_locations_ * no_age_categories_ * no_sociobehavioural_categories_;
        i++) {  // Loop over male agent compound categories (location x age x
                // socio-behaviour)
@@ -700,18 +700,18 @@ void CategoricalEnvironment::UpdateMigrationLocationProbability(
     std::vector<std::vector<std::vector<float>>> migration_matrix) {
   migration_location_distribution_.clear();
   migration_location_distribution_.resize(no_locations_);
-  for (int i = 0; i < no_locations_; i++) {
+  for (size_t i = 0; i < no_locations_; i++) {
     migration_location_distribution_[i].resize(no_locations_);
     // Compute Denominator for Normalization
     float sum = 0.0;
-    for (int j = 0; j < no_locations_; j++) {
+    for (size_t j = 0; j < no_locations_; j++) {
       // Weight migration_matrix with population size per destination
       migration_location_distribution_[i][j] =
           migration_matrix[year_index][i][j] * GetNumAdultsAtLocation(j);
       sum += migration_location_distribution_[i][j];
     }
     // Normalize and Cumulate
-    for (int j = 0; j < no_locations_; j++) {
+    for (size_t j = 0; j < no_locations_; j++) {
       if (j == 0) {
         migration_location_distribution_[i][j] =
             migration_location_distribution_[i][j] / sum;

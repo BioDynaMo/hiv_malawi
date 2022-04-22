@@ -64,7 +64,8 @@ void PopulationData::Print(std::ostream& out) const {
   out << "\ninfected_female : "
       << std::accumulate(infected_female.begin(), infected_female.end(), 0);
   out << "\n\nage        male      female\n";
-  for (int age = 0; age < std::max(age_female.size(), age_male.size()); age++) {
+  for (size_t age = 0; age < std::max(age_female.size(), age_male.size());
+       age++) {
     out << std::setw(3) << age << "    " << std::setw(8) << age_male[age]
         << "    " << std::setw(8) << age_female[age] << " \n";
   }

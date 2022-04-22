@@ -84,7 +84,7 @@ void AgentVector::UpdateOffsets() {
     for (uint64_t i = 0; i < agents_.size(); ++i) {
       offsets_[i] = agents_[i].size();
     }
-    ExclusivePrefixSum(&offsets_, offsets_.size());
+    ExclusivePrefixSum(&offsets_, offsets_.size() - 1);
     dirty_ = false;
   }
 }

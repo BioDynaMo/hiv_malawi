@@ -79,18 +79,6 @@ inline int Simulate(int argc, const char** argv) {
   auto* reset_casual_partners = NewOperation("ResetCasualPartners");
   scheduler->ScheduleOp(reset_casual_partners, OpType::kPreSchedule);
 
-  // Add operation that extracts arbitrary information at the end of each
-  // iteration
-  OperationRegistry::GetInstance()->AddOperationImpl(
-      "ExtractInformation", OpComputeTarget::kCpu,
-      new ReductionOp<PopulationData>());
-  auto* extract_information = NewOperation("ExtractInformation");
-  auto* extract_information_impl =
-      extract_information->GetImplementation<ReductionOp<PopulationData>>();
-  extract_information_impl->Initialize(new GetPopulationDataThreadLocal(),
-                                       new CombinePopulationData());
-  scheduler->ScheduleOp(extract_information);
-
   // Run simulation for <number_of_iterations> timesteps
   {
     Timing timer_sim("RUNTIME");
@@ -103,24 +91,6 @@ inline int Simulate(int argc, const char** argv) {
     // Generate ROOT plot to visualize the number of healthy and infected
     // individuals over time.
     PlotAndSaveTimeseries();
-  }
-
-  // Here one could do something with the results of the extracted information
-  // e.g. print to stdout or export to some files.
-  {
-    const std::vector<PopulationData>& panel_data =
-        extract_information_impl->GetResults();
-    std::ofstream filewriter;
-    int local_cntr = 1;
-    for (auto& p : panel_data) {
-      std::string filename = simulation.GetOutputDir() + "/population_data_" +
-                             std::to_string(local_cntr) + ".out";
-      std::cout << filename << std::endl;
-      filewriter.open(filename);
-      p.Print(filewriter);
-      filewriter.close();
-      local_cntr++;
-    }
   }
 
   // DEBUG - AM - TO DO: Works only when selection depended soloely on locations

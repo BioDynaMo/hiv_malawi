@@ -397,6 +397,7 @@ void CategoricalEnvironment::UpdateImplementation() {
 
   Timing t3("Remaining");
   // AM: Map regular partners for each compound category
+#pragma omp parallel for
   for (size_t cat = 0; cat < regular_male_agents_.size(); cat++) {
     size_t no_males = regular_male_agents_[cat].GetNumAgents();
     size_t no_females = regular_female_agents_[cat].GetNumAgents();

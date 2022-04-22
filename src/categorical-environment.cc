@@ -12,6 +12,7 @@
 
 #include "categorical-environment.h"
 #include "biodynamo.h"
+#include "core/algorithm.h"
 
 namespace bdm {
 namespace hiv_malawi {
@@ -19,34 +20,74 @@ namespace hiv_malawi {
 ////////////////////////////////////////////////////////////////////////////////
 // AgentVector
 ////////////////////////////////////////////////////////////////////////////////
+AgentVector::AgentVector() {
+  auto* tinfo = ThreadInfo::GetInstance();
+  agents_.resize(tinfo->GetMaxThreads());
+  offsets_.resize(tinfo->GetMaxThreads() + 1);
+  size_ = 0;
+}
+
+AgentVector::AgentVector(const AgentVector& other) 
+  : agents_(other.agents_)
+  , offsets_(other.offsets_)
+  , tinfo_(other.tinfo_)
+  , size_(other.size_.load())
+  , dirty_(other.dirty_)
+{}
 
 AgentPointer<Person> AgentVector::GetRandomAgent() {
-  if (agents_.size() == 0) {
+  if (size_ == 0) {
     Log::Fatal("AgentVector::GetRandomAgent()",
                "There are no agents available in one of your "
                "locations or compound categories. Consider increasing the "
                "number of Agents.");
   }
   auto* r = Simulation::GetActive()->GetRandom();
-  return agents_[r->Integer(agents_.size() - 1)];
+  return GetAgentAtIndex(r->Integer(size_ - 1));
 }
 
 AgentPointer<Person> AgentVector::GetAgentAtIndex(size_t i) {
-  if (i >= agents_.size()) {
+  if (i >= size_) {
     Log::Fatal("AgentVector::GetAgentAtIndex()", "Given index ", i,
                "; agents_.size() ", agents_.size(), ".");
   }
-  return agents_[i];
+  if (dirty_) {
+    UpdateOffsets();
+  }
+  auto idx = BinarySearch(i, offsets_, 0u, offsets_.size() - 1);
+  auto offset = i - offsets_[idx];
+
+  assert(idx < agents_.size());
+  assert(offset < agents_[idx].size());
+  return agents_[idx][offset];
 }
 
 void AgentVector::AddAgent(AgentPointer<Person> agent) {
-  std::lock_guard<Spinlock> guard(lock_);
-  agents_.push_back(agent);
+  agents_[tinfo_->GetMyThreadId()].push_back(agent);
+  size_++;
+  dirty_ = true;
 }
 
 void AgentVector::Clear() {
-  agents_.clear();
-  agents_.reserve(10000);
+  for (auto& el : agents_) {
+    el.clear();
+  }
+  size_ = 0;
+  for(auto& el : offsets_) {
+    el = 0;
+  }
+  dirty_ = false;
+}
+
+void AgentVector::UpdateOffsets() {
+  std::lock_guard<Spinlock> guard(lock_);
+  if (dirty_) {
+    for (uint64_t i = 0; i < agents_.size(); ++i) {
+      offsets_[i] = agents_[i].size();
+    }
+    ExclusivePrefixSum(&offsets_, offsets_.size());
+    dirty_ = false;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

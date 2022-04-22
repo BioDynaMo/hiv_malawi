@@ -34,13 +34,22 @@ namespace hiv_malawi {
 // AgentPointer for each of the categorical locations.
 class AgentVector {
  private:
-  // vector of AgentPointers
-  std::vector<AgentPointer<Person>> agents_;
+  // thread-local vector of AgentPointers
+  std::vector<std::vector<AgentPointer<Person>>> agents_;
+  std::vector<uint64_t> offsets_;
+  ThreadInfo* tinfo_ = nullptr;
+  std::atomic<uint64_t> size_;
   Spinlock lock_;
+  bool dirty_ = false;
+
+  void UpdateOffsets();
 
  public:
+  AgentVector();
+  AgentVector(const AgentVector& other);
+
   // Get the number of agents in the vector
-  size_t GetNumAgents() { return agents_.size(); }
+  size_t GetNumAgents() const { return size_; }
 
   // Get a radom agent from the vector agents_
   AgentPointer<Person> GetRandomAgent();

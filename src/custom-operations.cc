@@ -19,7 +19,7 @@ void ResetCasualPartners::operator()() {
   // L2F converts a lambda call to a bdm::functor. We introduce this functor
   // because the ResourceManager::ForEachAgentParallel expects a functor.
   auto reset_functor = L2F([](Agent* agent) {
-    auto* person = dynamic_cast<Person*>(agent);
+    auto* person = bdm_static_cast<Person*>(agent);
     person->ResetCasualPartners();
   });
 

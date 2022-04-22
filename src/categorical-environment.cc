@@ -118,6 +118,7 @@ CategoricalEnvironment::CategoricalEnvironment(
 // compound category. Depends on static mixing matrices and updated number of
 // female agents per category
 void CategoricalEnvironment::UpdateImplementation() {
+  Timing t1("UpdateImplementation");
   // Debug
   /*uint64_t iter =
        Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
@@ -229,12 +230,16 @@ void CategoricalEnvironment::UpdateImplementation() {
           }
       }*/
   });
-  rm->ForEachAgentParallel(assign_to_indices);
+  {
+    Timing timing_fea1("ForEachAgentParallel 1");
+    rm->ForEachAgentParallel(assign_to_indices);
+  }
 
   // During first iteration, assign mothers to children
   // Note: Ignore for parallelization because it is only executed once at the
   // beginning of the simulation -> setup cost.
   if (!mothers_are_assiged_) {
+    Timing t4("Assign mothers");
     mothers_are_assiged_ = true;
     uint64_t iter =
         Simulation::GetActive()->GetScheduler()->GetSimulatedSteps();
@@ -384,8 +389,13 @@ void CategoricalEnvironment::UpdateImplementation() {
       }
     }
   });
-  rm->ForEachAgentParallel(choose_regular_partner_category);
 
+  {
+    Timing timing_fea2("ForEachAgentParallel 2");
+    rm->ForEachAgentParallel(choose_regular_partner_category);
+  }
+
+  Timing t3("Remaining");
   // AM: Map regular partners for each compound category
   for (size_t cat = 0; cat < regular_male_agents_.size(); cat++) {
     size_t no_males = regular_male_agents_[cat].GetNumAgents();
@@ -454,6 +464,7 @@ void CategoricalEnvironment::UpdateImplementation() {
       break;
     }
   }
+  Timing t4("Update*");
   // AM : Update probability matrix to select migration/relocation destination
   // given current year index and origin location
   UpdateMigrationLocationProbability(year_index, sparam->migration_matrix);

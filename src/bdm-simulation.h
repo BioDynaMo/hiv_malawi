@@ -19,11 +19,11 @@
 #include "core/operation/operation_registry.h"
 #include "core/operation/reduction_op.h"
 
+#include "analyze.h"
 #include "categorical-environment.h"
 #include "custom-operations.h"
 #include "population-initialization.h"
 #include "sim-param.h"
-#include "analyze.h"
 
 namespace bdm {
 namespace hiv_malawi {

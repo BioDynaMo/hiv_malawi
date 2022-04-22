@@ -27,13 +27,12 @@ AgentVector::AgentVector() {
   size_ = 0;
 }
 
-AgentVector::AgentVector(const AgentVector& other) 
-  : agents_(other.agents_)
-  , offsets_(other.offsets_)
-  , tinfo_(other.tinfo_)
-  , size_(other.size_.load())
-  , dirty_(other.dirty_)
-{}
+AgentVector::AgentVector(const AgentVector& other)
+    : agents_(other.agents_),
+      offsets_(other.offsets_),
+      tinfo_(other.tinfo_),
+      size_(other.size_.load()),
+      dirty_(other.dirty_) {}
 
 AgentPointer<Person> AgentVector::GetRandomAgent() {
   if (size_ == 0) {
@@ -73,7 +72,7 @@ void AgentVector::Clear() {
     el.clear();
   }
   size_ = 0;
-  for(auto& el : offsets_) {
+  for (auto& el : offsets_) {
     el = 0;
   }
   dirty_ = false;

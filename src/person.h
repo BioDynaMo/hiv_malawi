@@ -100,7 +100,8 @@ class Person : public Agent {
 
   // The following function is used to avoid simultaneous modification of
   // related agents. (Tread safety)
-  virtual void CriticalRegion(std::vector<AgentPointer<Agent>>* aptrs) override {
+  virtual void CriticalRegion(
+      std::vector<AgentPointer<Agent>>* aptrs) override {
     aptrs->push_back(GetAgentPtr<Agent>());
     if (partner_ != nullptr) {
       aptrs->push_back(partner_);
@@ -112,7 +113,7 @@ class Person : public Agent {
       aptrs->push_back(mother_);
     }
   }
-  
+
   // Returns True if the agent is healthy
   bool IsHealthy() { return state_ == GemsState::kHealthy; }
   // AM: Added below functions for more detailed follow up of HIV state

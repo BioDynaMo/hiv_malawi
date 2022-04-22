@@ -40,6 +40,7 @@ AgentPointer<Person> AgentVector::GetAgentAtIndex(size_t i) {
 }
 
 void AgentVector::AddAgent(AgentPointer<Person> agent) {
+  std::lock_guard<Spinlock> guard(lock_);
   agents_.push_back(agent);
 }
 
@@ -110,7 +111,7 @@ void CategoricalEnvironment::UpdateImplementation() {
   // Index females (by location x age x sociobehaviour for casual and regular
   // partnerships), and adults (by location for location attractivity)
   auto* rm = Simulation::GetActive()->GetResourceManager();
-  rm->ForEachAgent([](Agent* agent) {
+  auto assign_to_indices = L2F([](Agent* agent) {
     auto* env = bdm_static_cast<CategoricalEnvironment*>(
         Simulation::GetActive()->GetEnvironment());
     auto* person = bdm_static_cast<Person*>(agent);
@@ -187,8 +188,11 @@ void CategoricalEnvironment::UpdateImplementation() {
           }
       }*/
   });
+  rm->ForEachAgentParallel(assign_to_indices);
 
   // During first iteration, assign mothers to children
+  // Note: Ignore for parallelization because it is only executed once at the
+  // beginning of the simulation -> setup cost.
   if (!mothers_are_assiged_) {
     mothers_are_assiged_ = true;
     uint64_t iter =
@@ -301,7 +305,7 @@ void CategoricalEnvironment::UpdateImplementation() {
       sparam->reg_partner_age_mixing_matrix,
       sparam->reg_partner_sociobehav_mixing_matrix);
   // AM: Select potential regular partner's category for each adult single man
-  rm->ForEachAgent([&](Agent* agent) {
+  auto choose_regular_partner_category = L2F([&](Agent* agent) {
     auto* env = bdm_static_cast<CategoricalEnvironment*>(
         Simulation::GetActive()->GetEnvironment());
     auto* person = bdm_static_cast<Person*>(agent);
@@ -339,6 +343,8 @@ void CategoricalEnvironment::UpdateImplementation() {
       }
     }
   });
+  rm->ForEachAgentParallel(choose_regular_partner_category);
+
   // AM: Map regular partners for each compound category
   for (size_t cat = 0; cat < regular_male_agents_.size(); cat++) {
     size_t no_males = regular_male_agents_[cat].GetNumAgents();

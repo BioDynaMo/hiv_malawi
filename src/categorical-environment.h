@@ -36,6 +36,7 @@ class AgentVector {
  private:
   // vector of AgentPointers
   std::vector<AgentPointer<Person>> agents_;
+  Spinlock lock_;
 
  public:
   // Get the number of agents in the vector

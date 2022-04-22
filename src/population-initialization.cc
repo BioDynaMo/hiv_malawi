@@ -122,7 +122,7 @@ int ComputeBiomedical(float rand_num, int age,
 auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   // Get all random numbers for initialization
   std::vector<float> rand_num{};
-  rand_num.reserve(10);
+  rand_num.resize(10);
   for (int i = 0; i < 10; i++) {
     rand_num[i] = static_cast<float>(random_generator->Uniform());
   }

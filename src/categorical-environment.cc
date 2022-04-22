@@ -466,9 +466,9 @@ void CategoricalEnvironment::UpdateImplementation() {
 };
 
 void CategoricalEnvironment::UpdateCasualPartnerCategoryDistribution(
-    std::vector<std::vector<float>> location_mixing_matrix,
-    std::vector<std::vector<float>> age_mixing_matrix,
-    std::vector<std::vector<float>> sociobehav_mixing_matrix) {
+    const std::vector<std::vector<float>>& location_mixing_matrix,
+    const std::vector<std::vector<float>>& age_mixing_matrix,
+    const std::vector<std::vector<float>>& sociobehav_mixing_matrix) {
   //#pragma omp parallel
   mate_compound_category_distribution_.clear();
   mate_compound_category_distribution_.resize(
@@ -744,7 +744,7 @@ void CategoricalEnvironment::UpdateRegularPartnerCategoryDistribution(
 
 void CategoricalEnvironment::UpdateMigrationLocationProbability(
     size_t year_index,
-    std::vector<std::vector<std::vector<float>>> migration_matrix) {
+    const std::vector<std::vector<std::vector<float>>>& migration_matrix) {
   migration_location_distribution_.clear();
   migration_location_distribution_.resize(no_locations_);
   for (size_t i = 0; i < no_locations_; i++) {

@@ -133,15 +133,15 @@ class CategoricalEnvironment : public Environment {
   // district
   void UpdateMigrationLocationProbability(
       size_t year_index,
-      std::vector<std::vector<std::vector<float>>> migration_matrix);
+      const std::vector<std::vector<std::vector<float>>>& migration_matrix);
 
   // Update (at every iteration) matrix storing the porbability that a male
   // agent selects a casual partner based on their compound categories (location
   // x age category x sociobehaviour category)
   void UpdateCasualPartnerCategoryDistribution(
-      std::vector<std::vector<float>> location_mixing_matrix,
-      std::vector<std::vector<float>> age_mixing_matrix,
-      std::vector<std::vector<float>> sociobehav_mixing_matrix);
+      const std::vector<std::vector<float>>& location_mixing_matrix,
+      const std::vector<std::vector<float>>& age_mixing_matrix,
+      const std::vector<std::vector<float>>& sociobehav_mixing_matrix);
 
   void UpdateRegularPartnerCategoryDistribution(
       std::vector<std::vector<float>> reg_partner_age_mixing_matrix,

@@ -52,7 +52,7 @@ struct RandomMigration : public Behavior {
       float rand_num_loc = static_cast<float>(random->Uniform());
       // Get (cumulative) probability distribution that agent relocates the
       // current year, to each location
-      const std::vector<float> migration_location_distribution_ =
+      const auto& migration_location_distribution_ =
           env->GetMigrationLocDistribution(person->location_);
 
       int new_location =
@@ -125,7 +125,7 @@ struct MatingBehaviour : public Behavior {
           person->GetAgeCategory(env->GetMinAge(), env->GetNoAgeCategories());
       // Get (cumulative) probability distribution that the male agent selects a
       // female mate from each compound category
-      const std::vector<float> mate_compound_category_distribution =
+      const std::vector<float>& mate_compound_category_distribution =
           env->GetMateCompoundCategoryDistribution(
               person->location_, age_category,
               person->social_behaviour_factor_);
@@ -425,9 +425,9 @@ struct GetOlder : public Behavior {
   GetOlder() {}
 
   // AM : Get mortality rate by age
-  float get_mortality_rate_age(float age,
-                               std::vector<int> mortality_rate_age_transition,
-                               std::vector<float> mortality_rate_by_age) {
+  float get_mortality_rate_age(
+      float age, const std::vector<int>& mortality_rate_age_transition,
+      const std::vector<float>& mortality_rate_by_age) {
     size_t age_index = mortality_rate_by_age.size() - 1;
     for (size_t i = 0; i < mortality_rate_age_transition.size(); i++) {
       if (age < mortality_rate_age_transition[i]) {
@@ -442,7 +442,7 @@ struct GetOlder : public Behavior {
 
   // AM: Get HIV-related mortality rate
   float get_mortality_rate_hiv(int state,
-                               std::vector<float> hiv_mortality_rate) {
+                               const std::vector<float>& hiv_mortality_rate) {
     return hiv_mortality_rate[state];
   }
 
@@ -544,7 +544,7 @@ struct GetOlder : public Behavior {
             6;  // Others (Male over 15, and Female over 40)
       }
     }
-    std::vector<float> transition_proba =
+    const auto& transition_proba =
         sparam->hiv_transition_matrix[person->state_][year_population_category];
     for (size_t i = 0; i < transition_proba.size(); i++) {
       if (random->Uniform() < transition_proba[i]) {

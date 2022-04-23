@@ -35,7 +35,7 @@ namespace hiv_malawi {
 class AgentVector {
  private:
   // thread-local vector of AgentPointers
-  std::vector<std::vector<AgentPointer<Person>>> agents_;
+  SharedData<std::vector<AgentPointer<Person>>> agents_;
   std::vector<uint64_t> offsets_;
   ThreadInfo* tinfo_ = nullptr;
   std::atomic<uint64_t> size_;

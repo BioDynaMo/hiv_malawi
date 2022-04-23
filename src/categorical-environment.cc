@@ -62,7 +62,13 @@ AgentPointer<Person> AgentVector::GetAgentAtIndex(size_t i) {
 }
 
 void AgentVector::AddAgent(AgentPointer<Person> agent) {
-  agents_[tinfo_->GetMyThreadId()].push_back(agent);
+  auto tid = tinfo_->GetMyThreadId();
+  if (agents_[tid].capacity() == agents_[tid].size()) {
+    auto new_cap = std::max(static_cast<uint64_t>(1000u),
+                            static_cast<uint64_t>(agents_[tid].size() * 1.2));
+    agents_[tid].reserve(new_cap);
+  }
+  agents_[tid].push_back(agent);
   size_++;
   dirty_ = true;
 }
@@ -126,22 +132,32 @@ void CategoricalEnvironment::UpdateImplementation() {
      std::cout << "Before clearing section" << std::endl;
      DescribePopulation();
   }*/
-  casual_female_agents_.clear();
+  for (auto& el : casual_female_agents_) {
+    el.Clear();
+  }
   casual_female_agents_.resize(no_age_categories_ * no_locations_ *
                                no_sociobehavioural_categories_);
 
-  regular_female_agents_.clear();
+  for (auto& el : regular_female_agents_) {
+    el.Clear();
+  }
   regular_female_agents_.resize(no_age_categories_ * no_locations_ *
                                 no_sociobehavioural_categories_);
 
-  casual_male_agents_.clear();
+  for (auto& el : casual_male_agents_) {
+    el.Clear();
+  }
   casual_male_agents_.resize(no_age_categories_ * no_locations_ *
                              no_sociobehavioural_categories_);
 
-  regular_male_agents_.clear();
+  for (auto& el : regular_male_agents_) {
+    el.Clear();
+  }
   regular_male_agents_.resize(no_age_categories_ * no_locations_ *
                               no_sociobehavioural_categories_);
-  adults_.clear();
+  for (auto& el : adults_) {
+    el.Clear();
+  }
   adults_.resize(no_locations_);
   // DEBUG
   /*if (iter < 4) {
@@ -481,7 +497,9 @@ void CategoricalEnvironment::UpdateCasualPartnerCategoryDistribution(
     const std::vector<std::vector<float>>& age_mixing_matrix,
     const std::vector<std::vector<float>>& sociobehav_mixing_matrix) {
   //#pragma omp parallel
-  mate_compound_category_distribution_.clear();
+  for (auto& el : mate_compound_category_distribution_) {
+    el.clear();
+  }
   mate_compound_category_distribution_.resize(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
 
@@ -611,7 +629,9 @@ void CategoricalEnvironment::UpdateRegularPartnerCategoryDistribution(
     std::vector<std::vector<float>> reg_partner_age_mixing_matrix,
     std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix) {
   //#pragma omp parallel
-  reg_partner_compound_category_distribution_.clear();
+  for (auto& el : reg_partner_compound_category_distribution_) {
+    el.clear();
+  }
   reg_partner_compound_category_distribution_.resize(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
 
@@ -756,7 +776,9 @@ void CategoricalEnvironment::UpdateRegularPartnerCategoryDistribution(
 void CategoricalEnvironment::UpdateMigrationLocationProbability(
     size_t year_index,
     const std::vector<std::vector<std::vector<float>>>& migration_matrix) {
-  migration_location_distribution_.clear();
+  for (auto& el : migration_location_distribution_) {
+    el.clear();
+  }
   migration_location_distribution_.resize(no_locations_);
   for (size_t i = 0; i < no_locations_; i++) {
     migration_location_distribution_[i].resize(no_locations_);

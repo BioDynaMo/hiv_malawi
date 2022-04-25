@@ -32,7 +32,7 @@ class Person : public Agent {
     mother_ = nullptr;
     partner_ = nullptr;
     children_.clear();
-    children_.reserve(100);
+    children_.reserve(3);
     protected_ = false;
     no_casual_partners_ = 0;
   }

@@ -378,7 +378,7 @@ void CategoricalEnvironment::UpdateImplementation() {
       size_t man_compound_index = ComputeCompoundIndex(
           person->location_, age_category, person->social_behaviour_factor_);
       // Get man's partner category distribution
-      auto partner_category_distribution =
+      const auto& partner_category_distribution =
           reg_partner_compound_category_distribution_[man_compound_index];
       // Sample regular partner's category
       float rand_num = static_cast<float>(random->Uniform());

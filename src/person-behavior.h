@@ -584,25 +584,8 @@ struct GetOlder : public Behavior {
     }
 
     if (!stay_alive) {
-      // If has regular partner, end partnership
-      if (person->hasPartner()) {
-        person->SeparateFromPartner();
-      }
-      // If mother dies, children have no mother anymore
-      for (int c = 0; c < person->GetNumberOfChildren(); c++) {
-        person->children_[c]->mother_ = nullptr;
-      }
-      // If a child dies and has a mother, remove him from mother's list of
-      // children
-      if (person->mother_ != nullptr) {
-        // std::cout << "A Child dies" << std::endl;
-        person->mother_->RemoveChild(person->GetAgentPtr<Person>());
-        // std::cout << " ==> Removed from mother's list of children" <<
-        // std::endl;
-      }
       // Person dies, i.e. is removed from simulation.
       person->RemoveFromSimulation();
-
     } else {
       // increase age
       person->age_ += 1;

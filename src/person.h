@@ -100,8 +100,7 @@ class Person : public Agent {
 
   // The following function is used to avoid simultaneous modification of
   // related agents. (Tread safety)
-  virtual void CriticalRegion(
-      std::vector<AgentPointer<Agent>>* aptrs) override {
+  void CriticalRegion(std::vector<AgentPointer<Agent>>* aptrs) override {
     aptrs->push_back(GetAgentPtr<Agent>());
     if (partner_ != nullptr) {
       aptrs->push_back(partner_);
@@ -112,6 +111,26 @@ class Person : public Agent {
     if (mother_ != nullptr) {
       aptrs->push_back(mother_);
     }
+  }
+
+  void RemoveFromSimulation() override {
+    // If has regular partner, end partnership
+    if (hasPartner()) {
+      SeparateFromPartner();
+    }
+    // If mother dies, children have no mother anymore
+    for (uint64_t c = 0; c < children_.size(); c++) {
+      children_[c]->mother_ = nullptr;
+    }
+    // If a child dies and has a mother, remove him from mother's list of
+    // children
+    if (mother_ != nullptr) {
+      // std::cout << "A Child dies" << std::endl;
+      mother_->RemoveChild(GetAgentPtr<Person>());
+      // std::cout << " ==> Removed from mother's list of children" <<
+      // std::endl;
+    }
+    Base::RemoveFromSimulation();
   }
 
   // Returns True if the agent is healthy

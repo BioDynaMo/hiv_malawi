@@ -18,27 +18,41 @@
 #include "datatypes.h"
 
 namespace bdm {
+namespace hiv_malawi {
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's Agent / Individual
 ////////////////////////////////////////////////////////////////////////////////
 
-class Person : public Cell {
+class Person : public Agent {
   // BioDynaMo API
-  BDM_AGENT_HEADER(Person, Cell, 1);
+  BDM_AGENT_HEADER(Person, Agent, 1);
 
  public:
   Person() {
-    mother_ =
-        AgentPointer<Person>();  // AgentPointer object representing a nullptr
-    partner_ =
-        AgentPointer<Person>();  // AgentPointer object representing a nullptr
+    mother_ = nullptr;
+    partner_ = nullptr;
     children_.clear();
     children_.reserve(100);
     protected_ = false;
     no_casual_partners_ = 0;
   }
-  explicit Person(const Double3& position) : Base(position) {}
   virtual ~Person() {}
+
+  // Overwrite abstract methods from Base class
+  Shape GetShape() const override { return Shape::kSphere; }
+  double GetDiameter() const override { return 0; }
+  const Double3& GetPosition() const override {
+    static Double3 kDefault{0, 0, 0};
+    return kDefault;
+  }
+  void SetDiameter(double diameter) override {}
+  void SetPosition(const Double3& position) override {}
+  Double3 CalculateDisplacement(const InteractionForce* force,
+                                double squared_radius, double dt) override {
+    return {0, 0, 0};
+  }
+  void ApplyDisplacement(const Double3& displacement) override {}
+  // Overwrite end
 
   /// Stores the current GemsState of the person.
   int state_;
@@ -76,13 +90,29 @@ class Person : public Cell {
   // float year_of_infection_;
   // Stores the ID of the mother. Useful to unlink child from mother, when child
   // dies.
-  AgentPointer<Person> mother_;
+  AgentPointer<Person> mother_ = nullptr;
   // Stores the IDs of the children. Useful, when mother migrates, and takes her
   // children. Unlink mother from child, when mother dies
   std::vector<AgentPointer<Person>> children_;
   // Stores the ID of the regular partner. Useful for infection in
   // serodiscordant regular relationships, and family migration.
-  AgentPointer<Person> partner_;
+  AgentPointer<Person> partner_ = nullptr;
+
+  // The following function is used to avoid simultaneous modification of
+  // related agents. (Tread safety)
+  virtual void CriticalRegion(
+      std::vector<AgentPointer<Agent>>* aptrs) override {
+    aptrs->push_back(GetAgentPtr<Agent>());
+    if (partner_ != nullptr) {
+      aptrs->push_back(partner_);
+    }
+    for (auto& child : children_) {
+      aptrs->push_back(child);
+    }
+    if (mother_ != nullptr) {
+      aptrs->push_back(mother_);
+    }
+  }
 
   // Returns True if the agent is healthy
   bool IsHealthy() { return state_ == GemsState::kHealthy; }
@@ -194,9 +224,9 @@ class Person : public Cell {
   void SeparateFromPartner() {
     if (hasPartner()) {
       // Symetric relation. Start with partner while not nullptr
-      partner_->partner_ = AgentPointer<Person>();
+      partner_->partner_ = nullptr;
       // Set partner to nullptr
-      partner_ = AgentPointer<Person>();
+      partner_ = nullptr;
     } else {
       Log::Warning("Person::SeparateFromPartner()", "Person is single");
     }
@@ -272,6 +302,7 @@ class Person : public Cell {
   bool IsProtected() { return protected_; }
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // PERSON_H_

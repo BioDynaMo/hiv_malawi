@@ -27,18 +27,29 @@
 #include <random>
 
 namespace bdm {
+namespace hiv_malawi {
 
 // This is a small helper class that wraps a vector of Agent pointers. It's a
 // building block of the CategoricalEnvironment because we store a vector of
 // AgentPointer for each of the categorical locations.
 class AgentVector {
  private:
-  // vector of AgentPointers
-  std::vector<AgentPointer<Person>> agents_;
+  // thread-local vector of AgentPointers
+  SharedData<std::vector<AgentPointer<Person>>> agents_;
+  std::vector<uint64_t> offsets_;
+  ThreadInfo* tinfo_ = nullptr;
+  std::atomic<uint64_t> size_;
+  Spinlock lock_;
+  bool dirty_ = false;
+
+  void UpdateOffsets();
 
  public:
+  AgentVector();
+  AgentVector(const AgentVector& other);
+
   // Get the number of agents in the vector
-  size_t GetNumAgents() { return agents_.size(); }
+  size_t GetNumAgents() const { return size_; }
 
   // Get a radom agent from the vector agents_
   AgentPointer<Person> GetRandomAgent();
@@ -122,15 +133,15 @@ class CategoricalEnvironment : public Environment {
   // district
   void UpdateMigrationLocationProbability(
       size_t year_index,
-      std::vector<std::vector<std::vector<float>>> migration_matrix);
+      const std::vector<std::vector<std::vector<float>>>& migration_matrix);
 
   // Update (at every iteration) matrix storing the porbability that a male
   // agent selects a casual partner based on their compound categories (location
   // x age category x sociobehaviour category)
   void UpdateCasualPartnerCategoryDistribution(
-      std::vector<std::vector<float>> location_mixing_matrix,
-      std::vector<std::vector<float>> age_mixing_matrix,
-      std::vector<std::vector<float>> sociobehav_mixing_matrix);
+      const std::vector<std::vector<float>>& location_mixing_matrix,
+      const std::vector<std::vector<float>>& age_mixing_matrix,
+      const std::vector<std::vector<float>>& sociobehav_mixing_matrix);
 
   void UpdateRegularPartnerCategoryDistribution(
       std::vector<std::vector<float>> reg_partner_age_mixing_matrix,
@@ -303,6 +314,7 @@ class CategoricalEnvironment : public Environment {
   Environment::NeighborMutexBuilder* GetNeighborMutexBuilder() override;
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // CATEGORICAL_ENVIRONMENT_H_

@@ -20,6 +20,7 @@
 #include <vector>
 
 namespace bdm {
+namespace hiv_malawi {
 
 // Possible illness states. If you adjust this enum, make sure to put the last
 // element into the definition of struct Population below. Even better, just
@@ -73,6 +74,7 @@ enum TransmissionType {
   kTransmissionLast
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // DATATYPES_H_

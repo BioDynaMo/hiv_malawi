@@ -1,6 +1,12 @@
 #include "sim-param.h"
 
 namespace bdm {
+namespace hiv_malawi {
+
+// Initialize parameter group Uid, part of the BioDynaMo API, needs to be part
+// of a cc file, depends on #include "sim-param.h". With this, we can access the
+// simulation parameters anywhere in the simulation.
+const ParamGroupUid SimParam::kUid = ParamGroupUidGenerator::Get()->NewUid();
 
 void SimParam::SetSociobehavMixingMatrix() {
   sociobehav_mixing_matrix.clear();
@@ -198,4 +204,6 @@ void SimParam::SetInitialInfectionProbability() {
   initial_infection_probability[GemsState::kChronic] = initial_infection_probability[GemsState::kAcute] + 0.8 * initial_prevalence/districts_proportion;
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
+

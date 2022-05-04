@@ -20,14 +20,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "main.h"
 #include "bdm-simulation.h"
 #include "stdout-utlis.h"
 
 int main(int argc, const char** argv) {
   PrintHeader();
 
-  bdm::Simulate(argc, argv);
+  bdm::hiv_malawi::Simulate(argc, argv);
 
   PrintClosing();
   return 0;

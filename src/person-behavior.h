@@ -19,6 +19,7 @@
 #include "population-initialization.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 ////////////////////////////////////////////////////////////////////////////////
 // BioDynaMo's Agent / Individual Behaviors
@@ -51,7 +52,7 @@ struct RandomMigration : public Behavior {
       float rand_num_loc = static_cast<float>(random->Uniform());
       // Get (cumulative) probability distribution that agent relocates the
       // current year, to each location
-      const std::vector<float> migration_location_distribution_ =
+      const auto& migration_location_distribution_ =
           env->GetMigrationLocDistribution(person->location_);
 
       int new_location =
@@ -105,7 +106,7 @@ struct MatingBehaviour : public Behavior {
     // If no transition year is higher than current year, then use last
     // transition year
     int year_index = sparam->no_mates_year_transition.size() - 1;
-    for (int y = 0; y < sparam->no_mates_year_transition.size() - 1; y++) {
+    for (size_t y = 0; y < sparam->no_mates_year_transition.size() - 1; y++) {
       if (year < sparam->no_mates_year_transition[y + 1]) {
         year_index = y;
         break;
@@ -128,7 +129,7 @@ struct MatingBehaviour : public Behavior {
           person->GetAgeCategory(env->GetMinAge(), env->GetNoAgeCategories());
       // Get (cumulative) probability distribution that the male agent selects a
       // female mate from each compound category
-      const std::vector<float> mate_compound_category_distribution =
+      const std::vector<float>& mate_compound_category_distribution =
           env->GetMateCompoundCategoryDistribution(
               person->location_, age_category,
               person->social_behaviour_factor_);
@@ -284,9 +285,9 @@ struct RegularPartnershipBehaviour : public Behavior {
     if (person->IsAdult() && person->hasPartner() &&
         random->Uniform() <= sparam->break_up_probability) {
       // Set female partner to single
-      person->partner_->partner_ = AgentPointer<Person>();
+      person->partner_->partner_ = nullptr;
       // Set male agent to single
-      person->partner_ = AgentPointer<Person>();
+      person->partner_ = nullptr;
     }
 
     // Adult single men can decide to engage in a regular partnership
@@ -443,9 +444,9 @@ struct GetOlder : public Behavior {
   GetOlder() {}
 
   // AM : Get mortality rate by age
-  float get_mortality_rate_age(float age,
-                               std::vector<int> mortality_rate_age_transition,
-                               std::vector<float> mortality_rate_by_age) {
+  float get_mortality_rate_age(
+      float age, const std::vector<int>& mortality_rate_age_transition,
+      const std::vector<float>& mortality_rate_by_age) {
     size_t age_index = mortality_rate_by_age.size() - 1;
     for (size_t i = 0; i < mortality_rate_age_transition.size(); i++) {
       if (age < mortality_rate_age_transition[i]) {
@@ -460,7 +461,7 @@ struct GetOlder : public Behavior {
 
   // AM: Get HIV-related mortality rate
   float get_mortality_rate_hiv(int state,
-                               std::vector<float> hiv_mortality_rate) {
+                               const std::vector<float>& hiv_mortality_rate) {
     return hiv_mortality_rate[state];
   }
 
@@ -483,7 +484,7 @@ struct GetOlder : public Behavior {
       // If no sociobehavioural risk transition year is higher than current
       // year, then use last transition year
       int year_index = sparam->sociobehavioural_risk_year_transition.size() - 1;
-      for (int y = 0;
+      for (size_t y = 0;
            y < sparam->sociobehavioural_risk_year_transition.size() - 1; y++) {
         if (year < sparam->sociobehavioural_risk_year_transition[y + 1]) {
           year_index = y;
@@ -562,7 +563,7 @@ struct GetOlder : public Behavior {
             6;  // Others (Male over 15, and Female over 40)
       }
     }
-    std::vector<float> transition_proba =
+    const auto& transition_proba =
         sparam->hiv_transition_matrix[person->state_][year_population_category];
     for (size_t i = 0; i < transition_proba.size(); i++) {
       if (random->Uniform() < transition_proba[i]) {
@@ -607,14 +608,12 @@ struct GetOlder : public Behavior {
         person->SeparateFromPartner();
       }
       // If mother dies, children have no mother anymore
-      if (person->sex_ == Sex::kFemale && person->GetNumberOfChildren() > 0) {
-        for (int c = 0; c < person->GetNumberOfChildren(); c++) {
-          person->children_[c]->mother_ = AgentPointer<Person>();
-        }
+      for (int c = 0; c < person->GetNumberOfChildren(); c++) {
+        person->children_[c]->mother_ = nullptr;
       }
       // If a child dies and has a mother, remove him from mother's list of
       // children
-      if (person->age_ < 15 && person->mother_ != nullptr) {
+      if (person->mother_ != nullptr) {
         // std::cout << "A Child dies" << std::endl;
         person->mother_->RemoveChild(person->GetAgentPtr<Person>());
         // std::cout << " ==> Removed from mother's list of children" <<
@@ -644,6 +643,9 @@ struct GiveBirth : public Behavior {
                       const SimParam* sparam, size_t year) {
     // Create new child
     Person* child = new Person();
+    // BioDynaMo API: Add agent (child) to simulation
+    Simulation::GetActive()->GetExecutionContext()->AddAgent(child);
+
     // Assign sex
     child->sex_ =
         SampleSex(random_generator->Uniform(), sparam->probability_male);
@@ -700,14 +702,17 @@ struct GiveBirth : public Behavior {
       }
     }
 
+    // Register child with mother
+    mother->AddChild(child->GetAgentPtr<Person>());
+
     // Assign mother to child. When, the child becomes adult, break the link.
     child->mother_ = mother->GetAgentPtr<Person>();
 
     ///! The aguments below are currently either not used or repetitive.
     // // NOTE: we do not assign a specific mother or partner at the moment. Use
     // // nullptr instead.
-    // child->mother_id_ = AgentPointer<Person>();
-    // child->partner_id_ = AgentPointer<Person>();
+    // child->mother_id_ = nullptr;
+    // child->partner_id_ = nullptr;
 
     // BioDynaMo API: Add the behaviors to the Agent
     child->AddBehavior(new RandomMigration());
@@ -728,7 +733,6 @@ struct GiveBirth : public Behavior {
 
   void Run(Agent* agent) override {
     auto* sim = Simulation::GetActive();
-    auto* ctxt = sim->GetExecutionContext();
     auto* random = sim->GetRandom();
     auto* param = sim->GetParam();
     const auto* sparam = param->Get<SimParam>();
@@ -746,12 +750,6 @@ struct GiveBirth : public Behavior {
 
       // Create a child
       auto* new_child = CreateChild(random, mother, sparam, year);
-
-      // BioDynaMo API: Add agent (child) to simulation
-      ctxt->AddAgent(new_child);
-
-      // Register child with mother
-      mother->AddChild(new_child->GetAgentPtr<Person>());
 
       // Protect mother from death.
       if (sparam->protect_mothers_at_birth) {
@@ -774,6 +772,7 @@ struct GiveBirth : public Behavior {
   }
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // PERSON_BEHAVIOR_H_

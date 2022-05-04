@@ -18,6 +18,7 @@
 #include "datatypes.h"  //AM: Added to access GemState Enum
 
 namespace bdm {
+namespace hiv_malawi {
 
 /// This class defines parameters that are specific to this simulation.
 class SimParam : public ParamGroup {
@@ -183,10 +184,8 @@ class SimParam : public ParamGroup {
 
   // AM: Socio-behavioural Mixing Matrix used for casual partner selection.
   // Socio-beahioural Category -> Socio-behavioural Category
-  std::vector<std::vector<float>> sociobehav_mixing_matrix{
-    {1.0, 4.0},
-    {1.0, 4.0}
-  };
+  std::vector<std::vector<float>> sociobehav_mixing_matrix{{1.0, 4.0},
+                                                           {1.0, 4.0}};
 
   // AM: Socio-behavioural Mixing Matrix used for regular partner selection.
   // Socio-beahioural Category -> Socio-behavioural Category
@@ -277,9 +276,11 @@ class SimParam : public ParamGroup {
   // Defines the right sizes for the matrices, for some fills it's entries, and
   // is called in constructor.
   void Initialize() {
+
     SetInitialInfectionProbability();
 
     //SetSociobehavMixingMatrix();
+
     SetAgeMixingMatrix();
     SetLocationMixingMatrix();
 
@@ -331,6 +332,7 @@ class SimParam : public ParamGroup {
   void SetMigrationLocationProbability();
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm
 
 #endif  // SIM_PARAM_H_

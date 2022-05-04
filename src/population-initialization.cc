@@ -22,6 +22,7 @@
 // All hard-coded numbers are taken from Janne's work (Parameters_D1.R)
 
 namespace bdm {
+namespace hiv_malawi {
 
 float SampleAge(float rand_num_1, float rand_num_2, int sex,
                 const std::vector<float>& age_distribution) {
@@ -125,7 +126,7 @@ int ComputeBiomedical(float rand_num, int age,
 auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   // Get all random numbers for initialization
   std::vector<float> rand_num{};
-  rand_num.reserve(10);
+  rand_num.resize(10);
   for (int i = 0; i < 10; i++) {
     rand_num[i] = static_cast<float>(random_generator->Uniform());
   }
@@ -173,8 +174,8 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   // // NOTE: we do not assign a specific mother or partner during the
   // population
   // // initialization. Use nullptr.
-  // person->mother_id_ = AgentPointer<Person>();
-  // person->partner_id_ = AgentPointer<Person>();
+  // person->mother_id_ = nullptr;
+  // person->partner_id_ = nullptr;
 
   // BioDynaMo API: Add the behaviors to the Agent
   person->AddBehavior(new RandomMigration());
@@ -211,4 +212,5 @@ void InitializePopulation() {
   }
 }
 
+}  // namespace hiv_malawi
 }  // namespace bdm

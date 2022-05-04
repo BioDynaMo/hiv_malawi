@@ -12,39 +12,87 @@
 
 #include "categorical-environment.h"
 #include "biodynamo.h"
+#include "core/algorithm.h"
 
 namespace bdm {
+namespace hiv_malawi {
 
 ////////////////////////////////////////////////////////////////////////////////
 // AgentVector
 ////////////////////////////////////////////////////////////////////////////////
+AgentVector::AgentVector() {
+  auto* tinfo = ThreadInfo::GetInstance();
+  agents_.resize(tinfo->GetMaxThreads());
+  offsets_.resize(tinfo->GetMaxThreads() + 1);
+  size_ = 0;
+}
+
+AgentVector::AgentVector(const AgentVector& other)
+    : agents_(other.agents_),
+      offsets_(other.offsets_),
+      tinfo_(other.tinfo_),
+      size_(other.size_.load()),
+      dirty_(other.dirty_) {}
 
 AgentPointer<Person> AgentVector::GetRandomAgent() {
-  if (agents_.size() == 0) {
+  if (size_ == 0) {
     Log::Fatal("AgentVector::GetRandomAgent()",
                "There are no agents available in one of your "
                "locations or compound categories. Consider increasing the "
                "number of Agents.");
   }
   auto* r = Simulation::GetActive()->GetRandom();
-  return agents_[r->Integer(agents_.size() - 1)];
+  return GetAgentAtIndex(r->Integer(size_ - 1));
 }
 
 AgentPointer<Person> AgentVector::GetAgentAtIndex(size_t i) {
-  if (i >= agents_.size()) {
+  if (i >= size_) {
     Log::Fatal("AgentVector::GetAgentAtIndex()", "Given index ", i,
                "; agents_.size() ", agents_.size(), ".");
   }
-  return agents_[i];
+  if (dirty_) {
+    UpdateOffsets();
+  }
+  auto idx = BinarySearch(i, offsets_, 0u, offsets_.size() - 1);
+  auto offset = i - offsets_[idx];
+
+  assert(idx < agents_.size());
+  assert(offset < agents_[idx].size());
+  return agents_[idx][offset];
 }
 
 void AgentVector::AddAgent(AgentPointer<Person> agent) {
-  agents_.push_back(agent);
+  auto tid = tinfo_->GetMyThreadId();
+  if (agents_[tid].capacity() == agents_[tid].size()) {
+    auto new_cap = std::max(static_cast<uint64_t>(1000u),
+                            static_cast<uint64_t>(agents_[tid].size() * 1.2));
+    agents_[tid].reserve(new_cap);
+  }
+  agents_[tid].push_back(agent);
+  size_++;
+  dirty_ = true;
 }
 
 void AgentVector::Clear() {
-  agents_.clear();
-  agents_.reserve(10000);
+  for (auto& el : agents_) {
+    el.clear();
+  }
+  size_ = 0;
+  for (auto& el : offsets_) {
+    el = 0;
+  }
+  dirty_ = false;
+}
+
+void AgentVector::UpdateOffsets() {
+  std::lock_guard<Spinlock> guard(lock_);
+  if (dirty_) {
+    for (uint64_t i = 0; i < agents_.size(); ++i) {
+      offsets_[i] = agents_[i].size();
+    }
+    ExclusivePrefixSum(&offsets_, offsets_.size() - 1);
+    dirty_ = false;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,22 +131,32 @@ void CategoricalEnvironment::UpdateImplementation() {
      std::cout << "Before clearing section" << std::endl;
      DescribePopulation();
   }*/
-  casual_female_agents_.clear();
+  for (auto& el : casual_female_agents_) {
+    el.Clear();
+  }
   casual_female_agents_.resize(no_age_categories_ * no_locations_ *
                                no_sociobehavioural_categories_);
 
-  regular_female_agents_.clear();
+  for (auto& el : regular_female_agents_) {
+    el.Clear();
+  }
   regular_female_agents_.resize(no_age_categories_ * no_locations_ *
                                 no_sociobehavioural_categories_);
 
-  casual_male_agents_.clear();
+  for (auto& el : casual_male_agents_) {
+    el.Clear();
+  }
   casual_male_agents_.resize(no_age_categories_ * no_locations_ *
                              no_sociobehavioural_categories_);
 
-  regular_male_agents_.clear();
+  for (auto& el : regular_male_agents_) {
+    el.Clear();
+  }
   regular_male_agents_.resize(no_age_categories_ * no_locations_ *
                               no_sociobehavioural_categories_);
-  adults_.clear();
+  for (auto& el : adults_) {
+    el.Clear();
+  }
   adults_.resize(no_locations_);
   // DEBUG
   /*if (iter < 4) {
@@ -109,7 +167,7 @@ void CategoricalEnvironment::UpdateImplementation() {
   // Index females (by location x age x sociobehaviour for casual and regular
   // partnerships), and adults (by location for location attractivity)
   auto* rm = Simulation::GetActive()->GetResourceManager();
-  rm->ForEachAgent([](Agent* agent) {
+  auto assign_to_indices = L2F([](Agent* agent) {
     auto* env = bdm_static_cast<CategoricalEnvironment*>(
         Simulation::GetActive()->GetEnvironment());
     auto* person = bdm_static_cast<Person*>(agent);
@@ -186,8 +244,11 @@ void CategoricalEnvironment::UpdateImplementation() {
           }
       }*/
   });
+  rm->ForEachAgentParallel(assign_to_indices);
 
   // During first iteration, assign mothers to children
+  // Note: Ignore for parallelization because it is only executed once at the
+  // beginning of the simulation -> setup cost.
   if (!mothers_are_assiged_) {
     mothers_are_assiged_ = true;
     uint64_t iter =
@@ -240,6 +301,9 @@ void CategoricalEnvironment::UpdateImplementation() {
         // TO DO AM: ideally, mother is at least 15 and at most 40 years older
         // than child
         person->mother_ = env->GetRandomMotherFromLocation(person->location_);
+        if (!person->mother_) {
+          return;
+        }
         // Check that mother and child have the same location
         if (person->location_ != person->mother_->location_) {
           Log::Warning("CategoricalEnvironment::UpdateImplementation()",
@@ -297,7 +361,7 @@ void CategoricalEnvironment::UpdateImplementation() {
       sparam->reg_partner_age_mixing_matrix,
       sparam->reg_partner_sociobehav_mixing_matrix);
   // AM: Select potential regular partner's category for each adult single man
-  rm->ForEachAgent([&](Agent* agent) {
+  auto choose_regular_partner_category = L2F([&](Agent* agent) {
     auto* env = bdm_static_cast<CategoricalEnvironment*>(
         Simulation::GetActive()->GetEnvironment());
     auto* person = bdm_static_cast<Person*>(agent);
@@ -335,7 +399,11 @@ void CategoricalEnvironment::UpdateImplementation() {
       }
     }
   });
+
+  rm->ForEachAgentParallel(choose_regular_partner_category);
+
   // AM: Map regular partners for each compound category
+#pragma omp parallel for
   for (size_t cat = 0; cat < regular_male_agents_.size(); cat++) {
     size_t no_males = regular_male_agents_[cat].GetNumAgents();
     size_t no_females = regular_female_agents_[cat].GetNumAgents();
@@ -397,7 +465,7 @@ void CategoricalEnvironment::UpdateImplementation() {
   // If no transition year is higher than current year, then use last
   // transition year
   int year_index = sparam->migration_year_transition.size() - 1;
-  for (int y = 0; y < sparam->migration_year_transition.size() - 1; y++) {
+  for (size_t y = 0; y < sparam->migration_year_transition.size() - 1; y++) {
     if (year < sparam->migration_year_transition[y + 1]) {
       year_index = y;
       break;
@@ -415,16 +483,18 @@ void CategoricalEnvironment::UpdateImplementation() {
 };
 
 void CategoricalEnvironment::UpdateCasualPartnerCategoryDistribution(
-    std::vector<std::vector<float>> location_mixing_matrix,
-    std::vector<std::vector<float>> age_mixing_matrix,
-    std::vector<std::vector<float>> sociobehav_mixing_matrix) {
+    const std::vector<std::vector<float>>& location_mixing_matrix,
+    const std::vector<std::vector<float>>& age_mixing_matrix,
+    const std::vector<std::vector<float>>& sociobehav_mixing_matrix) {
   //#pragma omp parallel
-  mate_compound_category_distribution_.clear();
+  for (auto& el : mate_compound_category_distribution_) {
+    el.clear();
+  }
   mate_compound_category_distribution_.resize(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
 
   //#pragma omp for
-  for (int i = 0;
+  for (size_t i = 0;
        i < no_locations_ * no_age_categories_ * no_sociobehavioural_categories_;
        i++) {  // Loop over male agent compound categories (location x age x
                // socio-behaviour)
@@ -549,12 +619,14 @@ void CategoricalEnvironment::UpdateRegularPartnerCategoryDistribution(
     std::vector<std::vector<float>> reg_partner_age_mixing_matrix,
     std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix) {
   //#pragma omp parallel
-  reg_partner_compound_category_distribution_.clear();
+  for (auto& el : reg_partner_compound_category_distribution_) {
+    el.clear();
+  }
   reg_partner_compound_category_distribution_.resize(
       no_locations_ * no_age_categories_ * no_sociobehavioural_categories_);
 
   //#pragma omp for
-  for (int i = 0;
+  for (size_t i = 0;
        i < no_locations_ * no_age_categories_ * no_sociobehavioural_categories_;
        i++) {  // Loop over male agent compound categories (location x age x
                // socio-behaviour)
@@ -693,21 +765,23 @@ void CategoricalEnvironment::UpdateRegularPartnerCategoryDistribution(
 
 void CategoricalEnvironment::UpdateMigrationLocationProbability(
     size_t year_index,
-    std::vector<std::vector<std::vector<float>>> migration_matrix) {
-  migration_location_distribution_.clear();
+    const std::vector<std::vector<std::vector<float>>>& migration_matrix) {
+  for (auto& el : migration_location_distribution_) {
+    el.clear();
+  }
   migration_location_distribution_.resize(no_locations_);
-  for (int i = 0; i < no_locations_; i++) {
+  for (size_t i = 0; i < no_locations_; i++) {
     migration_location_distribution_[i].resize(no_locations_);
     // Compute Denominator for Normalization
     float sum = 0.0;
-    for (int j = 0; j < no_locations_; j++) {
+    for (size_t j = 0; j < no_locations_; j++) {
       // Weight migration_matrix with population size per destination
       migration_location_distribution_[i][j] =
           migration_matrix[year_index][i][j] * GetNumAdultsAtLocation(j);
       sum += migration_location_distribution_[i][j];
     }
     // Normalize and Cumulate
-    for (int j = 0; j < no_locations_; j++) {
+    for (size_t j = 0; j < no_locations_; j++) {
       if (j == 0) {
         migration_location_distribution_[i][j] =
             migration_location_distribution_[i][j] / sum;
@@ -948,7 +1022,7 @@ AgentPointer<Person> CategoricalEnvironment::GetRandomMotherFromLocation(
   if (mothers_[location].GetNumAgents() == 0) {
     Log::Warning("CategoricalEnvironment::GetRandomMotherFromLocation()",
                  "Mothers empty. Received location: ", location);
-    return AgentPointer<Person>();  // nullptr
+    return nullptr;
   }
   return mothers_[location].GetRandomAgent();
 }
@@ -1030,4 +1104,5 @@ CategoricalEnvironment::GetNeighborMutexBuilder() {
   return nullptr;
 };
 
+}  // namespace hiv_malawi
 }  // namespace bdm

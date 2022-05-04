@@ -166,4 +166,36 @@ void SimParam::SetMigrationMatrix() {
   }
 };
 
+void SimParam::SetInitialInfectionProbability() {
+  
+  // Compute Proportion of Population in Seed Districts
+  float districts_proportion = 0.0;
+  int nb_seed_districts = 0;
+  for (size_t i = 0; i < nb_locations; i++){
+    if (seed_districts[i] == true){
+      nb_seed_districts += 1;
+      if (i == 0){
+        districts_proportion += location_distribution[i];
+      } else {
+        districts_proportion += (location_distribution[i] - location_distribution[i-1]);
+      }
+    }
+  } 
+
+  std::cout << "nb_seed_districts = " << nb_seed_districts <<  "; districts_proportion = " << districts_proportion << std::endl;
+
+  int nb_states = GemsState::kGemsLast;
+  initial_infection_probability.clear();
+  initial_infection_probability.resize(nb_states);
+  fill(initial_infection_probability.begin(), initial_infection_probability.end(), 1.0);
+
+  // Given Proportion of Seed District Populations and National Prevalence 
+  // Probability to be Healthy is 1 - Probability to be Infected
+  initial_infection_probability[GemsState::kHealthy] = (1.0 - initial_prevalence/districts_proportion);
+  // Among Infected, (1/5) 20% are acute 
+  initial_infection_probability[GemsState::kAcute] = initial_infection_probability[GemsState::kHealthy] + 0.2 * initial_prevalence/districts_proportion;
+  // 80% remaining are chronic
+  initial_infection_probability[GemsState::kChronic] = initial_infection_probability[GemsState::kAcute] + 0.8 * initial_prevalence/districts_proportion;
+};
+
 }  // namespace bdm

@@ -51,6 +51,10 @@ int SampleLocation(float rand_num,
   Log::Warning("SampleLocation()",
                "Could not sample the location. Recieved inputs: ", rand_num,
                ". Use location 0.");
+  for (size_t i = 0; i < location_distribution.size(); i++) {
+    std::cout << location_distribution[i] << ", ";
+  }
+  std::cout << std::endl;
   return 0;
 }
 

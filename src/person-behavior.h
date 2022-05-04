@@ -112,9 +112,13 @@ struct MatingBehaviour : public Behavior {
         break;
       }
     }
-    int no_mates = static_cast<int>(random->Gaus(
+    /*int no_mates = static_cast<int>(random->Gaus(
         sparam->no_mates_mean[year_index][person->social_behaviour_factor_],
-        sparam->no_mates_sigma[year_index][person->social_behaviour_factor_]));
+        sparam->no_mates_sigma[year_index][person->social_behaviour_factor_]));*/
+    
+    // Poisson Distribution
+    int no_mates = random->Poisson(
+        sparam->no_mates_mean[year_index][person->social_behaviour_factor_]);
 
     // This part is only executed for male persons in a certain age group, since
     // the infection goes into both directions.
@@ -313,6 +317,21 @@ struct RegularMatingBehaviour : public Behavior {
     const auto* sparam = param->Get<SimParam>();
     auto* person = bdm_static_cast<Person*>(agent);
 
+    // Determine the number of regular acts
+    // AM: Number of regular acts depends on the current year
+    int year = static_cast<int>(
+        sparam->start_year +
+        sim->GetScheduler()->GetSimulatedSteps());  // Current year
+    // If no transition year is higher than current year, then use last
+    // transition year
+    int year_index = sparam->no_regacts_year_transition.size() - 1;
+    for (int y = 0; y < sparam->no_regacts_year_transition.size() - 1; y++) {
+      if (year < sparam->no_regacts_year_transition[y + 1]) {
+        year_index = y;
+        break;
+      }
+    }
+
     if (person->hasPartner() && person->age_ < env->GetMaxAge()) {
       // Scenario healthy male has intercourse with infected acute female
       // partner
@@ -320,7 +339,7 @@ struct RegularMatingBehaviour : public Behavior {
           person->state_ == GemsState::kHealthy &&
           random->Uniform() <
               (1.0 - pow(1.0 - sparam->infection_probability_acute_fm,
-                         sparam->no_regular_acts_mean))) {
+                         sparam->no_regular_acts_mean[year_index]))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
@@ -333,7 +352,7 @@ struct RegularMatingBehaviour : public Behavior {
                person->state_ == GemsState::kHealthy &&
                random->Uniform() <
                    (1.0 - pow(1.0 - sparam->infection_probability_chronic_fm,
-                              sparam->no_regular_acts_mean))) {
+                              sparam->no_regular_acts_mean[year_index]))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
@@ -346,7 +365,7 @@ struct RegularMatingBehaviour : public Behavior {
                person->state_ == GemsState::kHealthy &&
                random->Uniform() <
                    (1.0 - pow(1.0 - sparam->infection_probability_treated_fm,
-                              sparam->no_regular_acts_mean))) {
+                              sparam->no_regular_acts_mean[year_index]))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
@@ -359,7 +378,7 @@ struct RegularMatingBehaviour : public Behavior {
                person->state_ == GemsState::kHealthy &&
                random->Uniform() <
                    (1.0 - pow(1.0 - sparam->infection_probability_failing_fm,
-                              sparam->no_regular_acts_mean))) {
+                              sparam->no_regular_acts_mean[year_index]))) {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
@@ -372,7 +391,7 @@ struct RegularMatingBehaviour : public Behavior {
                person->state_ == GemsState::kAcute &&
                random->Uniform() <
                    (1.0 - pow(1.0 - sparam->infection_probability_acute_mf,
-                              sparam->no_regular_acts_mean))) {
+                              sparam->no_regular_acts_mean[year_index]))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ =
             TransmissionType::kRegularPartner;
@@ -383,7 +402,7 @@ struct RegularMatingBehaviour : public Behavior {
                person->state_ == GemsState::kChronic &&
                random->Uniform() <
                    (1.0 - pow(1.0 - sparam->infection_probability_chronic_mf,
-                              sparam->no_regular_acts_mean))) {
+                              sparam->no_regular_acts_mean[year_index]))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ =
             TransmissionType::kRegularPartner;
@@ -394,7 +413,7 @@ struct RegularMatingBehaviour : public Behavior {
                person->state_ == GemsState::kTreated &&
                random->Uniform() <
                    (1.0 - pow(1.0 - sparam->infection_probability_treated_mf,
-                              sparam->no_regular_acts_mean))) {
+                              sparam->no_regular_acts_mean[year_index]))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ =
             TransmissionType::kRegularPartner;
@@ -405,7 +424,7 @@ struct RegularMatingBehaviour : public Behavior {
                person->state_ == GemsState::kFailing &&
                random->Uniform() <
                    (1.0 - pow(1.0 - sparam->infection_probability_failing_mf,
-                              sparam->no_regular_acts_mean))) {
+                              sparam->no_regular_acts_mean[year_index]))) {
         person->partner_->state_ = GemsState::kAcute;
         person->partner_->transmission_type_ =
             TransmissionType::kRegularPartner;

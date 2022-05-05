@@ -192,7 +192,7 @@ class SimParam : public ParamGroup {
   std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix;
 
   // Initial prevalence among 15-50 years old.
-  const float initial_prevalence = 15e-4;//30e-4; //15e-4;  
+  const float initial_prevalence = 30e-4;//30e-4; //15e-4;  
 
   // AM: Probability for agent to be healthy or at a certain HIV progression
   // state at beginning of simulation. Given in a summed up/cumulative form.

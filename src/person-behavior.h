@@ -115,7 +115,7 @@ struct MatingBehaviour : public Behavior {
     /*int no_mates = static_cast<int>(random->Gaus(
         sparam->no_mates_mean[year_index][person->social_behaviour_factor_],
         sparam->no_mates_sigma[year_index][person->social_behaviour_factor_]));*/
-    
+
     // Poisson Distribution
     int no_mates = random->Poisson(
         sparam->no_mates_mean[year_index][person->social_behaviour_factor_]);

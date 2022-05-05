@@ -70,7 +70,7 @@ class SimParam : public ParamGroup {
 
   // AM: Probability to migrate
   // TO DO AM: Make this probability dependent on the origin location?
-  float migration_probability = 0.01; //0.0; // No Mogration //0.01;
+  float migration_probability = 0.01;  // 0.0; // No Mogration //0.01;
   // AM: Migration year index
   const std::vector<int> migration_year_transition{1960};
   // AM: Migration Matrix. Year index x Location x Location
@@ -83,8 +83,9 @@ class SimParam : public ParamGroup {
   float break_up_probability = 1.0;
 
   // Years where number of mates per socio-behavioural factors changes
-  const std::vector<int> no_mates_year_transition//{1960, 1990, 2000};
-  {1960, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002};
+  const std::vector<int> no_mates_year_transition  //{1960, 1990, 2000};
+      {1960, 1991, 1992, 1993, 1994, 1995, 1996,
+       1997, 1998, 1999, 2000, 2001, 2002};
 
   // The mating behaviour is modeled with a random process. For each male agent,
   // we sample the number of female sex partners per year from a Gaussian
@@ -94,35 +95,45 @@ class SimParam : public ParamGroup {
   const std::vector<std::vector<float>> no_mates_mean /*{{40.0,80.0},
                                                       {30.0,60.0},
                                                       {20.0,40.0}};*/
-      {{24,95}, {22,89}, {21,83}, {20,77}, {18,71}, {16,65}, {15,59}, {14,53}, {12,48},  {10,42},  {9,36}, {8,30}, {6,24}};     
-      //{{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
-      //{{2.0, 8.0}, {1.0, 4.0}, {1.0, 4.0}};
+      {{24, 95}, {22, 89}, {21, 83}, {20, 77}, {18, 71}, {16, 65}, {15, 59},
+       {14, 53}, {12, 48}, {10, 42}, {9, 36},  {8, 30},  {6, 24}};
+  //{{20.0, 70.0}, {15.0, 53.0}, {10.0, 35.0}};
+  //{{2.0, 8.0}, {1.0, 4.0}, {1.0, 4.0}};
 
   const std::vector<std::vector<float>> no_mates_sigma /*{{100.0,100.0},
                                                     {100.0,100.0},
                                                     {100.0,100.0}};*/
-      {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},{0.0, 0.0},{0.0, 0.0},{0.0, 0.0},{0.0, 0.0}};      
-      //{{8.0, 10.0}, {8.0, 10.0}, {8.0, 10.0}};
-      //{{10.0, 10.0}, {10.0, 10.0}, {10.0, 10.0}};
+      {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},
+       {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},
+       {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
+  //{{8.0, 10.0}, {8.0, 10.0}, {8.0, 10.0}};
+  //{{10.0, 10.0}, {10.0, 10.0}, {10.0, 10.0}};
 
   // We sample the number of sex acts with each female sex partner per year
   // from a Gaussian distribution.
-  const std::vector<std::vector<float>> no_acts_mean
-      {{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0},{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0},{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0},{1.0, 1.0},{1.0, 1.0},{1.0, 1.0},{1.0, 1.0}};
-      //{{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
-      //{{10.0, 10.0}, {10.0, 10.0}, {10.0, 10.0}};
+  const std::vector<std::vector<float>> no_acts_mean{
+      {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0},
+      {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0},
+      {1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
+  //{{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
+  //{{10.0, 10.0}, {10.0, 10.0}, {10.0, 10.0}};
 
   const std::vector<std::vector<float>> no_acts_sigma{
-      {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},{0.0, 0.0},{0.0, 0.0},{0.0, 0.0},{0.0, 0.0}};
-      //{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
-      //{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
+      {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},
+      {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0},
+      {0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
+  //{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
+  //{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
 
-  const std::vector<int> no_regacts_year_transition {1960, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002};
+  const std::vector<int> no_regacts_year_transition{
+      1960, 1991, 1992, 1993, 1994, 1995, 1996,
+      1997, 1998, 1999, 2000, 2001, 2002};
 
   // Mean number of sexual acts with regular partner per year.
-  //const float no_regular_acts_mean = 50.0;  // 150;
-  const std::vector<float> no_regular_acts_mean//{50, 47, 44, 41, 38, 34, 31, 28, 25, 22, 19, 16, 12};
-  {90, 84, 79, 73, 68, 62, 56, 51, 45, 39, 34, 28, 22};
+  // const float no_regular_acts_mean = 50.0;  // 150;
+  const std::vector<float> no_regular_acts_mean  //{50, 47, 44, 41, 38, 34, 31,
+                                                 //28, 25, 22, 19, 16, 12};
+      {90, 84, 79, 73, 68, 62, 56, 51, 45, 39, 34, 28, 22};
 
   // AM: Probability of getting infected depends on
   // 1) disease state, 2) sex of partners Male-to-female
@@ -137,10 +148,14 @@ class SimParam : public ParamGroup {
   float infection_probability_treated_fm = 6.5e-4 * coef_infection_probability;
   float infection_probability_failing_fm = 3.9e-4 * coef_infection_probability;
   // Male-to-male
-  float infection_probability_acute_mm = 9.3e-2 * coef_infection_probability;;
-  float infection_probability_chronic_mm = 1.9e-2 * coef_infection_probability;;
-  float infection_probability_treated_mm = 1.3e-3 * coef_infection_probability;;
-  float infection_probability_failing_mm = 7.6e-3 * coef_infection_probability;;
+  float infection_probability_acute_mm = 9.3e-2 * coef_infection_probability;
+  ;
+  float infection_probability_chronic_mm = 1.9e-2 * coef_infection_probability;
+  ;
+  float infection_probability_treated_mm = 1.3e-3 * coef_infection_probability;
+  ;
+  float infection_probability_failing_mm = 7.6e-3 * coef_infection_probability;
+  ;
 
   // AM: Transition Matrix between HIV states.
   // GemState->Year-and-Population-category->GemsState
@@ -162,7 +177,7 @@ class SimParam : public ParamGroup {
       }};
 
   // Number of locations
-  int nb_locations = Location::kLocLast; //1; //Location::kLocLast;
+  int nb_locations = Location::kLocLast;  // 1; //Location::kLocLast;
 
   // AM: Location Mixing Matrix used for casual partner selection.
   // Location->Location
@@ -192,7 +207,7 @@ class SimParam : public ParamGroup {
   std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix;
 
   // Initial prevalence among 15-50 years old.
-  const float initial_prevalence = 30e-4;//30e-4; //15e-4;  
+  const float initial_prevalence = 30e-4;  // 30e-4; //15e-4;
 
   // AM: Probability for agent to be healthy or at a certain HIV progression
   // state at beginning of simulation. Given in a summed up/cumulative form.
@@ -200,17 +215,16 @@ class SimParam : public ParamGroup {
   // Healthy. x2 = p_Healthy + p_Acute, x3 = p_Healthy + p_Acute + p_Chronic, x4
   // = p_Healthy + p_Acute + p_Chronic + p_Treated, x5 = p_Healthy + p_Acute +
   // p_Chronic + p_Treated + p_Failing
-  // These probablities involve 15-50 years old agents, located in seed districts.
-  // 1/5 of HIV infected are in acute phase, others are chronic.
+  // These probablities involve 15-50 years old agents, located in seed
+  // districts. 1/5 of HIV infected are in acute phase, others are chronic.
   std::vector<float> initial_infection_probability;
 
-                 
   // Districts where HIV infected agents are initially located
   const std::vector<bool> seed_districts{
       false, true,  false, false, false, false, false, false, false, false,
       true,  false, true,  false, true,  true,  true,  true,  true,  true,
       true,  true,  true,  true,  true,  true,  true,  true,  false};
-  
+
   // One Location
   /*const std::vector<bool> seed_districts{
       true, false};*/
@@ -276,10 +290,9 @@ class SimParam : public ParamGroup {
   // Defines the right sizes for the matrices, for some fills it's entries, and
   // is called in constructor.
   void Initialize() {
-
     SetInitialInfectionProbability();
 
-    //SetSociobehavMixingMatrix();
+    // SetSociobehavMixingMatrix();
 
     SetAgeMixingMatrix();
     SetLocationMixingMatrix();

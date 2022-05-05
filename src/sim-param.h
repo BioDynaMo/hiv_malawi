@@ -132,7 +132,7 @@ class SimParam : public ParamGroup {
   // Mean number of sexual acts with regular partner per year.
   // const float no_regular_acts_mean = 50.0;  // 150;
   const std::vector<float> no_regular_acts_mean  //{50, 47, 44, 41, 38, 34, 31,
-                                                 //28, 25, 22, 19, 16, 12};
+                                                 // 28, 25, 22, 19, 16, 12};
       {90, 84, 79, 73, 68, 62, 56, 51, 45, 39, 34, 28, 22};
 
   // AM: Probability of getting infected depends on

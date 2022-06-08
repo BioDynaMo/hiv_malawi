@@ -68,6 +68,48 @@ void DefineAndRegisterCollectors() {
   };
   ts->AddCollector("acute_agents", new Counter<double>(acute), get_year);
 
+  // AM: Define how to count the infected acute male individuals
+  auto acute_male_agents = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsAcute() && person->IsMale();
+  };
+  ts->AddCollector("acute_male_agents", new Counter<double>(acute_male_agents), get_year);
+
+  // AM: Define how to count the infected acute male individuals with low risk behaviours
+  auto acute_male_low_sb_agents = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsAcute() && person->IsMale() && person->HasLowRiskSocioBehav();
+  };
+  ts->AddCollector("acute_male_low_sb_agents", new Counter<double>(acute_male_low_sb_agents), get_year);
+
+  // AM: Define how to count the infected acute male individuals with high risk behaviours
+  auto acute_male_high_sb_agents = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsAcute() && person->IsMale() && person->HasHighRiskSocioBehav();
+  };
+  ts->AddCollector("acute_male_high_sb_agents", new Counter<double>(acute_male_high_sb_agents), get_year);
+
+  // AM: Define how to count the infected acute female individuals
+  auto acute_female_agents = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsAcute() && person->IsFemale();
+  };
+  ts->AddCollector("acute_female_agents", new Counter<double>(acute_female_agents), get_year);
+
+  // AM: Define how to count the infected acute female individuals with low risk sociobehaviours
+  auto acute_female_low_sb_agents = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsAcute() && person->IsFemale() && person->HasLowRiskSocioBehav();
+  };
+  ts->AddCollector("acute_female_low_sb_agents", new Counter<double>(acute_female_low_sb_agents), get_year);
+
+  // AM: Define how to count the infected acute female individuals with high risk sociobehaviours
+  auto acute_female_high_sb_agents = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsAcute() && person->IsFemale() && person->HasHighRiskSocioBehav();
+  };
+  ts->AddCollector("acute_female_high_sb_agents", new Counter<double>(acute_female_high_sb_agents), get_year);
+
   // AM: Define how to count the infected chronic individuals
   auto chronic = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
@@ -96,6 +138,20 @@ void DefineAndRegisterCollectors() {
   };
   ts->AddCollector("mtct_agents", new Counter<double>(mtct), get_year);
 
+  // AM: Define how to count the male individuals infected at birth
+  auto mtct_transmission_to_male = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->MTCTransmission() && person->IsMale();
+  };
+  ts->AddCollector("mtct_transmission_to_male", new Counter<double>(mtct_transmission_to_male), get_year);
+
+  // AM: Define how to count the female individuals infected at birth
+  auto mtct_transmission_to_female = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->MTCTransmission() && person->IsFemale();
+  };
+  ts->AddCollector("mtct_transmission_to_female", new Counter<double>(mtct_transmission_to_female), get_year);
+
   // AM: Define how to count the individuals infected through casual mating
   auto casual = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
@@ -104,12 +160,41 @@ void DefineAndRegisterCollectors() {
   ts->AddCollector("casual_transmission_agents", new Counter<double>(casual),
                    get_year);
 
+  // AM: Define how to count the male individuals infected through casual mating
+  auto casual_transmission_to_male = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->CasualTransmission() && person->IsMale();
+  };
+  ts->AddCollector("casual_transmission_to_male", new Counter<double>(casual_transmission_to_male),
+                   get_year);
+  // AM: Define how to count the female individuals infected through casual mating
+  auto casual_transmission_to_female = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->CasualTransmission() && person->IsFemale();
+  };
+  ts->AddCollector("casual_transmission_to_female", new Counter<double>(casual_transmission_to_female),
+                   get_year);
+
   // AM: Define how to count the individuals infected through regular mating
   auto regular = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return person->RegularTransmission();
   };
   ts->AddCollector("regular_transmission_agents", new Counter<double>(regular),
+                   get_year);
+  // AM: Define how to count the male individuals infected through regular mating
+  auto regular_transmission_to_male = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->RegularTransmission() && person->IsMale();
+  };
+  ts->AddCollector("regular_transmission_to_male", new Counter<double>(regular_transmission_to_male),
+                   get_year);
+  // AM: Define how to count the female individuals infected through regular mating
+  auto regular_transmission_to_female = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->RegularTransmission() && person->IsFemale();
+  };
+  ts->AddCollector("regular_transmission_to_female", new Counter<double>(regular_transmission_to_female),
                    get_year);
 
   // AM: Define how to count the individuals that were infected by an Acute HIV
@@ -147,6 +232,24 @@ void DefineAndRegisterCollectors() {
   };
   ts->AddCollector("failing_transmission",
                    new Counter<double>(failing_transmission), get_year);
+
+  // AM: Define how to count the individuals that were infected by an low risk
+  // HIV partner
+  auto low_sb_transmission = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->LowRiskTransmission();
+  };
+  ts->AddCollector("low_sb_transmission",
+                   new Counter<double>(low_sb_transmission), get_year);
+
+  // AM: Define how to count the individuals that were infected by a high risk
+  // HIV partner
+  auto high_sb_transmission = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->HighRiskTransmission();
+  };
+  ts->AddCollector("high_sb_transmission",
+                   new Counter<double>(high_sb_transmission), get_year);
 
   // Define how to compute mean number of casual partners for males with
   // low-risk sociobehaviours
@@ -271,6 +374,126 @@ void DefineAndRegisterCollectors() {
     return num_casual / agents;
   };
   ts->AddCollector("mean_nocas_women_high_sb", mean_nocas_women_high_sb,
+                   get_year);
+
+  // AM: Define how to compute mean number of casual partners for HIV infected females with
+  // high-risk sociobehaviours
+  //
+  // Define how to count adult HIV infected females younger than 50 with high risk social
+  // behavior
+  auto adult_hiv_female_age_lt50_high_sb = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (!person->IsHealthy() && person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
+            person->HasHighRiskSocioBehav());
+  };
+  ts->AddCollector("adult_hiv_female_age_lt50_high_sb",
+                   new Counter<double>(adult_hiv_female_age_lt50_high_sb),
+                   get_year);
+
+  // Sum all casual partners for adult_hiv_female_age_lt50_high_sb
+  ts->AddCollector(
+      "total_nocas_hiv_women_high_sb",
+      new GenericReducer<uint64_t, double>(sum_casual_partners, sum_tl_results,
+                                           adult_hiv_female_age_lt50_high_sb),
+      get_year);
+
+  auto mean_nocas_hiv_women_high_sb = [](Simulation* sim) {
+    auto* ts = sim->GetTimeSeries();
+    auto num_casual = ts->GetYValues("total_nocas_hiv_women_high_sb").back();
+    auto agents = ts->GetYValues("adult_hiv_female_age_lt50_high_sb").back();
+    return num_casual / agents;
+  };
+  ts->AddCollector("mean_nocas_hiv_women_high_sb", mean_nocas_hiv_women_high_sb,
+                   get_year);
+  
+  // AM: Define how to compute mean number of casual partners for HIV infected females with
+  // high-risk sociobehaviours
+  //
+  // Define how to count adult HIV infected females younger than 50 with high risk social
+  // behavior
+  auto adult_hiv_female_age_lt50_low_sb = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (!person->IsHealthy() && person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
+            person->HasLowRiskSocioBehav());
+  };
+  ts->AddCollector("adult_hiv_female_age_lt50_low_sb",
+                   new Counter<double>(adult_hiv_female_age_lt50_low_sb),
+                   get_year);
+
+  // Sum all casual partners for adult_hiv_female_age_lt50_low_sb
+  ts->AddCollector(
+      "total_nocas_hiv_women_low_sb",
+      new GenericReducer<uint64_t, double>(sum_casual_partners, sum_tl_results,
+                                           adult_hiv_female_age_lt50_low_sb),
+      get_year);
+
+  auto mean_nocas_hiv_women_low_sb = [](Simulation* sim) {
+    auto* ts = sim->GetTimeSeries();
+    auto num_casual = ts->GetYValues("total_nocas_hiv_women_low_sb").back();
+    auto agents = ts->GetYValues("adult_hiv_female_age_lt50_low_sb").back();
+    return num_casual / agents;
+  };
+  ts->AddCollector("mean_nocas_hiv_women_low_sb", mean_nocas_hiv_women_low_sb,
+                   get_year);
+
+  // AM: Define how to compute mean number of casual partners for HIV infected males with
+  // high-risk sociobehaviours
+  //
+  // Define how to count adult HIV infected males younger than 50 with high risk social
+  // behavior
+  auto adult_hiv_male_age_lt50_high_sb = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (!person->IsHealthy() && person->IsMale() && person->IsAdult() && person->age_ < 50 &&
+            person->HasHighRiskSocioBehav());
+  };
+  ts->AddCollector("adult_hiv_male_age_lt50_high_sb",
+                   new Counter<double>(adult_hiv_male_age_lt50_high_sb),
+                   get_year);
+
+  // Sum all casual partners for adult_hiv_male_age_lt50_high_sb
+  ts->AddCollector(
+      "total_nocas_hiv_men_high_sb",
+      new GenericReducer<uint64_t, double>(sum_casual_partners, sum_tl_results,
+                                           adult_hiv_male_age_lt50_high_sb),
+      get_year);
+
+  auto mean_nocas_hiv_men_high_sb = [](Simulation* sim) {
+    auto* ts = sim->GetTimeSeries();
+    auto num_casual = ts->GetYValues("total_nocas_hiv_men_high_sb").back();
+    auto agents = ts->GetYValues("adult_hiv_male_age_lt50_high_sb").back();
+    return num_casual / agents;
+  };
+  ts->AddCollector("mean_nocas_hiv_men_high_sb", mean_nocas_hiv_men_high_sb,
+                   get_year);
+
+  // AM: Define how to compute mean number of casual partners for HIV infected males with
+  // low-risk sociobehaviours
+  //
+  // Define how to count adult HIV infected males younger than 50 with high risk social
+  // behavior
+  auto adult_hiv_male_age_lt50_low_sb = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (!person->IsHealthy() && person->IsMale() && person->IsAdult() && person->age_ < 50 &&
+            person->HasLowRiskSocioBehav());
+  };
+  ts->AddCollector("adult_hiv_male_age_lt50_low_sb",
+                   new Counter<double>(adult_hiv_male_age_lt50_low_sb),
+                   get_year);
+
+  // Sum all casual partners for adult_hiv_male_age_lt50_low_sb
+  ts->AddCollector(
+      "total_nocas_hiv_men_low_sb",
+      new GenericReducer<uint64_t, double>(sum_casual_partners, sum_tl_results,
+                                           adult_hiv_male_age_lt50_low_sb),
+      get_year);
+
+  auto mean_nocas_hiv_men_low_sb = [](Simulation* sim) {
+    auto* ts = sim->GetTimeSeries();
+    auto num_casual = ts->GetYValues("total_nocas_hiv_men_low_sb").back();
+    auto agents = ts->GetYValues("adult_hiv_male_age_lt50_low_sb").back();
+    return num_casual / agents;
+  };
+  ts->AddCollector("mean_nocas_hiv_men_low_sb", mean_nocas_hiv_men_low_sb,
                    get_year);
 
   // AM: Define how to compute general prevalence
@@ -665,6 +888,27 @@ int PlotAndSaveTimeseries() {
             {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g2_1(ts, "Acute HIV by sex", "Time", "Number of agents",
+                                  true);
+  g2_1.Add("acute_male_agents", "Male Acute", "L", kBlue, 1.0, 1);
+  g2_1.Add("acute_female_agents", "Female Acute", "L", kMagenta, 1.0, 1);
+  g2_1.Draw();
+  g2_1.SaveAs(Concat(sim->GetOutputDir(), "/simulation_hiv_acute_sex"),
+            {".svg", ".png"});
+
+  // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g2_1_1(ts, "Acute HIV by sex and risk", "Time", "Number of agents",
+                                  true);
+  g2_1_1.Add("acute_male_low_sb_agents", "Male Acute - Low risk", "L", kBlue, 1.0, 2);
+  g2_1_1.Add("acute_male_high_sb_agents", "Male Acute - High risk", "L", kBlue, 1.0, 1);
+  g2_1_1.Add("acute_female_low_sb_agents", "Female Acute - Low risk", "L", kMagenta, 1.0, 2);
+  g2_1_1.Add("acute_female_high_sb_agents", "Female Acute - High risk", "L", kMagenta, 1.0, 1);
+
+  g2_1_1.Draw();
+  g2_1_1.SaveAs(Concat(sim->GetOutputDir(), "/simulation_hiv_acute_sex_sb"),
+            {".svg", ".png"});
+
+  // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_2(ts, "Transmission", "Time",
                                     "Number of agents", true);
   g2_2.Add("mtct_agents", "MTCT", "L", kGreen, 1.0, 3);
@@ -677,6 +921,25 @@ int PlotAndSaveTimeseries() {
               {".svg", ".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g2_2_1(ts, "Transmission", "Time",
+                                    "Number of agents", true);
+  g2_2_1.Add("casual_transmission_to_male", "Casual Transmission - to Male", "L", kBlue, 1.0,
+           1);
+  g2_2_1.Add("casual_transmission_to_female", "Casual Transmission - to Female", "L", kMagenta, 1.0,
+           1);
+  g2_2_1.Add("regular_transmission_to_male", "Regular Transmission - to Male", "L", kBlue, 1.0,
+           2);
+  g2_2_1.Add("regular_transmission_to_male", "Regular Transmission - to Female", "L", kMagenta, 1.0,
+           2);
+  g2_2_1.Add("mtct_transmission_to_male", "MTCT - to Male", "L", kBlue, 1.0,
+           3);
+  g2_2_1.Add("mtct_transmission_to_female", "MTCT Transmission - to Female", "L", kMagenta, 1.0,
+           3);
+  g2_2_1.Draw();
+  g2_2_1.SaveAs(Concat(sim->GetOutputDir(), "/simulation_transmission_types_by_sex"),
+              {".svg", ".png"});
+
+  // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_3(ts, "Source of infection - HIV stage",
                                     "Time", "Number of agents", true);
   g2_3.Add("acute_transmission", "Infected by Acute", "L", kRed, 1.0, 10);
@@ -685,8 +948,19 @@ int PlotAndSaveTimeseries() {
   g2_3.Add("treated_transmission", "Infected by Treated", "L", kGreen, 1.0, 10);
   g2_3.Add("failing_transmission", "Infected by Failing", "L", kGray, 1.0, 10);
   g2_3.Draw();
-  g2_3.SaveAs(Concat(sim->GetOutputDir(), "/simulation_transmission_sources"),
+  g2_3.SaveAs(Concat(sim->GetOutputDir(), "/simulation_transmission_sources_state"),
               {".svg", ".png"});
+
+  // Create a bdm LineGraph that visualizes the TimeSeries data
+  bdm::experimental::LineGraph g2_4(ts, "Source of infection - Risk level",
+                                    "Time", "Number of agents", true);
+  g2_4.Add("low_sb_transmission", "Infected by Low Risk", "L", kRed, 1.0, 10);
+  g2_4.Add("high_sb_transmission", "Infected by High Risk", "L", kMagenta, 1.0,
+           10);
+  g2_4.Draw();
+  g2_4.SaveAs(Concat(sim->GetOutputDir(), "/simulation_transmission_sources_sb"),
+              {".svg", ".png"});
+
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g3(ts, "HIV", "Time", "", true);
   g3.Add("prevalence", "Prevalence", "L", kOrange, 1.0, 3, 1, kOrange, 1.0, 5);
@@ -728,9 +1002,9 @@ int PlotAndSaveTimeseries() {
          kGreen, 1.0, 10);
 
   g4.Add("high_risk_sb_healthy_men", "High Risk SB - Healthy Men", "L", kOrange,
-         1.0, 2);
+         1.0, 5);
   g4.Add("low_risk_sb_healthy_men", "Low Risk SB - Healthy Men", "L", kGreen,
-         1.0, 2);
+         1.0, 5);
   g4.Draw();
   g4.SaveAs(Concat(sim->GetOutputDir(), "/simulation_sociobehaviours"),
             {".svg", ".png"});
@@ -741,11 +1015,19 @@ int PlotAndSaveTimeseries() {
 
   g5.Add("mean_nocas_men_low_sb", "Mean - Men w/ Low Risk SB", "L", kGreen, 1.0,
          2);
-  g5.Add("mean_nocas_men_high_sb", "Mean - Men w/ High Risk SB", "L", kRed, 1.0,
-         2);
-  g5.Add("mean_nocas_women_low_sb", "Mean - Women w/ Low Risk SB", "L", kGreen,
-         1.0, 1);
+  g5.Add("mean_nocas_men_high_sb", "Mean - Men w/ High Risk SB", "L", kGreen, 1.0,
+         1);
+  g5.Add("mean_nocas_women_low_sb", "Mean - Women w/ Low Risk SB", "L", kRed,
+         1.0, 2);
   g5.Add("mean_nocas_women_high_sb", "Mean - Women w/ High Risk SB", "L", kRed,
+         1.0, 1);
+  g5.Add("mean_nocas_hiv_men_low_sb", "Mean - Men w/ HIV & Low Risk SB", "L", kBlue, 1.0,
+         2);
+  g5.Add("mean_nocas_hiv_men_high_sb", "Mean - Men w/ HIV & High Risk SB", "L", kBlue, 1.0,
+         1);
+  g5.Add("mean_nocas_hiv_women_low_sb", "Mean - Women w/ HIV & Low Risk SB", "L", kMagenta,
+         1.0, 2);
+  g5.Add("mean_nocas_hiv_women_high_sb", "Mean - Women w/ HIV & High Risk SB", "L", kMagenta,
          1.0, 1);
 
   g5.Draw();

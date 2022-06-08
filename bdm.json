@@ -1,7 +1,7 @@
 {
     "bdm::hiv_malawi::SimParam": {
-        "number_of_iterations": 45,
-        "initial_population_size": 530200
+        "number_of_iterations": 5,
+        "initial_population_size": 530200,
+        "initial_prevalence": 18e-4
     }
 }
-

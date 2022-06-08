@@ -131,9 +131,9 @@ class SimParam : public ParamGroup {
 
   // Mean number of sexual acts with regular partner per year.
   // const float no_regular_acts_mean = 50.0;  // 150;
-  const std::vector<float> no_regular_acts_mean  //{50, 47, 44, 41, 38, 34, 31,
-                                                 // 28, 25, 22, 19, 16, 12};
-      {90, 84, 79, 73, 68, 62, 56, 51, 45, 39, 34, 28, 22};
+  const std::vector<float> no_regular_acts_mean  {50, 47, 44, 41, 38, 34, 31,
+                                                  28, 25, 22, 19, 16, 12};
+      //{90, 84, 79, 73, 68, 62, 56, 51, 45, 39, 34, 28, 22};
 
   // AM: Probability of getting infected depends on
   // 1) disease state, 2) sex of partners Male-to-female
@@ -207,7 +207,7 @@ class SimParam : public ParamGroup {
   std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix;
 
   // Initial prevalence among 15-50 years old.
-  const float initial_prevalence = 30e-4;  // 30e-4; //15e-4;
+  float initial_prevalence = 18e-4; //15e-3;  // 30e-4; //15e-4;
 
   // AM: Probability for agent to be healthy or at a certain HIV progression
   // state at beginning of simulation. Given in a summed up/cumulative form.
@@ -235,7 +235,7 @@ class SimParam : public ParamGroup {
   // typical birth rate in the region. We substracted 0.06 to account for child
   // motability and reach a realistic demographic development from 1960-2020.
   // Parameter 0.21 is used in Janne's R implementation.
-  float give_birth_probability = 0.21;  // 0.18
+  float give_birth_probability = 0.188;  // 0.18
 
   // AM : Probability for agent to be infected at birth, if its mother is
   // infected and treated
@@ -252,7 +252,7 @@ class SimParam : public ParamGroup {
   float probability_male = 0.499;
 
   // Years where probability of high socio-behavioural factor changes
-  const std::vector<int> sociobehavioural_risk_year_transition{1975, 1976};
+  const std::vector<int> sociobehavioural_risk_year_transition{1960, 1976};
 
   // Probability of assigning 1 to socio-behavioural factor (high risk)
   // depending on year (see sociobehavioural_risk_year_transition) and health

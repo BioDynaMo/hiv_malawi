@@ -60,6 +60,8 @@ class Person : public Agent {
   int transmission_type_;
   // Stores the state of the agent who infected them.
   int infection_origin_state_;
+  // Stores the socio-behavioural risk of the agent who infected them.
+  int infection_origin_sb_;
   // Stores the age of the agent
   float age_;
   // Stores the sex of the agent
@@ -173,6 +175,14 @@ class Person : public Agent {
   // Return True if recently infected by an failing partner/mother
   bool FailingTransmission() {
     return IsAcute() && infection_origin_state_ == GemsState::kFailing;
+  }
+  // Return True if recently infected by a low risk partner
+  bool LowRiskTransmission() {
+    return IsAcute() && infection_origin_sb_ == 0;
+  }
+  // Return True if recently infected by an high risk partner
+  bool HighRiskTransmission() {
+    return IsAcute() && infection_origin_sb_ == 1;
   }
 
   // Returns True if the agent has high-risk socio-behaviours

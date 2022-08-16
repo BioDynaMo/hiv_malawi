@@ -507,14 +507,14 @@ void DefineAndRegisterCollectors() {
   // AM: Define how to compute prevalence between 15 and 49 year olds
   auto infected_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return !(person->IsHealthy()) && person->age_ >= 15 && person->age_ <= 49;
+    return !(person->IsHealthy()) && person->age_ >= 15 && person->age_ < 50;
   };
   ts->AddCollector("infected_15_49", new Counter<double>(infected_15_49),
                    get_year);
 
   auto all_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->age_ >= 15 && person->age_ <= 49;
+    return person->age_ >= 15 && person->age_ < 50;
   };
   ts->AddCollector("all_15_49", new Counter<double>(all_15_49), get_year);
 
@@ -527,39 +527,39 @@ void DefineAndRegisterCollectors() {
   ts->AddCollector("prevalence_15_49", pct_prevalence_15_49, get_year);
 
   // AM: Define how to compute prevalence among women
-  auto infected_women = [](Agent* a) {
+  auto infected_females = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return !(person->IsHealthy()) && person->IsFemale();
   };
-  ts->AddCollector("infected_women", new Counter<double>(infected_women),
+  ts->AddCollector("infected_females", new Counter<double>(infected_females),
                    get_year);
 
-  auto women = [](Agent* a) {
+  auto females = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return person->IsFemale();
   };
-  ts->AddCollector("women", new Counter<double>(women), get_year);
+  ts->AddCollector("females", new Counter<double>(females), get_year);
 
-  auto pct_prevalence_women = [](Simulation* sim) {
+  auto pct_prevalence_females = [](Simulation* sim) {
     auto* ts = sim->GetTimeSeries();
-    auto infected = ts->GetYValues("infected_women").back();
-    auto all = ts->GetYValues("women").back();
+    auto infected = ts->GetYValues("infected_females").back();
+    auto all = ts->GetYValues("females").back();
     return infected / all;
   };
-  ts->AddCollector("prevalence_women", pct_prevalence_women, get_year);
+  ts->AddCollector("prevalence_females", pct_prevalence_females, get_year);
 
   // AM: Define how to compute prevalence among women between 15 and 49
   auto infected_women_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return !(person->IsHealthy()) && person->IsFemale() && person->age_ >= 15 &&
-           person->age_ <= 49;
+           person->age_ < 50;
   };
   ts->AddCollector("infected_women_15_49",
                    new Counter<double>(infected_women_15_49), get_year);
 
   auto women_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->IsFemale() && person->age_ >= 15 && person->age_ <= 49;
+    return person->IsFemale() && person->age_ >= 15 && person->age_ < 50;
   };
   ts->AddCollector("women_15_49", new Counter<double>(women_15_49), get_year);
 
@@ -573,38 +573,38 @@ void DefineAndRegisterCollectors() {
                    get_year);
 
   // AM: Define how to compute prevalence among men
-  auto infected_men = [](Agent* a) {
+  auto infected_males = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return !(person->IsHealthy()) && person->IsMale();
   };
-  ts->AddCollector("infected_men", new Counter<double>(infected_men), get_year);
+  ts->AddCollector("infected_males", new Counter<double>(infected_males), get_year);
 
-  auto men = [](Agent* a) {
+  auto males = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return person->IsMale();
   };
-  ts->AddCollector("men", new Counter<double>(men), get_year);
+  ts->AddCollector("males", new Counter<double>(males), get_year);
 
-  auto pct_prevalence_men = [](Simulation* sim) {
+  auto pct_prevalence_males = [](Simulation* sim) {
     auto* ts = sim->GetTimeSeries();
-    auto infected = ts->GetYValues("infected_men").back();
-    auto all = ts->GetYValues("men").back();
+    auto infected = ts->GetYValues("infected_males").back();
+    auto all = ts->GetYValues("males").back();
     return infected / all;
   };
-  ts->AddCollector("prevalence_men", pct_prevalence_men, get_year);
+  ts->AddCollector("prevalence_males", pct_prevalence_males, get_year);
 
   // AM: Define how to compute prevalence among men between 15 and 49
   auto infected_men_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return !(person->IsHealthy()) && person->IsMale() && person->age_ >= 15 &&
-           person->age_ <= 49;
+           person->age_ < 50;
   };
   ts->AddCollector("infected_men_15_49",
                    new Counter<double>(infected_men_15_49), get_year);
 
   auto men_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->IsMale() && person->age_ >= 15 && person->age_ <= 49;
+    return person->IsMale() && person->age_ >= 15 && person->age_ < 50;
   };
   ts->AddCollector("men_15_49", new Counter<double>(men_15_49), get_year);
 
@@ -964,9 +964,9 @@ int PlotAndSaveTimeseries() {
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g3(ts, "HIV", "Time", "", true);
   g3.Add("prevalence", "Prevalence", "L", kOrange, 1.0, 3, 1, kOrange, 1.0, 5);
-  g3.Add("prevalence_women", "Prevalence - Women", "L", kRed, 1.0, 3, 1, kRed,
+  g3.Add("prevalence_females", "Prevalence - Females", "L", kRed, 1.0, 3, 1, kRed,
          1.0, 10);
-  g3.Add("prevalence_men", "Prevalence - Men", "L", kBlue, 1.0, 3, 1, kBlue,
+  g3.Add("prevalence_males", "Prevalence - Males", "L", kBlue, 1.0, 3, 1, kBlue,
          1.0, 10);
 
   g3.Add("prevalence_15_49", "Prevalence (15-49)", "L", kOrange, 1.0, 1, 1);

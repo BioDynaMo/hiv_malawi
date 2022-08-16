@@ -67,34 +67,35 @@ int SampleSex(float rand_num, float probability_male) {
   }
 }
 
-int SampleState(float rand_num_1, float rand_num_2, float initial_healthy_probability,
+int SampleState(float rand_num_1, float rand_num_2,
+                float initial_healthy_probability,
                 const std::vector<float>& initial_infection_probability) {
-
-  if (rand_num_1 <= initial_healthy_probability){
+  if (rand_num_1 <= initial_healthy_probability) {
     return GemsState::kHealthy;
   } else {
-    //std::cout << "SampleState ==> HIV, " << rand_num_1 << std::endl;
+    // std::cout << "SampleState ==> HIV, " << rand_num_1 << std::endl;
     for (size_t i = 0; i < initial_infection_probability.size(); i++) {
       if (rand_num_2 <= initial_infection_probability[i]) {
-        //std::cout << "SampleState ==> " << i+1 << ", rand_num_2 " << rand_num_2 << std::endl;
-        return i+1;  // AM: GemsState Enum values are by default associated with int
-                  // values
+        // std::cout << "SampleState ==> " << i+1 << ", rand_num_2 " <<
+        // rand_num_2 << std::endl;
+        return i + 1;  // AM: GemsState Enum values are by default associated
+                       // with int values
       } else {
         continue;
       }
     }
   }
-  
 
   // This line of code should never be reached
   Log::Warning("SampleState()",
-               "Could not sample the state. Recieved inputs:", rand_num_1, rand_num_2,
-               ". Use state GemsState::kHealthy.");
+               "Could not sample the state. Recieved inputs:", rand_num_1,
+               rand_num_2, ". Use state GemsState::kHealthy.");
   return GemsState::kHealthy;
 }
 
-int ComputeState(float rand_num_1, float rand_num_2, int age, int min_age, int max_age,
-                 size_t location, const std::vector<bool>& seed_districts,
+int ComputeState(float rand_num_1, float rand_num_2, int age, int min_age,
+                 int max_age, size_t location,
+                 const std::vector<bool>& seed_districts,
                  const float initial_healthy_probability,
                  const std::vector<float>& initial_infection_probability) {
   // Younger than min_age, older than max_age and living outside the subset of
@@ -105,7 +106,8 @@ int ComputeState(float rand_num_1, float rand_num_2, int age, int min_age, int m
     return GemsState::kHealthy;  // Healthy
   }
   // Else, sample the state given the initial infection probability.
-  return SampleState(rand_num_1, rand_num_2, initial_healthy_probability, initial_infection_probability);
+  return SampleState(rand_num_1, rand_num_2, initial_healthy_probability,
+                     initial_infection_probability);
 }
 
 int ComputeSociobehavioural(float rand_num, int age,
@@ -159,11 +161,11 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
   // AM: This depends on the person's age and location. HIV+ are only between
   // min_age and max_age, ans in a subset of locations.
   person->state_ =
-      ComputeState(rand_num[4], rand_num[5], person->age_, sparam->min_age, sparam->max_age,
-                   person->location_, sparam->seed_districts,
+      ComputeState(rand_num[4], rand_num[5], person->age_, sparam->min_age,
+                   sparam->max_age, person->location_, sparam->seed_districts,
                    sparam->initial_healthy_probability,
                    sparam->initial_infection_probability);
-  
+
   // If the person is infected at initialisation, set that it got infected
   // through casual partnership.
   if (person->state_ != GemsState::kHealthy) {
@@ -180,10 +182,10 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
 
   // DEBUG
   /*if (person->state_ == GemsState::kAcute){
-    std::cout << "Right after ComputeState, state_ = " << person->state_ 
-    << ", IsAcute = " << person->IsAcute() 
-    << ", IsMale = " << person->IsMale() 
-    << " (isFemale = "<< person->IsFemale() << ")" 
+    std::cout << "Right after ComputeState, state_ = " << person->state_
+    << ", IsAcute = " << person->IsAcute()
+    << ", IsMale = " << person->IsMale()
+    << " (isFemale = "<< person->IsFemale() << ")"
     << ", HasHighRiskSocioBehav = " << person->HasHighRiskSocioBehav()
     << " (HasLowRiskSocioBehav = " << person->HasLowRiskSocioBehav() << ")"
     << std::endl;

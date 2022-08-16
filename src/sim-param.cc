@@ -193,7 +193,7 @@ void SimParam::SetInitialInfectionProbability() {
 
   // Given Proportion of Seed District Populations and National Prevalence
   // Probability to be Healthy is 1 - Probability to be Infected
-  initial_healthy_probability = 
+  initial_healthy_probability =
       (1.0 - initial_prevalence / districts_proportion);
 };
 

@@ -37,7 +37,8 @@ int SampleSex(float rand_num, float probability_male);
 
 // Sample HIV healt state; returns GemsState::kHealthy in 1-initial_inf... of
 // the cases
-int SampleState(float rand_num_1, float rand_num_2, float initial_healthy_probability,
+int SampleState(float rand_num_1, float rand_num_2,
+                float initial_healthy_probability,
                 const std::vector<float>& initial_infection_probability);
 
 // Compute sociobehavioural-factor; return 1 in sociobehavio... of the cases

@@ -65,13 +65,12 @@ class SimParam : public ParamGroup {
   std::vector<int> mortality_rate_age_transition{15, 50, 90};
   std::vector<float> mortality_rate_by_age{0.01, 0.005, 0.05, 1.0};
   // Test - No death
-  //std::vector<float> mortality_rate_by_age{0.0, 0.0, 0.0, 0.0};
+  // std::vector<float> mortality_rate_by_age{0.0, 0.0, 0.0, 0.0};
 
   // HIV-related mortality. For Healthy, Acute, Chronic, Treated, Failing states
   std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.05, 0.01, 0.1};
   // Test - No death
-  //std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.0, 0.0, 0.0};
-
+  // std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.0, 0.0, 0.0};
 
   // AM: Probability to migrate
   // TO DO AM: Make this probability dependent on the origin location?
@@ -136,9 +135,9 @@ class SimParam : public ParamGroup {
 
   // Mean number of sexual acts with regular partner per year.
   // const float no_regular_acts_mean = 50.0;  // 150;
-  const std::vector<float> no_regular_acts_mean  {50, 47, 44, 41, 38, 34, 31,
-                                                  28, 25, 22, 19, 16, 12};
-      //{90, 84, 79, 73, 68, 62, 56, 51, 45, 39, 34, 28, 22};
+  const std::vector<float> no_regular_acts_mean{50, 47, 44, 41, 38, 34, 31,
+                                                28, 25, 22, 19, 16, 12};
+  //{90, 84, 79, 73, 68, 62, 56, 51, 45, 39, 34, 28, 22};
 
   // AM: Probability of getting infected depends on
   // 1) disease state, 2) sex of partners Male-to-female
@@ -208,17 +207,17 @@ class SimParam : public ParamGroup {
   std::vector<std::vector<float>> reg_partner_sociobehav_mixing_matrix;
 
   // Initial prevalence among 15-50 years old.
-  float initial_prevalence = 18e-4; //15e-3;  // 30e-4; //15e-4;
+  float initial_prevalence = 18e-4;  // 15e-3;  // 30e-4; //15e-4;
 
-  // AM: Probability for agent infected by HIV to be at a certain HIV progression
-  // state at beginning of simulation. Given in a summed up/cumulative form.
-  // First vector x1 = p_Acute (|HIV+) component corresponds to probability of being
-  // Acute. x2 = p_Acute(|HIV+) + p_Chronic(|HIV+), x3
-  // = p_Acute(|HIV+) + p_Chronic(|HIV+) + p_Treated(|HIV+), x4 = p_Acute(|HIV+) +
-  // p_Chronic(|HIV+) + p_Treated(|HIV+) + p_Failing(|HIV+)
-  // These probablities involve 15-49 years old agents, located in seed
-  // districts. 1/5 of HIV infected are in acute phase, others are chronic.
-  std::vector<float> initial_infection_probability{0.2,1.0,1.0,1.0};
+  // AM: Probability for agent infected by HIV to be at a certain HIV
+  // progression state at beginning of simulation. Given in a summed
+  // up/cumulative form. First vector x1 = p_Acute (|HIV+) component corresponds
+  // to probability of being Acute. x2 = p_Acute(|HIV+) + p_Chronic(|HIV+), x3
+  // = p_Acute(|HIV+) + p_Chronic(|HIV+) + p_Treated(|HIV+), x4 = p_Acute(|HIV+)
+  // + p_Chronic(|HIV+) + p_Treated(|HIV+) + p_Failing(|HIV+) These probablities
+  // involve 15-49 years old agents, located in seed districts. 1/5 of HIV
+  // infected are in acute phase, others are chronic.
+  std::vector<float> initial_infection_probability{0.2, 1.0, 1.0, 1.0};
   // Initial probability to be healthy for 15-49 years old in seed districts
   float initial_healthy_probability;
 

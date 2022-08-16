@@ -177,13 +177,9 @@ class Person : public Agent {
     return IsAcute() && infection_origin_state_ == GemsState::kFailing;
   }
   // Return True if recently infected by a low risk partner
-  bool LowRiskTransmission() {
-    return IsAcute() && infection_origin_sb_ == 0;
-  }
+  bool LowRiskTransmission() { return IsAcute() && infection_origin_sb_ == 0; }
   // Return True if recently infected by an high risk partner
-  bool HighRiskTransmission() {
-    return IsAcute() && infection_origin_sb_ == 1;
-  }
+  bool HighRiskTransmission() { return IsAcute() && infection_origin_sb_ == 1; }
 
   // Returns True if the agent has high-risk socio-behaviours
   bool HasHighRiskSocioBehav() { return social_behaviour_factor_ == 1; }

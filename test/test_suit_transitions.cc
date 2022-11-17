@@ -24,6 +24,7 @@ namespace bdm {
 
 namespace hiv_malawi {
 
+// Test if an infected, acute female agent infects a healthy male agent.
 TEST(TransitionTest, FemaleToMale) {
   // Register Sim Param
   Param::RegisterParamGroup(new SimParam());

@@ -18,6 +18,7 @@
 namespace bdm {
 namespace hiv_malawi {
 
+// Test the person class for the age_ attribute
 TEST(PersonTest, Age) {
   Simulation simulation(TEST_NAME);
   auto person = Person();
@@ -30,6 +31,7 @@ TEST(PersonTest, Age) {
   EXPECT_TRUE(person.IsAdult());
 }
 
+// Test the person class for the sex_ attribute
 TEST(PersonTest, Sex) {
   Simulation simulation(TEST_NAME);
   auto person = Person();
@@ -44,6 +46,7 @@ TEST(PersonTest, Sex) {
   EXPECT_TRUE(person.IsFemale());
 }
 
+// Test the person class for the partner_ attribute
 TEST(PersonTest, Partner) {
   Simulation simulation(TEST_NAME);
   auto person = new Person();
@@ -67,6 +70,7 @@ TEST(PersonTest, Partner) {
   EXPECT_FALSE(partner->hasPartner());
 }
 
+// Test the person class for the mother-child relationship
 TEST(PersonTest, MotherChild) {
   Simulation simulation(TEST_NAME);
   auto child = new Person();
@@ -106,6 +110,7 @@ TEST(PersonTest, MotherChild) {
   EXPECT_FALSE(child->IsChildOf(ap_mother));
 }
 
+// Test the person class for the state_ attribute
 TEST(PersonTest, State) {
   Simulation simulation(TEST_NAME);
   auto person = Person();

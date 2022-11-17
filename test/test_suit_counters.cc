@@ -21,6 +21,8 @@
 namespace bdm {
 namespace hiv_malawi {
 
+// Empty environment such that we don't need to worry about any asserts in the
+// custom categorical environment.
 class EmptyEnvironment : public Environment {
  public:
   // Constructor
@@ -62,6 +64,7 @@ class EmptyEnvironment : public Environment {
   void UpdateImplementation() override{};
 };
 
+// Test the counting of healty agents
 TEST(CounterTest, Healthy) {
   Param::RegisterParamGroup(new SimParam());
   Simulation simulation(TEST_NAME);
@@ -95,6 +98,7 @@ TEST(CounterTest, Healthy) {
   EXPECT_EQ(count2[0], 0);
 }
 
+// Test the counting of acute infected agents
 TEST(CounterTest, Acute) {
   Param::RegisterParamGroup(new SimParam());
   Simulation simulation(TEST_NAME);

@@ -21,6 +21,7 @@ namespace bdm {
 
 namespace hiv_malawi {
 
+// Test the population initialization function SampleSex
 TEST(InitializationTest, SampleSex) {
   // Promblem setup
   const float probability_male = 0.2;

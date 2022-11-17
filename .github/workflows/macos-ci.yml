@@ -45,10 +45,9 @@ jobs:
           -B build
         cmake --build build --parallel --config Release
 
-    - name: Build hiv_malawi and run small simulation
+    - name: Build hiv_malawi, run small simulation, and run tests
       run: |
         sed -i '' 's/uint64_t number_of_iterations = 60/uint64_t number_of_iterations = 3/g' src/sim-param.h
         . ../biodynamo/build/bin/thisbdm.sh
-        cmake -G Ninja -B build
-        cmake --build build --parallel --config Release
-        ./build/hiv_malawi
+        bdm run
+        bdm test

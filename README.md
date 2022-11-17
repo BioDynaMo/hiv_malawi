@@ -147,6 +147,14 @@ bdm run
 ```
 which basically executes the the above steps in the background.
 
+## Run the unit tests
+
+To execute the unit tests, execute
+```
+bdm test
+```
+Needless to say, all should pass.
+
 ## Debugging guide
 
 Generally, `gdb` and `lldb` are advised on Linux and macOS, respectively. For 

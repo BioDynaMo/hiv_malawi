@@ -93,10 +93,6 @@ inline int Simulate(int argc, const char** argv) {
     PlotAndSaveTimeseries();
   }
 
-  // DEBUG - AM - TO DO: Works only when selection depended soloely on locations
-  /*env->NormalizeMateLocationFrequencies();
-  env->PrintMateLocationFrequencies();*/
-
   return 0;
 }
 

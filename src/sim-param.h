@@ -68,7 +68,7 @@ class SimParam : public ParamGroup {
   // std::vector<float> mortality_rate_by_age{0.0, 0.0, 0.0, 0.0};
 
   // HIV-related mortality. For Healthy, Acute, Chronic, Treated, Failing states
-  std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.05, 0.01, 0.1};
+  std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.0, 0.05, 0.01, 0.1};
   // Test - No death
   // std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.0, 0.0, 0.0};
 
@@ -143,12 +143,12 @@ class SimParam : public ParamGroup {
   // 1) disease state, 2) sex of partners Male-to-female
   float coef_infection_probability = 2;
   float infection_probability_acute_mf = 9.3e-3 * coef_infection_probability;
-  float infection_probability_chronic_mf = 1.9e-3 * coef_infection_probability;
+  float infection_probability_chronic_mf = 0* 1.9e-3 * coef_infection_probability;
   float infection_probability_treated_mf = 1.3e-4 * coef_infection_probability;
   float infection_probability_failing_mf = 7.6e-4 * coef_infection_probability;
   // Female-to-male
   float infection_probability_acute_fm = 4.8e-3 * coef_infection_probability;
-  float infection_probability_chronic_fm = 9.5e-4 * coef_infection_probability;
+  float infection_probability_chronic_fm = 0* 9.5e-4 * coef_infection_probability;
   float infection_probability_treated_fm = 6.5e-4 * coef_infection_probability;
   float infection_probability_failing_fm = 3.9e-4 * coef_infection_probability;
   // Male-to-male
@@ -217,7 +217,9 @@ class SimParam : public ParamGroup {
   // + p_Chronic(|HIV+) + p_Treated(|HIV+) + p_Failing(|HIV+) These probablities
   // involve 15-49 years old agents, located in seed districts. 1/5 of HIV
   // infected are in acute phase, others are chronic.
-  std::vector<float> initial_infection_probability{0.2, 1.0, 1.0, 1.0};
+  //std::vector<float> initial_infection_probability{0.2, 1.0, 1.0, 1.0};
+  // JE: EXPOSED
+  std::vector<float> initial_infection_probability{0.0, 0.2, 1.0, 1.0, 1.0};
   // Initial probability to be healthy for 15-49 years old in seed districts
   float initial_healthy_probability;
 
@@ -260,7 +262,7 @@ class SimParam : public ParamGroup {
   // depending on year (see sociobehavioural_risk_year_transition) and health
   // state (Healthy, Acute, Chronic, Treated, Failing)
   const std::vector<std::vector<float>> sociobehavioural_risk_probability{
-      {0.05, 0.5, 0.5, 0.5, 0.5}, {0.05, 0.05, 0.05, 0.05, 0.05}};
+      {0.05, 0.5, 0.5, 0.5, 0.5, 0.5}, {0.05, 0.05, 0.05, 0.05, 0.05, 0.05}};
 
   float biomedical_risk_probability = 0.05;
 

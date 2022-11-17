@@ -26,7 +26,8 @@ namespace hiv_malawi {
 // element into the definition of struct Population below. Even better, just
 // leave the kGemsLast at the End.
 // AM: Healthy + 4 HIV progression states
-enum GemsState { kHealthy, kAcute, kChronic, kTreated, kFailing, kGemsLast };
+// JE: Added Exposed
+enum GemsState { kHealthy, kExposed, kAcute, kChronic, kTreated, kFailing, kGemsLast };
 
 // Possible sex
 enum Sex { kMale, kFemale };

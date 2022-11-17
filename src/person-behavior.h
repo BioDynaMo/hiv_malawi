@@ -172,10 +172,9 @@ struct MatingBehaviour : public Behavior {
           person->transmission_type_ = TransmissionType::kCasualPartner;
           person->infection_origin_state_ = mate->state_;
           person->infection_origin_sb_ = mate->social_behaviour_factor_;
-          // AM: Add MatingBehaviour only when male gets infected
-          /*person->AddBehavior(new MatingBehaviour());
-          std::cout << "This should not currently happen: AddBehavior(new
-          MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
+
+          std::cout << "Acute woman transmits to healthy man!" << std::endl;
+          
         }
         // Scenario healthy male has intercourse with infected chronic female
         else if (mate->state_ == GemsState::kChronic &&
@@ -187,10 +186,8 @@ struct MatingBehaviour : public Behavior {
           person->transmission_type_ = TransmissionType::kCasualPartner;
           person->infection_origin_state_ = mate->state_;
           person->infection_origin_sb_ = mate->social_behaviour_factor_;
-          // AM: Add MatingBehaviour only when male gets infected
-          /*person->AddBehavior(new MatingBehaviour());
-          std::cout << "This should not currently happen: AddBehavior(new
-          MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
+          
+          std::cout << "Chronic woman transmits to healthy man! casual_transmission_to_male = " << (person->CasualTransmission() && person->IsMale()) << std::endl;
         }
         // Scenario healthy male has intercourse with infected treated female
         else if (mate->state_ == GemsState::kTreated &&
@@ -206,6 +203,8 @@ struct MatingBehaviour : public Behavior {
           /*person->AddBehavior(new MatingBehaviour());
           std::cout << "This should not currently happen: AddBehavior(new
           MatingBehaviour()) in MatingBehaviour::Run()" << std::endl;*/
+          
+          
         }
         // Scenario healthy male has intercourse with infected failing treatment
         // female
@@ -233,6 +232,8 @@ struct MatingBehaviour : public Behavior {
           mate->transmission_type_ = TransmissionType::kCasualPartner;
           mate->infection_origin_state_ = person->state_;
           mate->infection_origin_sb_ = person->social_behaviour_factor_;
+          
+          std::cout << "Acute man transmits to healthy woman!" << std::endl;
         }  // Scenario infected chronic male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
                  person->state_ == GemsState::kChronic &&
@@ -243,6 +244,7 @@ struct MatingBehaviour : public Behavior {
           mate->transmission_type_ = TransmissionType::kCasualPartner;
           mate->infection_origin_state_ = person->state_;
           mate->infection_origin_sb_ = person->social_behaviour_factor_;
+          std::cout << "Chronic woman transmits to healthy man!" << std::endl;
         }  // Scenario infected treated male has intercourse with healthy female
         else if (mate->state_ == GemsState::kHealthy &&
                  person->state_ == GemsState::kTreated &&
@@ -612,7 +614,8 @@ struct GetOlder : public Behavior {
 
     if (!stay_alive) {
       // Person dies, i.e. is removed from simulation.
-      person->RemoveFromSimulation();
+      //JE: REMOVE DEATH
+      //person->RemoveFromSimulation();
     } else {
       // increase age
       person->age_ += 1;

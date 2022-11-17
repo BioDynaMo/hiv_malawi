@@ -138,6 +138,8 @@ class Person : public Agent {
   // Returns True if the agent is healthy
   bool IsHealthy() { return state_ == GemsState::kHealthy; }
   // AM: Added below functions for more detailed follow up of HIV state
+  // JE: added "exposed" Returns True if the agent is infected in exposed state
+  bool IsExposed() { return state_ == GemsState::kExposed; }
   // Returns True if the agent is infected in acute state
   bool IsAcute() { return state_ == GemsState::kAcute; }
   // Returns True if the agent is infected in chronic state
@@ -147,17 +149,18 @@ class Person : public Agent {
   // Returns True if the agent is infected in failing treatement state
   bool IsFailing() { return state_ == GemsState::kFailing; }
 
+  // JE: changed all below from acute to exposed
   // Return True if recently infected at birth
   bool MTCTransmission() {
-    return IsAcute() && transmission_type_ == TransmissionType::kMotherToChild;
+    return IsExposed() && transmission_type_ == TransmissionType::kMotherToChild;
   }
   // Return True if recently infected during casual mating
   bool CasualTransmission() {
-    return IsAcute() && transmission_type_ == TransmissionType::kCasualPartner;
+    return IsExposed() && transmission_type_ == TransmissionType::kCasualPartner;
   }
   // Return True if recently infected during regular mating
   bool RegularTransmission() {
-    return IsAcute() && transmission_type_ == TransmissionType::kRegularPartner;
+    return IsExposed() && transmission_type_ == TransmissionType::kRegularPartner;
   }
 
   // Return True if recently infected by an acute partner/mother

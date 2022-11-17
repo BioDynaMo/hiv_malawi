@@ -61,10 +61,18 @@ void DefineAndRegisterCollectors() {
   };
   ts->AddCollector("infected_agents", new Counter<double>(infected), get_year);
 
+  // JE: Define how to count the infected exposed individuals
+  auto exposed = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsExposed();
+  };
+  ts->AddCollector("exposed_agents", new Counter<double>(exposed), get_year);
+
+
   // AM: Define how to count the infected acute individuals
   auto acute = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->IsAcute();
+    return (person->IsAcute()) ;
   };
   ts->AddCollector("acute_agents", new Counter<double>(acute), get_year);
 

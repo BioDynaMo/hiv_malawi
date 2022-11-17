@@ -115,22 +115,23 @@ void SimParam::SetHivTransitionMatrix() {
   for (int i = 0; i < nb_states; i++) {
     hiv_transition_matrix[i].resize(nb_years_categ);
     for (int j = 0; j < nb_years_categ; j++) {
-      if (i == GemsState::kExposed){
+      if (i == GemsState::kExposed) {
         // For all years and population categories
         hiv_transition_matrix[i][j].resize(nb_states);
-        hiv_transition_matrix[i][j] = {
-            0.0, 0.0, 1.0, 1.0, 1.0, 1.0};  // Exposed become Acute
+        hiv_transition_matrix[i][j] = {0.0, 0.0, 1.0,
+                                       1.0, 1.0, 1.0};  // Exposed become Acute
       } else if (i == GemsState::kAcute) {
         // For all years and population categories
         hiv_transition_matrix[i][j].resize(nb_states);
         hiv_transition_matrix[i][j] = {
-            0.0, 0.0, 0.0, 1.0, 1.0, 1.0};  // After one year ACUTE, go to CHRONIC
+            0.0, 0.0, 0.0,
+            1.0, 1.0, 1.0};  // After one year ACUTE, go to CHRONIC
       } else if (i == GemsState::kChronic) {
         if (j ==
             0) {  // Prior to 2003, for all (women 15-40, children and others)
           hiv_transition_matrix[i][j].resize(nb_states);
-          hiv_transition_matrix[i][j] = {0.0, 0.0, 0.0, 1.0, 1.0,
-                                         1.0};  // NO ART, then stay chronic
+          hiv_transition_matrix[i][j] = {
+              0.0, 0.0, 0.0, 1.0, 1.0, 1.0};  // NO ART, then stay chronic
         } else if (j == 1) {  // Between to 2003 and 2010, for women 15-40
           hiv_transition_matrix[i][j].resize(nb_states);
           hiv_transition_matrix[i][j] = {0.0, 0.0, 0.0, 0.9, 1.0, 1.0};

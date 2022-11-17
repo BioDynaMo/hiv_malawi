@@ -152,15 +152,18 @@ class Person : public Agent {
   // JE: changed all below from acute to exposed
   // Return True if recently infected at birth
   bool MTCTransmission() {
-    return IsExposed() && transmission_type_ == TransmissionType::kMotherToChild;
+    return IsExposed() &&
+           transmission_type_ == TransmissionType::kMotherToChild;
   }
   // Return True if recently infected during casual mating
   bool CasualTransmission() {
-    return IsExposed() && transmission_type_ == TransmissionType::kCasualPartner;
+    return IsExposed() &&
+           transmission_type_ == TransmissionType::kCasualPartner;
   }
   // Return True if recently infected during regular mating
   bool RegularTransmission() {
-    return IsExposed() && transmission_type_ == TransmissionType::kRegularPartner;
+    return IsExposed() &&
+           transmission_type_ == TransmissionType::kRegularPartner;
   }
 
   // Return True if recently infected by an acute partner/mother

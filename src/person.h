@@ -28,6 +28,7 @@ class Person : public Agent {
   BDM_AGENT_HEADER(Person, Agent, 1);
 
  public:
+  // Warning: many member unititialized!
   Person() {
     mother_ = nullptr;
     partner_ = nullptr;
@@ -208,6 +209,8 @@ class Person : public Agent {
     return age_category;
   }
 
+  // Note: This does not assign the child a mother. The mother must be assigned
+  // separately.
   void AddChild(AgentPointer<Person> child) {
     /*if (child->location_ != location_){
         Log::Warning("Person::AddChild()", "Adding a child who is at a different
@@ -216,6 +219,8 @@ class Person : public Agent {
     children_.push_back(child);
   }
 
+  // Note: this does not remove the mother from the child. The mother must be
+  // removed separately.
   void RemoveChild(AgentPointer<Person> child) {
     bool found = false;
     for (int c = 0; c < GetNumberOfChildren(); c++) {

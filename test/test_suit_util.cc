@@ -16,6 +16,6 @@
 
 namespace bdm {
 
-TEST(UtilTEst, TrivalTest) { EXPECT_DOUBLE_EQ(0, 0); }
+TEST(UtilTest, TrivalTest) { EXPECT_DOUBLE_EQ(0, 0); }
 
 }  // namespace bdm

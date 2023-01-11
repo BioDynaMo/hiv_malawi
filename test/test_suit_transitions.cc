@@ -77,5 +77,58 @@ TEST(TransitionTest, FemaleToMale) {
   EXPECT_TRUE(ap_male->CasualTransmission());
 }
 
+TEST(TransitionTest, MaleToFemale) {
+  // Register Sim Param
+  Param::RegisterParamGroup(new SimParam());
+
+  // Set the probability male to female to 1.0
+  auto set_param = [&](Param* param) {
+    auto* sparam = param->Get<SimParam>();
+    sparam->infection_probability_acute_mf = 1.0;
+  };
+
+  // Create simulation object
+  Simulation simulation(TEST_NAME, set_param);
+  auto* rm = simulation.GetResourceManager();
+
+  // Add a healthy female to the simulation
+  auto female = new Person();
+  female->state_ = GemsState::kHealthy;
+  female->sex_ = Sex::kFemale;
+  female->age_ = 20;
+  female->location_ = 0;
+  female->biomedical_factor_ = 0;
+  female->social_behaviour_factor_ = 0;
+  
+  auto ap_female = female->GetAgentPtr<Person>();  // Get agent pointer
+  rm->AddAgent(female);
+
+  // Add an infected (acute) male to the simulation
+  auto male = new Person();
+  male->state_ = GemsState::kAcute;
+  male->sex_ = Sex::kMale;
+  male->age_ = 20;
+  male->location_ = 0;
+  male->biomedical_factor_ = 0;
+  male->social_behaviour_factor_ = 0;
+  male->AddBehavior(new MatingBehaviour());   // JE: added mating behavior
+  // auto ap_male = male->GetAgentPtr<Person>();
+  rm->AddAgent(male);
+
+  // Set the custom environment
+  auto* env = new CategoricalEnvironment(15, 40, 1, 1, 1);
+  simulation.SetEnvironment(env);
+
+  // Run simulation for one simulation time step
+  auto* scheduler = simulation.GetScheduler();
+  scheduler->UnscheduleOp(scheduler->GetOps("load balancing")[0]);
+  scheduler->Simulate(1);
+
+  // Check if the female agent is not infected and in the state accute
+  EXPECT_TRUE(ap_female->state_ == GemsState::kAcute);
+  // Check if the female agent received the infectino via a casual transmission
+  EXPECT_TRUE(ap_female->CasualTransmission());
+}
+
 }  // namespace hiv_malawi
 }  // namespace bdm

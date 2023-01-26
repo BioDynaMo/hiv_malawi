@@ -99,7 +99,7 @@ TEST(TransitionTest, MaleToFemale) {
   female->location_ = 0;
   female->biomedical_factor_ = 0;
   female->social_behaviour_factor_ = 0;
-  
+
   auto ap_female = female->GetAgentPtr<Person>();  // Get agent pointer
   rm->AddAgent(female);
 
@@ -111,7 +111,7 @@ TEST(TransitionTest, MaleToFemale) {
   male->location_ = 0;
   male->biomedical_factor_ = 0;
   male->social_behaviour_factor_ = 0;
-  male->AddBehavior(new MatingBehaviour());   // JE: added mating behavior
+  male->AddBehavior(new MatingBehaviour());  // JE: added mating behavior
   // auto ap_male = male->GetAgentPtr<Person>();
   rm->AddAgent(male);
 

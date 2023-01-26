@@ -120,6 +120,8 @@ void SimParam::SetHivTransitionMatrix() {
         hiv_transition_matrix[i][j].resize(nb_states);
         hiv_transition_matrix[i][j] = {
             0.0, 0.0, 1.0, 1.0, 1.0};  // After one year ACUTE, go to CHRONIC
+        // 0.0, 1.0, 1.0, 1.0, 1.0};  // Test to keep Acutes (not go to CHRONIC)
+
       } else if (i == GemsState::kChronic) {
         if (j ==
             0) {  // Prior to 2003, for all (women 15-40, children and others)

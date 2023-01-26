@@ -63,25 +63,27 @@ class SimParam : public ParamGroup {
   // Mortality rate by age. Size(mortality_rate_by_age) must be equal to
   // 1+size(mortality_rate_age_transition).
   std::vector<int> mortality_rate_age_transition{15, 50, 90};
-  std::vector<float> mortality_rate_by_age{0.01, 0.005, 0.05, 1.0};
-  // Test - No death
-  // std::vector<float> mortality_rate_by_age{0.0, 0.0, 0.0, 0.0};
+  // std::vector<float> mortality_rate_by_age{0.01, 0.005, 0.05, 1.0};
+  //  AM: Test - No death
+  std::vector<float> mortality_rate_by_age{0.0, 0.0, 0.0, 0.0};
 
   // HIV-related mortality. For Healthy, Acute, Chronic, Treated, Failing states
-  std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.05, 0.01, 0.1};
-  // Test - No death
-  // std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.0, 0.0, 0.0};
+  // std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.05, 0.01, 0.1};
+  // AM: Test - No death
+  std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.0, 0.0, 0.0};
 
   // AM: Probability to migrate
   // TO DO AM: Make this probability dependent on the origin location?
-  float migration_probability = 0.01;  // 0.0; // No Mogration //0.01;
+  float migration_probability = 0.0;  // 0.0; // No Mogration //0.01;
   // AM: Migration year index
   const std::vector<int> migration_year_transition{1960};
   // AM: Migration Matrix. Year index x Location x Location
   std::vector<std::vector<std::vector<float>>> migration_matrix;
 
   // AM: Probability that a single man wants to engage in regular partnership
-  float regular_partnership_probability = 1.0;
+  // float regular_partnership_probability = 1.0;
+  // AM : TEST NO REGULAR PARTNERSHIP
+  float regular_partnership_probability = 0.0;
 
   // AM: Probability that a couple in regular partnership separate
   float break_up_probability = 1.0;
@@ -143,12 +145,14 @@ class SimParam : public ParamGroup {
   // 1) disease state, 2) sex of partners Male-to-female
   float coef_infection_probability = 2;
   float infection_probability_acute_mf = 9.3e-3 * coef_infection_probability;
-  float infection_probability_chronic_mf = 1.9e-3 * coef_infection_probability;
+  float infection_probability_chronic_mf =
+      0.0;  // 1.9e-3 * coef_infection_probability;
   float infection_probability_treated_mf = 1.3e-4 * coef_infection_probability;
   float infection_probability_failing_mf = 7.6e-4 * coef_infection_probability;
   // Female-to-male
   float infection_probability_acute_fm = 4.8e-3 * coef_infection_probability;
-  float infection_probability_chronic_fm = 9.5e-4 * coef_infection_probability;
+  float infection_probability_chronic_fm =
+      0.0;  // 9.5e-4 * coef_infection_probability;
   float infection_probability_treated_fm = 6.5e-4 * coef_infection_probability;
   float infection_probability_failing_fm = 3.9e-4 * coef_infection_probability;
   // Male-to-male
@@ -217,7 +221,9 @@ class SimParam : public ParamGroup {
   // + p_Chronic(|HIV+) + p_Treated(|HIV+) + p_Failing(|HIV+) These probablities
   // involve 15-49 years old agents, located in seed districts. 1/5 of HIV
   // infected are in acute phase, others are chronic.
-  std::vector<float> initial_infection_probability{0.2, 1.0, 1.0, 1.0};
+  // std::vector<float> initial_infection_probability{0.2, 1.0, 1.0, 1.0};
+  // AM: TEST THAT ALL HIV ARE ACUTE
+  std::vector<float> initial_infection_probability{1.0, 1.0, 1.0, 1.0};
   // Initial probability to be healthy for 15-49 years old in seed districts
   float initial_healthy_probability;
 
@@ -237,7 +243,9 @@ class SimParam : public ParamGroup {
   // typical birth rate in the region. We substracted 0.06 to account for child
   // motability and reach a realistic demographic development from 1960-2020.
   // Parameter 0.21 is used in Janne's R implementation.
-  float give_birth_probability = 0.188;  // 0.18
+  // float give_birth_probability = 0.188;  // 0.18
+  // Test NO BIRTHS
+  float give_birth_probability = 0.0;  // 0.18
 
   // AM : Probability for agent to be infected at birth, if its mother is
   // infected and treated
@@ -259,8 +267,11 @@ class SimParam : public ParamGroup {
   // Probability of assigning 1 to socio-behavioural factor (high risk)
   // depending on year (see sociobehavioural_risk_year_transition) and health
   // state (Healthy, Acute, Chronic, Treated, Failing)
+  // const std::vector<std::vector<float>> sociobehavioural_risk_probability{
+  //    {0.05, 0.5, 0.5, 0.5, 0.5}, {0.05, 0.05, 0.05, 0.05, 0.05}};
+  // AM: TEST ALL AGENTS HAVE LOW RISK SOCIOBEHABVIOURS
   const std::vector<std::vector<float>> sociobehavioural_risk_probability{
-      {0.05, 0.5, 0.5, 0.5, 0.5}, {0.05, 0.05, 0.05, 0.05, 0.05}};
+      {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}};
 
   float biomedical_risk_probability = 0.05;
 

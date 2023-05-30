@@ -43,7 +43,7 @@ TEST(TransitionTest, FemaleToMale) {
   auto male = new Person();
   male->state_ = GemsState::kHealthy;
   male->sex_ = Sex::kMale;
-  male->age_ = 20;
+  male->age_ = 20*12;
   male->location_ = 0;
   male->biomedical_factor_ = 0;
   male->social_behaviour_factor_ = 0;
@@ -55,7 +55,7 @@ TEST(TransitionTest, FemaleToMale) {
   auto female = new Person();
   female->state_ = GemsState::kAcute;
   female->sex_ = Sex::kFemale;
-  female->age_ = 20;
+  female->age_ = 20*12;
   female->location_ = 0;
   female->biomedical_factor_ = 0;
   female->social_behaviour_factor_ = 0;
@@ -63,7 +63,7 @@ TEST(TransitionTest, FemaleToMale) {
   rm->AddAgent(female);
 
   // Set the custom environment
-  auto* env = new CategoricalEnvironment(15, 40, 1, 1, 1);
+  auto* env = new CategoricalEnvironment(15*12, 40*12, 1, 1, 1);
   simulation.SetEnvironment(env);
 
   // Run simulation for one simulation time step
@@ -95,7 +95,7 @@ TEST(TransitionTest, MaleToFemale) {
   auto female = new Person();
   female->state_ = GemsState::kHealthy;
   female->sex_ = Sex::kFemale;
-  female->age_ = 20;
+  female->age_ = 20*12;
   female->location_ = 0;
   female->biomedical_factor_ = 0;
   female->social_behaviour_factor_ = 0;
@@ -107,7 +107,7 @@ TEST(TransitionTest, MaleToFemale) {
   auto male = new Person();
   male->state_ = GemsState::kAcute;
   male->sex_ = Sex::kMale;
-  male->age_ = 20;
+  male->age_ = 20*12;
   male->location_ = 0;
   male->biomedical_factor_ = 0;
   male->social_behaviour_factor_ = 0;
@@ -116,7 +116,7 @@ TEST(TransitionTest, MaleToFemale) {
   rm->AddAgent(male);
 
   // Set the custom environment
-  auto* env = new CategoricalEnvironment(15, 40, 1, 1, 1);
+  auto* env = new CategoricalEnvironment(15*12, 40*12, 1, 1, 1);
   simulation.SetEnvironment(env);
 
   // Run simulation for one simulation time step
@@ -129,6 +129,124 @@ TEST(TransitionTest, MaleToFemale) {
   // Check if the female agent received the infectino via a casual transmission
   EXPECT_TRUE(ap_female->CasualTransmission());
 }
+
+
+TEST(TransitionTest, Mating) {
+  // Register Sim Param
+  Param::RegisterParamGroup(new SimParam());
+
+  // Set the probability male to female to 1.0
+  auto set_param = [&](Param* param) {
+    auto* sparam = param->Get<SimParam>();
+    sparam->infection_probability_acute_fm = 1.0;
+    sparam->regular_partnership_probability = 1.0;
+  };
+
+  // Create simulation object
+  Simulation simulation(TEST_NAME, set_param);
+  auto* rm = simulation.GetResourceManager();
+
+  // Add a healthy male to the simulation
+  auto male = new Person();
+  male->state_ = GemsState::kHealthy;
+  male->sex_ = Sex::kMale;
+  male->age_ = 400;
+  male->location_ = 0;
+  male->biomedical_factor_ = 0;
+  male->social_behaviour_factor_ = 0;
+  male->AddBehavior(new MatingBehaviour());    // Add mating behavior
+  male->AddBehavior(new RegularPartnershipBehaviour());
+  auto ap_male = male->GetAgentPtr<Person>();  // Get agent pointer
+  rm->AddAgent(male);
+
+  // Add an infected (acute) female to the simulation
+  auto female = new Person();
+  female->state_ = GemsState::kAcute;
+  female->sex_ = Sex::kFemale;
+  female->age_ = 400;
+  female->location_ = 0;
+  female->biomedical_factor_ = 0;
+  female->social_behaviour_factor_ = 0;
+  auto ap_female = female->GetAgentPtr<Person>();
+  rm->AddAgent(female);
+
+  // Set the custom environment
+  auto* env = new CategoricalEnvironment(180, 600, 1, 1, 1);
+  simulation.SetEnvironment(env);
+
+  // Run simulation for one simulation time step
+  auto* scheduler = simulation.GetScheduler();
+  scheduler->UnscheduleOp(scheduler->GetOps("load balancing")[0]);
+  scheduler->Simulate(1);
+
+  EXPECT_TRUE(male->hasPartner());
+  EXPECT_TRUE(ap_male->partner_ == ap_female);
+  EXPECT_TRUE(female->hasPartner());
+  EXPECT_TRUE(ap_female->partner_ == ap_male);
+  // Check if the male agent is not infected and in the state accute
+  //EXPECT_TRUE(ap_male->state_ == GemsState::kAcute);
+  // Check if the male agent received the infectino via a casual transmission
+  //EXPECT_TRUE(ap_male->CasualTransmission());
+}
+
+
+TEST(TransitionTest, RegularTransmissionFtoM) {
+  // Register Sim Param
+  Param::RegisterParamGroup(new SimParam());
+
+  // Set the probability male to female to 1.0
+  auto set_param = [&](Param* param) {
+    auto* sparam = param->Get<SimParam>();
+    sparam->infection_probability_acute_fm = 1.0;
+    sparam->regular_partnership_probability = 1.0;
+    
+  };
+
+  // Create simulation object
+  Simulation simulation(TEST_NAME, set_param);
+  auto* rm = simulation.GetResourceManager();
+
+  // Add a healthy male to the simulation
+  auto male = new Person();
+  male->state_ = GemsState::kHealthy;
+  male->sex_ = Sex::kMale;
+  male->age_ = 400;
+  male->location_ = 0;
+  male->biomedical_factor_ = 0;
+  male->social_behaviour_factor_ = 0;
+  //male->AddBehavior(new MatingBehaviour());    // Add mating behavior
+  male->AddBehavior(new RegularPartnershipBehaviour());
+  male->AddBehavior(new RegularMatingBehaviour());
+  auto ap_male = male->GetAgentPtr<Person>();  // Get agent pointer
+  rm->AddAgent(male);
+
+  // Add an infected (acute) female to the simulation
+  auto female = new Person();
+  female->state_ = GemsState::kAcute;
+  female->sex_ = Sex::kFemale;
+  female->age_ = 400;
+  female->location_ = 0;
+  female->biomedical_factor_ = 0;
+  female->social_behaviour_factor_ = 0;
+  auto ap_female = female->GetAgentPtr<Person>();
+  rm->AddAgent(female);
+
+  // Set the custom environment
+  auto* env = new CategoricalEnvironment(180, 600, 1, 1, 1);
+  simulation.SetEnvironment(env);
+
+  // Run simulation for one simulation time step
+  auto* scheduler = simulation.GetScheduler();
+  scheduler->UnscheduleOp(scheduler->GetOps("load balancing")[0]);
+  scheduler->Simulate(1);
+
+ 
+  // Check if the male agent is not infected and in the state accute
+  EXPECT_TRUE(ap_male->state_ == GemsState::kAcute);
+  // Check if the male agent received the infectino via a casual transmission
+  //EXPECT_TRUE(ap_male->RegularTransmission());
+}
+
 
 }  // namespace hiv_malawi
 }  // namespace bdm

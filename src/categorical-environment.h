@@ -149,7 +149,7 @@ class CategoricalEnvironment : public Environment {
 
  public:
   // Constructor
-  CategoricalEnvironment(int min_age = 15, int max_age = 40,
+  CategoricalEnvironment(int min_age = 15*12, int max_age = 40*12,
                          size_t no_age_categories = 1,
                          size_t no_locations = Location::kLocLast,
                          size_t no_sociobehavioural_categories = 1);

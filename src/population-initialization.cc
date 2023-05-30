@@ -28,7 +28,7 @@ float SampleAge(float rand_num_1, float rand_num_2, int sex,
                 const std::vector<float>& age_distribution) {
   for (size_t i = 0; i < age_distribution.size(); i++) {
     if (rand_num_1 <= age_distribution[i]) {
-      return 5 * (i + rand_num_2);
+      return 12*5 * (i + rand_num_2);
     } else {
       continue;
     }
@@ -112,7 +112,7 @@ int ComputeState(float rand_num_1, float rand_num_2, int age, int min_age,
 
 int ComputeSociobehavioural(float rand_num, int age,
                             float sociobehavioural_risk_probability) {
-  if (age < 15) {  // AM: 15 yo is not a child anymore
+  if (age < 15*12) {  // AM: 15 yo is not a child anymore
     return 0;
   }
   if (rand_num <= sociobehavioural_risk_probability) {
@@ -124,7 +124,7 @@ int ComputeSociobehavioural(float rand_num, int age,
 
 int ComputeBiomedical(float rand_num, int age,
                       float biomedical_risk_probability) {
-  if (age < 15) {  // / AM: 15 yo is not a child anymore
+  if (age < 15*12) {  // / AM: 15 yo is not a child anymore
     return 0;
   }
   if (rand_num <= biomedical_risk_probability) {

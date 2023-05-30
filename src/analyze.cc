@@ -47,6 +47,170 @@ void DefineAndRegisterCollectors() {
                                sim->GetScheduler()->GetSimulatedSteps());
   };
 
+  // JE: calculate the true year (in case of monthly cycle)
+  auto get_real_year = [](Simulation* sim) {
+    int start_step = sim->GetParam()->Get<SimParam>()->start_year;
+    int current_step = start_step + sim->GetScheduler()->GetSimulatedSteps();
+    double current_step_as_year = 1975 + current_step/12;
+    return static_cast<double>(current_step_as_year);
+  };
+  auto get_month = [](Simulation* sim) {
+    int start_step = sim->GetParam()->Get<SimParam>()->start_year;
+    int current_step = start_step + sim->GetScheduler()->GetSimulatedSteps();
+    double current_step_as_month = (current_step % 12);
+    return static_cast<double>(current_step_as_month);
+  };
+  auto full_year_yn = [](Simulation* sim) {
+    int start_step = sim->GetParam()->Get<SimParam>()->start_year;
+    int current_step = start_step + sim->GetScheduler()->GetSimulatedSteps();
+    bool current_step_fullyear = ((current_step % 12) == 1);
+    return static_cast<bool>(current_step_fullyear);
+  };
+
+  // JE: Set up counters for yearly estimates (in case of monthly cycle)
+
+
+  auto ymaleadt = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (person->IsMale() && person->age_>=15*12 && person->age_<=50*12);
+  };
+  ts->AddCollector("male_aged_15to49", new Counter<double>(ymaleadt), get_real_year);
+
+  auto yfemaleadt = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (person->IsFemale() && person->age_>=15*12 && person->age_<=50*12);
+  };
+  ts->AddCollector("female_aged_15to49", new Counter<double>(yfemaleadt), get_real_year);
+  
+  auto yinfectedm = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return !(person->IsHealthy()) && person->IsMale();
+  };
+  if (full_year_yn) {
+    ts->AddCollector("infected_male_yearly", new Counter<double>(yinfectedm),   get_real_year);
+  };
+
+  auto yinfectedf = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return !(person->IsHealthy()) && person->IsFemale();
+  };
+  if (full_year_yn) {
+    ts->AddCollector("infected_female_yearly", new Counter<double>(yinfectedf), get_real_year);
+  };
+
+  auto yacutem = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsAcute() && person->IsMale();
+  };
+  if (full_year_yn) {
+    ts->AddCollector("acute_male_yearly", new Counter<double>(yacutem), get_real_year);
+  };
+
+  auto yacutef = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsAcute() && person->IsFemale();
+  };
+  if (full_year_yn) {
+    ts->AddCollector("acute_female_yearly", new Counter<double>(yacutef), get_real_year);
+  };
+
+  auto ychronicm = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsChronic() && person->IsMale();
+  };
+  if (full_year_yn) {
+    ts->AddCollector("chronic_male_yearly", new Counter<double>(ychronicm), get_real_year);
+  };
+
+  auto ychronicf = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsChronic() && person->IsFemale();
+  };
+  if (full_year_yn) {
+    ts->AddCollector("chronic_female_yearly", new Counter<double>(ychronicf), get_real_year);
+  };
+
+  auto yinfectedm1549 = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return !(person->IsHealthy()) && person->IsMale() && person->age_ >= 15*12 && person->age_ < 50*12;
+  };
+  if (full_year_yn) {
+    ts->AddCollector("infected_male_1549_yearly", new Counter<double>(yinfectedm1549), get_real_year);
+  };
+
+  auto yinfectedf1549 = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return !(person->IsHealthy()) && person->IsFemale() && person->age_ >= 15*12 && person->age_ < 50*12;
+  };
+  if (full_year_yn) {
+    ts->AddCollector("infected_female_1549_yearly", new Counter<double>(yinfectedf1549), get_real_year);
+  };
+
+
+  // Count all regular partnerships
+  auto regpship = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner();
+  };
+  ts->AddCollector("regular partnership", new Counter<double>(regpship), get_real_year);
+
+  // Count partnerships by serostatus
+  auto seroneg_pship = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner() && person->IsHealthy() && person->partner_->IsHealthy();
+  };
+  ts->AddCollector("seroconcordant negative partnerships", new Counter<double>(seroneg_pship), get_real_year);
+
+  auto seropos_pship = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner() && !person->IsHealthy() && !person->partner_->IsHealthy();
+  };
+  ts->AddCollector("seroconcordant positive partnerships", new Counter<double>(seropos_pship), get_real_year);
+
+  auto serodisc_pship_Facute = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner() && person->IsHealthy() && person->partner_->IsAcute();
+  };
+  ts->AddCollector("serodiscordant partnerships, female acutely infected", new Counter<double>(serodisc_pship_Facute), get_real_year);
+
+    auto serodisc_pship_Fchron = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner() && person->IsHealthy() && person->partner_->IsChronic();
+  };
+  ts->AddCollector("serodiscordant partnerships, female chronically infected", new Counter<double>(serodisc_pship_Fchron), get_real_year);
+
+  auto serodisc_pship_Macute = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner() && person->IsAcute() && person->partner_->IsHealthy();
+  };
+  ts->AddCollector("serodiscordant partnerships, male acutely infected", new Counter<double>(serodisc_pship_Macute), get_real_year);
+
+  auto serodisc_pship_Mchron = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner() && person->IsChronic() && person->partner_->IsHealthy();
+  };
+  ts->AddCollector("serodiscordant partnerships, male chronically infected", new Counter<double>(serodisc_pship_Mchron), get_real_year);
+
+  auto regpship_both_1549 = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner() && person->age_>=15*12 && person->age_<50*12 && person->partner_->age_>=15*12 && person->partner_->age_<50*12;
+  };
+  ts->AddCollector("regular partnerships, both aged 15-49", new Counter<double>(regpship_both_1549), get_real_year);
+
+  auto regpship_both_above50 = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner() && person->age_>=50*12 && person->partner_->age_>=50*12;
+  };
+  ts->AddCollector("regular partnerships, both aged 50 or above", new Counter<double>(regpship_both_above50), get_real_year);
+
+  auto regpship_agediscordant = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return person->IsMale() && person->HasRegularPartner() && ((person->age_>=15*12 && person->age_<50*12 && person->partner_->age_>=50*12) || (person->age_>=50*12 && person->partner_->age_>=15*12 && person->partner_->age_<50*12));
+  };
+  ts->AddCollector("regular partnerships, one aged 15-49 and the other 50 or above", new Counter<double>(regpship_agediscordant), get_real_year);
+
+
+
   // Define how to count the healthy individuals
   auto healthy = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
@@ -279,7 +443,7 @@ void DefineAndRegisterCollectors() {
   // behavior
   auto adult_male_age_lt50_low_sb = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return (person->IsMale() && person->IsAdult() && person->age_ < 50 &&
+    return (person->IsMale() && person->IsAdult() && person->age_ < 50*12 &&
             person->HasLowRiskSocioBehav());
   };
   ts->AddCollector("adult_male_age_lt50_low_sb",
@@ -317,7 +481,7 @@ void DefineAndRegisterCollectors() {
   // behavior
   auto adult_male_age_lt50_high_sb = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return (person->IsMale() && person->IsAdult() && person->age_ < 50 &&
+    return (person->IsMale() && person->IsAdult() && person->age_ < 50*12 &&
             person->HasHighRiskSocioBehav());
   };
   ts->AddCollector("adult_male_age_lt50_high_sb",
@@ -345,7 +509,7 @@ void DefineAndRegisterCollectors() {
   // behavior
   auto adult_female_age_lt50_low_sb = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return (person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
+    return (person->IsFemale() && person->IsAdult() && person->age_ < 50*12 &&
             person->HasLowRiskSocioBehav());
   };
   ts->AddCollector("adult_female_age_lt50_low_sb",
@@ -374,7 +538,7 @@ void DefineAndRegisterCollectors() {
   // behavior
   auto adult_female_age_lt50_high_sb = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return (person->IsFemale() && person->IsAdult() && person->age_ < 50 &&
+    return (person->IsFemale() && person->IsAdult() && person->age_ < 50*12 &&
             person->HasHighRiskSocioBehav());
   };
   ts->AddCollector("adult_female_age_lt50_high_sb",
@@ -405,7 +569,7 @@ void DefineAndRegisterCollectors() {
   auto adult_hiv_female_age_lt50_high_sb = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return (!person->IsHealthy() && person->IsFemale() && person->IsAdult() &&
-            person->age_ < 50 && person->HasHighRiskSocioBehav());
+            person->age_ < 50*12 && person->HasHighRiskSocioBehav());
   };
   ts->AddCollector("adult_hiv_female_age_lt50_high_sb",
                    new Counter<double>(adult_hiv_female_age_lt50_high_sb),
@@ -435,7 +599,7 @@ void DefineAndRegisterCollectors() {
   auto adult_hiv_female_age_lt50_low_sb = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return (!person->IsHealthy() && person->IsFemale() && person->IsAdult() &&
-            person->age_ < 50 && person->HasLowRiskSocioBehav());
+            person->age_ < 50*12 && person->HasLowRiskSocioBehav());
   };
   ts->AddCollector("adult_hiv_female_age_lt50_low_sb",
                    new Counter<double>(adult_hiv_female_age_lt50_low_sb),
@@ -465,7 +629,7 @@ void DefineAndRegisterCollectors() {
   auto adult_hiv_male_age_lt50_high_sb = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return (!person->IsHealthy() && person->IsMale() && person->IsAdult() &&
-            person->age_ < 50 && person->HasHighRiskSocioBehav());
+            person->age_ < 50*12 && person->HasHighRiskSocioBehav());
   };
   ts->AddCollector("adult_hiv_male_age_lt50_high_sb",
                    new Counter<double>(adult_hiv_male_age_lt50_high_sb),
@@ -495,7 +659,7 @@ void DefineAndRegisterCollectors() {
   auto adult_hiv_male_age_lt50_low_sb = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
     return (!person->IsHealthy() && person->IsMale() && person->IsAdult() &&
-            person->age_ < 50 && person->HasLowRiskSocioBehav());
+            person->age_ < 50*12 && person->HasLowRiskSocioBehav());
   };
   ts->AddCollector("adult_hiv_male_age_lt50_low_sb",
                    new Counter<double>(adult_hiv_male_age_lt50_low_sb),
@@ -528,14 +692,14 @@ void DefineAndRegisterCollectors() {
   // AM: Define how to compute prevalence between 15 and 49 year olds
   auto infected_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return !(person->IsHealthy()) && person->age_ >= 15 && person->age_ < 50;
+    return !(person->IsHealthy()) && person->age_ >= 15*12 && person->age_ < 50*12;
   };
   ts->AddCollector("infected_15_49", new Counter<double>(infected_15_49),
                    get_year);
 
   auto all_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->age_ >= 15 && person->age_ < 50;
+    return person->age_ >= 15*12 && person->age_ < 50*12;
   };
   ts->AddCollector("all_15_49", new Counter<double>(all_15_49), get_year);
 
@@ -572,15 +736,15 @@ void DefineAndRegisterCollectors() {
   // AM: Define how to compute prevalence among women between 15 and 49
   auto infected_women_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return !(person->IsHealthy()) && person->IsFemale() && person->age_ >= 15 &&
-           person->age_ < 50;
+    return !(person->IsHealthy()) && person->IsFemale() && person->age_ >= 15*12 &&
+           person->age_ < 50*12;
   };
   ts->AddCollector("infected_women_15_49",
                    new Counter<double>(infected_women_15_49), get_year);
 
   auto women_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->IsFemale() && person->age_ >= 15 && person->age_ < 50;
+    return person->IsFemale() && person->age_ >= 15*12 && person->age_ < 50*12;
   };
   ts->AddCollector("women_15_49", new Counter<double>(women_15_49), get_year);
 
@@ -618,15 +782,15 @@ void DefineAndRegisterCollectors() {
   // AM: Define how to compute prevalence among men between 15 and 49
   auto infected_men_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return !(person->IsHealthy()) && person->IsMale() && person->age_ >= 15 &&
-           person->age_ < 50;
+    return !(person->IsHealthy()) && person->IsMale() && person->age_ >= 15*12 &&
+           person->age_ < 50*12;
   };
   ts->AddCollector("infected_men_15_49",
                    new Counter<double>(infected_men_15_49), get_year);
 
   auto men_15_49 = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->IsMale() && person->age_ >= 15 && person->age_ < 50;
+    return person->IsMale() && person->age_ >= 15*12 && person->age_ < 50*12;
   };
   ts->AddCollector("men_15_49", new Counter<double>(men_15_49), get_year);
 
@@ -1086,6 +1250,7 @@ int PlotAndSaveTimeseries() {
   std::cout << "Info: " << info << std::endl;
 
   return 0;
+
 }
 
 }  // namespace hiv_malawi

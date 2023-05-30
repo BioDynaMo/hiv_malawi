@@ -43,7 +43,7 @@ struct RandomMigration : public Behavior {
     // Probability to migrate
     float rand_num = static_cast<float>(random->Uniform());
     // Adult men and adult single women can initiate migration
-    if (rand_num <= sparam->migration_probability && person->age_ >= 15 &&
+    if (rand_num <= sparam->migration_probability && person->age_ >= 15*12 &&
         ((person->sex_ == Sex::kMale) ||
          (person->sex_ == Sex::kFemale && !person->hasPartner()))) {
       // Randomly determine the migration location
@@ -161,6 +161,10 @@ struct MatingBehaviour : public Behavior {
             sparam->no_acts_mean[year_index][person->social_behaviour_factor_],
             sparam
                 ->no_acts_sigma[year_index][person->social_behaviour_factor_]));
+
+        if (mate->age_ > env->GetMaxAge()+1) {
+          std::cout << "I am a male aged " << person->age_ << " and my casual partner is aged " << mate->age_ << " months" << std::endl;
+        }
 
         // Scenario healthy male has intercourse with infected acute female
         if (mate->state_ == GemsState::kAcute &&
@@ -339,8 +343,37 @@ struct RegularMatingBehaviour : public Behavior {
         break;
       }
     }
+       
+    //if (person->state_ != GemsState::kHealthy) {
+    //  if (person->partner_ != nullptr) {
+        //if (person->sex_==Sex::kMale) {
+        //  std::cout << "An acute male, aged " << person->age_ << " months is in partnership with a female aged " << person->partner_->age_ << "months." << std::endl;
+        //}
+        //if (person->sex_==Sex::kFemale) {
+        //  std::cout << "An acute female, aged " << person->age_ << " months is in partnership with a male aged " << person->partner_->age_ << "months." << std::endl;
+        //}
+    //  }
+    //  if (person->partner_ == nullptr) {
+        //if (person->sex_==Sex::kMale) {
+        //  std::cout << "An acute male, aged " << person->age_ << " months is not in a regular partnership." << std::endl;
+        //}
+        //if (person->sex_==Sex::kFemale) {
+        //  std::cout << "An acute female, aged " << person->age_ << " months is not in a regular partnership." << std::endl;
+        //}
+    //  }
+    //}
 
+    //if (person->hasPartner() && (person->state_==GemsState::kAcute || person->state_==GemsState::kChronic)) {
+    //    std::cout << "An infected male aged " << person->age_ << "is in partnership with a female aged" << person->partner_->age_ << " " << std::endl;
+    //}
+    //if (person->hasPartner() && (person->partner_->state_==GemsState::kAcute || person->partner_->state_==GemsState::kChronic)) {
+    //    std::cout << "A male aged " << person->age_ << "is in partnership with an infected female aged" << person->partner_->age_ << " " << std::endl;
+    //}
+    //if (person->hasPartner() && person->state_==GemsState::kHealthy && person->partner_->state_==GemsState::kHealthy) {
+    //    std::cout << "A healthy male aged " << person->age_ << "is in partnership with a healthy female aged" << person->partner_->age_ << " " << std::endl;
+    //}
     if (person->hasPartner() && person->age_ < env->GetMaxAge()) {
+      
       // Scenario healthy male has intercourse with infected acute female
       // partner
       if (person->partner_->state_ == GemsState::kAcute &&
@@ -351,6 +384,7 @@ struct RegularMatingBehaviour : public Behavior {
         person->state_ = GemsState::kAcute;
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
+        
         // AM: Add MatingBehaviour only when infected
         // person->AddBehavior(new MatingBehaviour());
       }
@@ -534,7 +568,7 @@ struct GetOlder : public Behavior {
       person->biomedical_factor_ = 0;
     }
 
-    // AM: HIV state transition, depending on current year and population
+    // AM: HIV  transition, depending on current year and population
     // category (important for transition to treatment)
     int year_population_category = -1;
 
@@ -547,24 +581,24 @@ struct GetOlder : public Behavior {
     // year_population_category =
     // sim->GetParam()->Get<SimParam>()->ComputeYearPopulationCategory(year,
     // person->age_, person->sex_);
-    if (year < 2003) {  // Prior to 2003
+    if (year < (2003-1975)*12) { //2003) {  // Prior to 2003
       year_population_category =
           0;  // All (No difference in ART between people. ART not available.)
-    } else if (year < 2011) {  // Between 2003 and 2010
-      if (person->sex_ == Sex::kFemale && person->age_ >= 15 and
+    } else if (year < (2011-2003)*12) {//2011) {  // Between 2003 and 2010
+      if (person->sex_ == Sex::kFemale && person->age_ >= 15*12 and
           person->age_ <= 40) {
         year_population_category = 1;  // Female between 15 and 40
-      } else if (person->age_ < 15) {
+      } else if (person->age_ < 15*12) {
         year_population_category = 2;  // Child
       } else {
         year_population_category =
             3;  // Others (Male over 15 and Female over 40)
       }
     } else {  // After 2011
-      if (person->sex_ == Sex::kFemale && person->age_ >= 15 and
+      if (person->sex_ == Sex::kFemale && person->age_ >= 15*12 and
           person->age_ <= 40) {
         year_population_category = 4;  // Female between 15 and 40
-      } else if (person->age_ < 15) {
+      } else if (person->age_ < 15*12) {
         year_population_category = 5;  // Child
       } else {
         year_population_category =

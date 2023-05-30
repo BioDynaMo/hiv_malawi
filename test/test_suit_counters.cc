@@ -176,6 +176,50 @@ TEST(CounterTest, Infected) {
 }
 
 
+TEST(CounterTest, FullYear) {
+  Param::RegisterParamGroup(new SimParam());
+  Simulation simulation(TEST_NAME);
+
+  // Add two healty people to simulation
+  auto p1 = new Person();
+  auto p2 = new Person();
+  auto p3 = new Person();
+  auto p4 = new Person();
+  auto p5 = new Person();
+  p1->state_ = GemsState::kHealthy;
+  p2->state_ = GemsState::kAcute;
+  p3->state_ = GemsState::kChronic;
+  p4->state_ = GemsState::kTreated;
+  p5->state_ = GemsState::kFailing;
+  auto* rm = simulation.GetResourceManager();
+  rm->AddAgent(p1);
+  rm->AddAgent(p2);
+  rm->AddAgent(p3);
+  rm->AddAgent(p4);
+  rm->AddAgent(p5);
+
+  // Set empty environment for test purposes
+  auto* env = new EmptyEnvironment();
+  simulation.SetEnvironment(env);
+
+  // Initialize counters
+  DefineAndRegisterCollectors();
+
+  // Run simulation for one simulation
+  auto* scheduler = simulation.GetScheduler();
+  scheduler->UnscheduleOp(scheduler->GetOps("load balancing")[0]);
+  scheduler->Simulate(1);
+
+  // Check if we find the correct number of healthy people
+  auto* ts = simulation.GetTimeSeries();
+  auto& count1 = ts->GetYValues("infected_agents");
+  EXPECT_EQ(count1[0], 4);
+ 
+}
+
+
+
+
 
 }  // namespace hiv_malawi
 }  // namespace bdm

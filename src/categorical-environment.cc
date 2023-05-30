@@ -187,7 +187,7 @@ void CategoricalEnvironment::UpdateImplementation() {
                    "person_ptr is nullptr");
       }
       // Under max_age_
-      if (person->age_ <= env->GetMaxAge()) {
+      if (person->age_ < env->GetMaxAge()) {
         // Compute age category of agent
         size_t age_category =
             person->GetAgeCategory(env->GetMinAge(), env->GetNoAgeCategories());
@@ -407,11 +407,13 @@ void CategoricalEnvironment::UpdateImplementation() {
   for (size_t cat = 0; cat < regular_male_agents_.size(); cat++) {
     size_t no_males = regular_male_agents_[cat].GetNumAgents();
     size_t no_females = regular_female_agents_[cat].GetNumAgents();
+    
     /*std::cout << "Coumpound Category " << i << " - Number of male seeking
     partner = " << no_males <<
     ", Number of single females = " << no_females << std::endl;*/
     if (no_males > 0 && no_females > 0) {
       if (no_males < no_females) {
+        //std::cout << no_females-no_males << " females will "
         // Vector of ordered female indexes
         std::vector<int> v(no_females);
         std::iota(std::begin(v), std::end(v), 0);
@@ -444,6 +446,9 @@ void CategoricalEnvironment::UpdateImplementation() {
         for (size_t i = 0; i < no_females; i++) {
           regular_female_agents_[cat].GetAgentAtIndex(i)->SetPartner(
               regular_male_agents_[cat].GetAgentAtIndex(v[i]));
+              //if (regular_female_agents_[cat].GetAgentAtIndex(i)->state_==GemsState::kAcute) {
+              //  std::cout << "An infected female agent is in regular partnership" << std::endl;
+              //}
           // Check Symmetry
           if (regular_female_agents_[cat]
                   .GetAgentAtIndex(i)
@@ -1041,7 +1046,7 @@ const std::vector<float>& CategoricalEnvironment::GetMigrationLocDistribution(
 }
 
 void CategoricalEnvironment::SetMinAge(int min_age) {
-  if (min_age >= 0 && min_age <= 120) {
+  if (min_age >= 0 && min_age <= 120*12) {
     min_age_ = min_age;
   } else {
     Log::Fatal("CategoricalEnvironment::SetMinAge()",
@@ -1050,7 +1055,7 @@ void CategoricalEnvironment::SetMinAge(int min_age) {
 }
 
 void CategoricalEnvironment::SetMaxAge(int max_age) {
-  if (max_age >= 0 && max_age <= 120) {
+  if (max_age >= 0 && max_age <= 120*12) {
     max_age_ = max_age;
   } else {
     Log::Fatal("CategoricalEnvironment::SetMaxAge()",

@@ -35,6 +35,17 @@ void SimParam::SetRegPartnerSociobehavMixingMatrix() {
 void SimParam::SetAgeMixingMatrix() {
   age_mixing_matrix.clear();
   age_mixing_matrix.resize(nb_age_categories);
+  // JE: try to restrict to those aged 15-49
+  //for (int i = 0; i < 6; i++) {
+    //age_mixing_matrix[i].resize(nb_age_categories);
+    //fill(age_mixing_matrix[i].begin(), age_mixing_matrix[i].begin()+6, 1.0);
+    //fill(age_mixing_matrix[i].begin()+7, age_mixing_matrix[i].end(), 0.01);
+  //}
+  //for (int i = 7; i < nb_sociobehav_categories; i++) {
+  //  age_mixing_matrix[i].resize(nb_age_categories);
+  //  fill(age_mixing_matrix[i].begin(), age_mixing_matrix[i].begin()+6, 0.0);
+  //  fill(age_mixing_matrix[i].begin()+7, age_mixing_matrix[i].end(), 1.0);
+  //}
 
   for (int i = 0; i < nb_age_categories; i++) {
     age_mixing_matrix[i].resize(nb_age_categories);
@@ -50,8 +61,17 @@ void SimParam::SetRegPartnerAgeMixingMatrix() {
   for (int i = 0; i < nb_age_categories; i++) {
     reg_partner_age_mixing_matrix[i].resize(nb_age_categories);
     // Fill all elements with 1.0. Homogeneous age mixing.
-    fill(reg_partner_age_mixing_matrix[i].begin(),
-         reg_partner_age_mixing_matrix[i].end(), 1.0);
+    //fill(reg_partner_age_mixing_matrix[i].begin(),
+    //     reg_partner_age_mixing_matrix[i].end(), 1.0);
+    for (int j=0; j<nb_age_categories; j++) {
+      //for (int k=0; k<7; k++) {
+        if (i<7 && j<7) {
+          reg_partner_age_mixing_matrix[i][j]=1.0;
+        } else {
+          reg_partner_age_mixing_matrix[i][j]=0.0;
+        }
+      //}
+    }
   }
 };
 
@@ -119,7 +139,8 @@ void SimParam::SetHivTransitionMatrix() {
         // For all years and population categories
         hiv_transition_matrix[i][j].resize(nb_states);
         hiv_transition_matrix[i][j] = {
-            0.0, 0.0, 1.0, 1.0, 1.0};  // After one year ACUTE, go to CHRONIC
+            // 0.0, 0.0, 1.0, 1.0, 1.0};  // After one year ACUTE, go to CHRONIC
+            0.0, 1.0-0.08333, 1.0, 1.0, 1.0};  // JE test: mean duration of acute stage is 12 months
       } else if (i == GemsState::kChronic) {
         if (j ==
             0) {  // Prior to 2003, for all (women 15-40, children and others)
@@ -195,6 +216,7 @@ void SimParam::SetInitialInfectionProbability() {
   // Probability to be Healthy is 1 - Probability to be Infected
   initial_healthy_probability =
       (1.0 - initial_prevalence / districts_proportion);
+  std::cout << "Prevalence at the beginning = " << 1.0-initial_healthy_probability << std::endl; 
 };
 
 }  // namespace hiv_malawi

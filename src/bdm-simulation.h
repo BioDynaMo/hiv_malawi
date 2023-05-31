@@ -22,6 +22,7 @@
 #include "analyze.h"
 #include "categorical-environment.h"
 #include "custom-operations.h"
+#include "hiv-ops.h"
 #include "population-initialization.h"
 #include "sim-param.h"
 
@@ -78,6 +79,12 @@ inline int Simulate(int argc, const char** argv) {
       "ResetCasualPartners", OpComputeTarget::kCpu, new ResetCasualPartners());
   auto* reset_casual_partners = NewOperation("ResetCasualPartners");
   scheduler->ScheduleOp(reset_casual_partners, OpType::kPreSchedule);
+
+  // Pre-schedule an operation that implements the previous GetOlder behavior
+  OperationRegistry::GetInstance()->AddOperationImpl(
+      "GetOlder", OpComputeTarget::kCpu, new GetOlderOperation());
+  auto* get_older = NewOperation("GetOlder");
+  scheduler->ScheduleOp(get_older, OpType::kPreSchedule);
 
   // Run simulation for <number_of_iterations> timesteps
   {

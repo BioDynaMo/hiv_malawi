@@ -378,7 +378,8 @@ void DefineAndRegisterCollectors() {
   // AM: Define how to count the male individuals infected through casual mating
   auto casual_transmission_to_male = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->CasualTransmission() && person->IsMale();
+    return person->CasualTransmission() && person->IsMale() &&
+           person->WasInfectedThisTimeStep();
   };
   ts->AddCollector("casual_transmission_to_male",
                    new Counter<double>(casual_transmission_to_male), get_year);
@@ -386,7 +387,8 @@ void DefineAndRegisterCollectors() {
   // mating
   auto casual_transmission_to_female = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->CasualTransmission() && person->IsFemale();
+    return person->CasualTransmission() && person->IsFemale() &&
+           person->WasInfectedThisTimeStep();
   };
   ts->AddCollector("casual_transmission_to_female",
                    new Counter<double>(casual_transmission_to_female),
@@ -403,7 +405,8 @@ void DefineAndRegisterCollectors() {
   // mating
   auto regular_transmission_to_male = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->RegularTransmission() && person->IsMale();
+    return person->RegularTransmission() && person->IsMale() &&
+           person->WasInfectedThisTimeStep();
   };
   ts->AddCollector("regular_transmission_to_male",
                    new Counter<double>(regular_transmission_to_male), get_year);
@@ -411,7 +414,8 @@ void DefineAndRegisterCollectors() {
   // mating
   auto regular_transmission_to_female = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);
-    return person->RegularTransmission() && person->IsFemale();
+    return person->RegularTransmission() && person->IsFemale() &&
+           person->WasInfectedThisTimeStep();
   };
   ts->AddCollector("regular_transmission_to_female",
                    new Counter<double>(regular_transmission_to_female),
@@ -1157,8 +1161,8 @@ int PlotAndSaveTimeseries() {
              "L", kMagenta, 1.0, 1);
   g2_2_1.Add("regular_transmission_to_male", "Regular Transmission - to Male",
              "L", kBlue, 1.0, 2);
-  g2_2_1.Add("regular_transmission_to_male", "Regular Transmission - to Female",
-             "L", kMagenta, 1.0, 2);
+  g2_2_1.Add("regular_transmission_to_female",
+             "Regular Transmission - to Female", "L", kMagenta, 1.0, 2);
   g2_2_1.Add("mtct_transmission_to_male", "MTCT - to Male", "L", kBlue, 1.0, 3);
   g2_2_1.Add("mtct_transmission_to_female", "MTCT Transmission - to Female",
              "L", kMagenta, 1.0, 3);

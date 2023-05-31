@@ -43,7 +43,7 @@ TEST(TransitionTest, FemaleToMale) {
   auto male = new Person();
   male->state_ = GemsState::kHealthy;
   male->sex_ = Sex::kMale;
-  male->age_ = 20*12;
+  male->age_ = 20 * 12;
   male->location_ = 0;
   male->biomedical_factor_ = 0;
   male->social_behaviour_factor_ = 0;
@@ -55,7 +55,7 @@ TEST(TransitionTest, FemaleToMale) {
   auto female = new Person();
   female->state_ = GemsState::kAcute;
   female->sex_ = Sex::kFemale;
-  female->age_ = 20*12;
+  female->age_ = 20 * 12;
   female->location_ = 0;
   female->biomedical_factor_ = 0;
   female->social_behaviour_factor_ = 0;
@@ -63,7 +63,7 @@ TEST(TransitionTest, FemaleToMale) {
   rm->AddAgent(female);
 
   // Set the custom environment
-  auto* env = new CategoricalEnvironment(15*12, 40*12, 1, 1, 1);
+  auto* env = new CategoricalEnvironment(15 * 12, 40 * 12, 1, 1, 1);
   simulation.SetEnvironment(env);
 
   // Run simulation for one simulation time step
@@ -95,11 +95,11 @@ TEST(TransitionTest, MaleToFemale) {
   auto female = new Person();
   female->state_ = GemsState::kHealthy;
   female->sex_ = Sex::kFemale;
-  female->age_ = 20*12;
+  female->age_ = 20 * 12;
   female->location_ = 0;
   female->biomedical_factor_ = 0;
   female->social_behaviour_factor_ = 0;
-  
+
   auto ap_female = female->GetAgentPtr<Person>();  // Get agent pointer
   rm->AddAgent(female);
 
@@ -107,16 +107,16 @@ TEST(TransitionTest, MaleToFemale) {
   auto male = new Person();
   male->state_ = GemsState::kAcute;
   male->sex_ = Sex::kMale;
-  male->age_ = 20*12;
+  male->age_ = 20 * 12;
   male->location_ = 0;
   male->biomedical_factor_ = 0;
   male->social_behaviour_factor_ = 0;
-  male->AddBehavior(new MatingBehaviour());   // JE: added mating behavior
+  male->AddBehavior(new MatingBehaviour());  // JE: added mating behavior
   // auto ap_male = male->GetAgentPtr<Person>();
   rm->AddAgent(male);
 
   // Set the custom environment
-  auto* env = new CategoricalEnvironment(15*12, 40*12, 1, 1, 1);
+  auto* env = new CategoricalEnvironment(15 * 12, 40 * 12, 1, 1, 1);
   simulation.SetEnvironment(env);
 
   // Run simulation for one simulation time step
@@ -129,7 +129,6 @@ TEST(TransitionTest, MaleToFemale) {
   // Check if the female agent received the infectino via a casual transmission
   EXPECT_TRUE(ap_female->CasualTransmission());
 }
-
 
 TEST(TransitionTest, Mating) {
   // Register Sim Param
@@ -154,7 +153,7 @@ TEST(TransitionTest, Mating) {
   male->location_ = 0;
   male->biomedical_factor_ = 0;
   male->social_behaviour_factor_ = 0;
-  male->AddBehavior(new MatingBehaviour());    // Add mating behavior
+  male->AddBehavior(new MatingBehaviour());  // Add mating behavior
   male->AddBehavior(new RegularPartnershipBehaviour());
   auto ap_male = male->GetAgentPtr<Person>();  // Get agent pointer
   rm->AddAgent(male);
@@ -184,11 +183,10 @@ TEST(TransitionTest, Mating) {
   EXPECT_TRUE(female->hasPartner());
   EXPECT_TRUE(ap_female->partner_ == ap_male);
   // Check if the male agent is not infected and in the state accute
-  //EXPECT_TRUE(ap_male->state_ == GemsState::kAcute);
+  // EXPECT_TRUE(ap_male->state_ == GemsState::kAcute);
   // Check if the male agent received the infectino via a casual transmission
-  //EXPECT_TRUE(ap_male->CasualTransmission());
+  // EXPECT_TRUE(ap_male->CasualTransmission());
 }
-
 
 TEST(TransitionTest, RegularTransmissionFtoM) {
   // Register Sim Param
@@ -199,7 +197,6 @@ TEST(TransitionTest, RegularTransmissionFtoM) {
     auto* sparam = param->Get<SimParam>();
     sparam->infection_probability_acute_fm = 1.0;
     sparam->regular_partnership_probability = 1.0;
-    
   };
 
   // Create simulation object
@@ -214,7 +211,7 @@ TEST(TransitionTest, RegularTransmissionFtoM) {
   male->location_ = 0;
   male->biomedical_factor_ = 0;
   male->social_behaviour_factor_ = 0;
-  //male->AddBehavior(new MatingBehaviour());    // Add mating behavior
+  // male->AddBehavior(new MatingBehaviour());    // Add mating behavior
   male->AddBehavior(new RegularPartnershipBehaviour());
   male->AddBehavior(new RegularMatingBehaviour());
   auto ap_male = male->GetAgentPtr<Person>();  // Get agent pointer
@@ -240,13 +237,11 @@ TEST(TransitionTest, RegularTransmissionFtoM) {
   scheduler->UnscheduleOp(scheduler->GetOps("load balancing")[0]);
   scheduler->Simulate(1);
 
- 
   // Check if the male agent is not infected and in the state accute
   EXPECT_TRUE(ap_male->state_ == GemsState::kAcute);
   // Check if the male agent received the infectino via a casual transmission
-  //EXPECT_TRUE(ap_male->RegularTransmission());
+  // EXPECT_TRUE(ap_male->RegularTransmission());
 }
-
 
 }  // namespace hiv_malawi
 }  // namespace bdm

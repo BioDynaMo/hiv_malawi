@@ -24,10 +24,10 @@ TEST(PersonTest, Age) {
   auto person = Person();
 
   // Age
-  person.age_ = 1*12;
+  person.age_ = 1 * 12;
   EXPECT_DOUBLE_EQ(person.age_, 12);
   EXPECT_FALSE(person.IsAdult());
-  person.age_ = 16*12;
+  person.age_ = 16 * 12;
   EXPECT_TRUE(person.IsAdult());
 }
 
@@ -35,12 +35,10 @@ TEST(PersonTest, AgeCategory) {
   Simulation simulation(TEST_NAME);
   auto person = Person();
 
-  person.age_ = 27*12+3;
+  person.age_ = 27 * 12 + 3;
   int age_category = person.GetAgeCategory(180, 12);
   EXPECT_DOUBLE_EQ(age_category, 2);
 }
-
-
 
 // Test the person class for the sex_ attribute
 TEST(PersonTest, Sex) {

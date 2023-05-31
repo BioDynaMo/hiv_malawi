@@ -200,10 +200,10 @@ class Person : public Agent {
   // categories from min_age.
   int GetAgeCategory(size_t min_age, size_t no_age_categories) {
     int age_category;
-    if (age_ >= min_age + (no_age_categories - 1) * 5 *12) {
+    if (age_ >= min_age + (no_age_categories - 1) * 5 * 12) {
       age_category = no_age_categories - 1;
     } else {
-      age_category = (int)(age_ - min_age) / (5*12);
+      age_category = (int)(age_ - min_age) / (5 * 12);
     }
     // DEBUG:
     // std::cout << "age " << age_ << " --> age_category " << age_category << "
@@ -274,7 +274,7 @@ class Person : public Agent {
       // std::cout << "I am a woman with "<< nb_children << " children and I
       // migrated to location " << location_<< std::endl;
       for (int c = 0; c < nb_children; c++) {
-        if (children_[c]->age_ < 15*12) {
+        if (children_[c]->age_ < 15 * 12) {
           /*if (old_location != children_[c]->location_){
               Log::Warning("RandomMigration::Run()", "child and mother had
           different locations BEFORE MIGRATION. Child's age = ",
@@ -290,7 +290,7 @@ class Person : public Agent {
       }
       // DEBUG : Check that all children migrated with Mother
       for (int c = 0; c < nb_children; c++) {
-        if (children_[c]->age_ < 15*12) {
+        if (children_[c]->age_ < 15 * 12) {
           if (children_[c]->location_ != location_) {
             Log::Warning("RandomMigration::Run()",
                          "DEBUG: child and mother have different locations "

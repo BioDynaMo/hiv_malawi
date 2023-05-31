@@ -65,13 +65,11 @@ TEST(InitializationTest, SampleSex) {
   EXPECT_LT(abs(probability_male - probability_male_measured), 0.01);
 }
 
-
 // TEST(InitializationTest, AcuteChronic) {
 //   const float initial_prevalence = 0.2;
 //   const float initial_healthy_probability = 1-initial_prevalence;
-//   const std::vector<float> initial_infection_probability{1.0, 1.0, 1.0, 1.0} ;
-//   const int n_samples = 100000;
-//   std::vector<int> stage(n_samples);
+//   const std::vector<float> initial_infection_probability{1.0, 1.0, 1.0, 1.0}
+//   ; const int n_samples = 100000; std::vector<int> stage(n_samples);
 //   EXPECT_EQ(stage.size(), n_samples);
 
 //   // Random number generator
@@ -111,7 +109,8 @@ TEST(InitializationTest, SampleSex) {
 //       }
 //     }
 //     // Sample Stage with function
-//     stage[i] = SampleState(random_number_1, random_number_2, initial_healthy_probability, initial_infection_probability );
+//     stage[i] = SampleState(random_number_1, random_number_2,
+//     initial_healthy_probability, initial_infection_probability );
 //   }
 
 //   int num_healthy = std::accumulate(stage.begin(), stage.end(), 0);

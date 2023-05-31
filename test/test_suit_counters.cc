@@ -132,7 +132,6 @@ TEST(CounterTest, Acute) {
   EXPECT_EQ(count2[0], 0);
 }
 
-
 // Test the counting of all infected agents
 TEST(CounterTest, Infected) {
   Param::RegisterParamGroup(new SimParam());
@@ -172,9 +171,7 @@ TEST(CounterTest, Infected) {
   auto* ts = simulation.GetTimeSeries();
   auto& count1 = ts->GetYValues("infected_agents");
   EXPECT_EQ(count1[0], 4);
- 
 }
-
 
 TEST(CounterTest, FullYear) {
   Param::RegisterParamGroup(new SimParam());
@@ -214,12 +211,7 @@ TEST(CounterTest, FullYear) {
   auto* ts = simulation.GetTimeSeries();
   auto& count1 = ts->GetYValues("infected_agents");
   EXPECT_EQ(count1[0], 4);
- 
 }
-
-
-
-
 
 }  // namespace hiv_malawi
 }  // namespace bdm

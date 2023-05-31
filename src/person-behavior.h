@@ -175,6 +175,7 @@ struct MatingBehaviour : public Behavior {
                 (1.0 -
                  pow(1.0 - sparam->infection_probability_acute_fm, no_acts))) {
           person->state_ = GemsState::kAcute;
+          person->MarkAsInfectedThisTimeStep();
           person->transmission_type_ = TransmissionType::kCasualPartner;
           person->infection_origin_state_ = mate->state_;
           person->infection_origin_sb_ = mate->social_behaviour_factor_;
@@ -190,6 +191,7 @@ struct MatingBehaviour : public Behavior {
                      (1.0 - pow(1.0 - sparam->infection_probability_chronic_fm,
                                 no_acts))) {
           person->state_ = GemsState::kAcute;
+          person->MarkAsInfectedThisTimeStep();
           person->transmission_type_ = TransmissionType::kCasualPartner;
           person->infection_origin_state_ = mate->state_;
           person->infection_origin_sb_ = mate->social_behaviour_factor_;
@@ -205,6 +207,7 @@ struct MatingBehaviour : public Behavior {
                      (1.0 - pow(1.0 - sparam->infection_probability_treated_fm,
                                 no_acts))) {
           person->state_ = GemsState::kAcute;
+          person->MarkAsInfectedThisTimeStep();
           person->transmission_type_ = TransmissionType::kCasualPartner;
           person->infection_origin_state_ = mate->state_;
           person->infection_origin_sb_ = mate->social_behaviour_factor_;
@@ -221,6 +224,7 @@ struct MatingBehaviour : public Behavior {
                      (1.0 - pow(1.0 - sparam->infection_probability_failing_fm,
                                 no_acts))) {
           person->state_ = GemsState::kAcute;
+          person->MarkAsInfectedThisTimeStep();
           person->transmission_type_ = TransmissionType::kCasualPartner;
           person->infection_origin_state_ = mate->state_;
           person->infection_origin_sb_ = mate->social_behaviour_factor_;
@@ -236,6 +240,7 @@ struct MatingBehaviour : public Behavior {
                      (1.0 - pow(1.0 - sparam->infection_probability_acute_mf,
                                 no_acts))) {
           mate->state_ = GemsState::kAcute;
+          mate->MarkAsInfectedThisTimeStep();
           mate->transmission_type_ = TransmissionType::kCasualPartner;
           mate->infection_origin_state_ = person->state_;
           mate->infection_origin_sb_ = person->social_behaviour_factor_;
@@ -246,6 +251,7 @@ struct MatingBehaviour : public Behavior {
                      (1.0 - pow(1.0 - sparam->infection_probability_chronic_mf,
                                 no_acts))) {
           mate->state_ = GemsState::kAcute;
+          mate->MarkAsInfectedThisTimeStep();
           mate->transmission_type_ = TransmissionType::kCasualPartner;
           mate->infection_origin_state_ = person->state_;
           mate->infection_origin_sb_ = person->social_behaviour_factor_;
@@ -256,6 +262,7 @@ struct MatingBehaviour : public Behavior {
                      (1.0 - pow(1.0 - sparam->infection_probability_treated_mf,
                                 no_acts))) {
           mate->state_ = GemsState::kAcute;
+          mate->MarkAsInfectedThisTimeStep();
           mate->transmission_type_ = TransmissionType::kCasualPartner;
           mate->infection_origin_state_ = person->state_;
           mate->infection_origin_sb_ = person->social_behaviour_factor_;
@@ -267,6 +274,7 @@ struct MatingBehaviour : public Behavior {
                      (1.0 - pow(1.0 - sparam->infection_probability_failing_mf,
                                 no_acts))) {
           mate->state_ = GemsState::kAcute;
+          mate->MarkAsInfectedThisTimeStep();
           mate->transmission_type_ = TransmissionType::kCasualPartner;
           mate->infection_origin_state_ = person->state_;
           mate->infection_origin_sb_ = person->social_behaviour_factor_;
@@ -398,6 +406,7 @@ struct RegularMatingBehaviour : public Behavior {
               (1.0 - pow(1.0 - sparam->infection_probability_acute_fm,
                          sparam->no_regular_acts_mean[year_index]))) {
         person->state_ = GemsState::kAcute;
+        person->MarkAsInfectedThisTimeStep();
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
 
@@ -412,6 +421,7 @@ struct RegularMatingBehaviour : public Behavior {
                    (1.0 - pow(1.0 - sparam->infection_probability_chronic_fm,
                               sparam->no_regular_acts_mean[year_index]))) {
         person->state_ = GemsState::kAcute;
+        person->MarkAsInfectedThisTimeStep();
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
         // AM: Add MatingBehaviour only when infected
@@ -425,6 +435,7 @@ struct RegularMatingBehaviour : public Behavior {
                    (1.0 - pow(1.0 - sparam->infection_probability_treated_fm,
                               sparam->no_regular_acts_mean[year_index]))) {
         person->state_ = GemsState::kAcute;
+        person->MarkAsInfectedThisTimeStep();
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
         // AM: Add MatingBehaviour only when infected
@@ -438,6 +449,7 @@ struct RegularMatingBehaviour : public Behavior {
                    (1.0 - pow(1.0 - sparam->infection_probability_failing_fm,
                               sparam->no_regular_acts_mean[year_index]))) {
         person->state_ = GemsState::kAcute;
+        person->MarkAsInfectedThisTimeStep();
         person->transmission_type_ = TransmissionType::kRegularPartner;
         person->infection_origin_state_ = person->partner_->state_;
         // AM: Add MatingBehaviour only when infected
@@ -451,6 +463,7 @@ struct RegularMatingBehaviour : public Behavior {
                    (1.0 - pow(1.0 - sparam->infection_probability_acute_mf,
                               sparam->no_regular_acts_mean[year_index]))) {
         person->partner_->state_ = GemsState::kAcute;
+        person->partner_->MarkAsInfectedThisTimeStep();
         person->partner_->transmission_type_ =
             TransmissionType::kRegularPartner;
         person->partner_->infection_origin_state_ = person->state_;
@@ -462,6 +475,7 @@ struct RegularMatingBehaviour : public Behavior {
                    (1.0 - pow(1.0 - sparam->infection_probability_chronic_mf,
                               sparam->no_regular_acts_mean[year_index]))) {
         person->partner_->state_ = GemsState::kAcute;
+        person->partner_->MarkAsInfectedThisTimeStep();
         person->partner_->transmission_type_ =
             TransmissionType::kRegularPartner;
         person->partner_->infection_origin_state_ = person->state_;
@@ -473,6 +487,7 @@ struct RegularMatingBehaviour : public Behavior {
                    (1.0 - pow(1.0 - sparam->infection_probability_treated_mf,
                               sparam->no_regular_acts_mean[year_index]))) {
         person->partner_->state_ = GemsState::kAcute;
+        person->partner_->MarkAsInfectedThisTimeStep();
         person->partner_->transmission_type_ =
             TransmissionType::kRegularPartner;
         person->partner_->infection_origin_state_ = person->state_;
@@ -484,6 +499,7 @@ struct RegularMatingBehaviour : public Behavior {
                    (1.0 - pow(1.0 - sparam->infection_probability_failing_mf,
                               sparam->no_regular_acts_mean[year_index]))) {
         person->partner_->state_ = GemsState::kAcute;
+        person->partner_->MarkAsInfectedThisTimeStep();
         person->partner_->transmission_type_ =
             TransmissionType::kRegularPartner;
         person->partner_->infection_origin_state_ = person->state_;
@@ -611,7 +627,7 @@ struct GetOlder : public Behavior {
         year_population_category =
             3;  // Others (Male over 15 and Female over 40)
       }
-    } else {  // After 2011
+    } else {    // After 2011
       if (person->sex_ == Sex::kFemale && person->age_ >= 15 * 12 and
           person->age_ <= 40) {
         year_population_category = 4;  // Female between 15 and 40
@@ -716,6 +732,7 @@ struct GiveBirth : public Behavior {
       if (random_generator->Uniform() <
           sparam->birth_infection_probability_treated) {
         child->state_ = GemsState::kAcute;
+        child->MarkAsInfectedThisTimeStep();
         child->transmission_type_ = TransmissionType::kMotherToChild;
         child->infection_origin_state_ = mother->state_;
       } else {
@@ -728,6 +745,7 @@ struct GiveBirth : public Behavior {
       if (random_generator->Uniform() <
           sparam->birth_infection_probability_untreated) {
         child->state_ = GemsState::kAcute;
+        child->MarkAsInfectedThisTimeStep();
         child->transmission_type_ = TransmissionType::kMotherToChild;
         child->infection_origin_state_ = mother->state_;
       } else {
@@ -737,6 +755,7 @@ struct GiveBirth : public Behavior {
       if (random_generator->Uniform() <
           sparam->birth_infection_probability_prophylaxis) {
         child->state_ = GemsState::kAcute;
+        child->MarkAsInfectedThisTimeStep();
         child->transmission_type_ = TransmissionType::kMotherToChild;
         child->infection_origin_state_ = mother->state_;
       } else {

@@ -894,7 +894,7 @@ int PlotAndSaveTimeseries() {
   g.Add("healthy_agents", "Healthy", "L", kBlue, 1.0);
   g.Add("infected_agents", "HIV", "L", kRed, 1.0);
   g.Draw();
-  g.SaveAs(Concat(sim->GetOutputDir(), "/simulation_hiv"), {".svg", ".png"});
+  g.SaveAs(Concat(sim->GetOutputDir(), "/simulation_hiv"), {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2(ts, "HIV stages", "Time", "Number of agents",
@@ -907,7 +907,7 @@ int PlotAndSaveTimeseries() {
   g2.Add("failing_agents", "Failing", "L", kGray, 1.0, 10);
   g2.Draw();
   g2.SaveAs(Concat(sim->GetOutputDir(), "/simulation_hiv_with_states"),
-            {".svg", ".png"});
+            {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_1(ts, "Acute HIV by sex", "Time",
@@ -916,7 +916,7 @@ int PlotAndSaveTimeseries() {
   g2_1.Add("acute_female_agents", "Female Acute", "L", kMagenta, 1.0, 1);
   g2_1.Draw();
   g2_1.SaveAs(Concat(sim->GetOutputDir(), "/simulation_hiv_acute_sex"),
-              {".svg", ".png"});
+              {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_1_1(ts, "Acute HIV by sex and risk", "Time",
@@ -932,7 +932,7 @@ int PlotAndSaveTimeseries() {
 
   g2_1_1.Draw();
   g2_1_1.SaveAs(Concat(sim->GetOutputDir(), "/simulation_hiv_acute_sex_sb"),
-                {".svg", ".png"});
+                {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_2(ts, "Transmission", "Time",
@@ -944,7 +944,7 @@ int PlotAndSaveTimeseries() {
            1.0, 3);
   g2_2.Draw();
   g2_2.SaveAs(Concat(sim->GetOutputDir(), "/simulation_transmission_types"),
-              {".svg", ".png"});
+              {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_2_1(ts, "Transmission", "Time",
@@ -963,7 +963,7 @@ int PlotAndSaveTimeseries() {
   g2_2_1.Draw();
   g2_2_1.SaveAs(
       Concat(sim->GetOutputDir(), "/simulation_transmission_types_by_sex"),
-      {".svg", ".png"});
+      {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_3(ts, "Source of infection - HIV stage",
@@ -976,7 +976,7 @@ int PlotAndSaveTimeseries() {
   g2_3.Draw();
   g2_3.SaveAs(
       Concat(sim->GetOutputDir(), "/simulation_transmission_sources_state"),
-      {".svg", ".png"});
+      {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g2_4(ts, "Source of infection - Risk level",
@@ -987,7 +987,7 @@ int PlotAndSaveTimeseries() {
   g2_4.Draw();
   g2_4.SaveAs(
       Concat(sim->GetOutputDir(), "/simulation_transmission_sources_sb"),
-      {".svg", ".png"});
+      {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g3(ts, "HIV", "Time", "", true);
@@ -1007,7 +1007,7 @@ int PlotAndSaveTimeseries() {
 
   g3.Draw();
   g3.SaveAs(Concat(sim->GetOutputDir(), "/simulation_hiv_prevalence_incidence"),
-            {".svg", ".png"});
+            {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g4(ts, "my result", "Time", "Proportion", true);
@@ -1035,7 +1035,7 @@ int PlotAndSaveTimeseries() {
          1.0, 5);
   g4.Draw();
   g4.SaveAs(Concat(sim->GetOutputDir(), "/simulation_sociobehaviours"),
-            {".svg", ".png"});
+            {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g5(ts, "Casual sex partners", "Time", "Number",
@@ -1060,7 +1060,7 @@ int PlotAndSaveTimeseries() {
 
   g5.Draw();
   g5.SaveAs(Concat(sim->GetOutputDir(), "/simulation_casual_mating_mean"),
-            {".svg", ".png"});
+            {".png"});
 
   // Create a bdm LineGraph that visualizes the TimeSeries data
   bdm::experimental::LineGraph g6(ts, "Casual sex partners", "Time", "Number",
@@ -1077,7 +1077,7 @@ int PlotAndSaveTimeseries() {
 
   g6.Draw();
   g6.SaveAs(Concat(sim->GetOutputDir(), "/simulation_casual_mating_total"),
-            {".svg", ".png"});
+            {".png"});
 
   // Print info for user to let him/her know where to find simulation results
   std::string info =

@@ -85,6 +85,8 @@ class Person : public Agent {
   bool seek_regular_partnership_;
   // Number of casual partners
   int no_casual_partners_;
+  // Tag to track if this person will be removed at the end of the iteration
+  bool will_be_removed_;
 
   ///! The aguments below are currently either not used or repetitive.
   // // Stores if an agent is infected or not

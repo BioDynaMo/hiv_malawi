@@ -185,6 +185,7 @@ void GetOlderOperation::ProcessAgent(Agent* agent) {
   if (!stay_alive) {
     // Person dies, i.e. is removed from simulation.
     person->RemoveFromSimulation();
+    person->will_be_removed_ = true;
   } else {
     // increase age
     person->age_ += 1;

@@ -552,6 +552,11 @@ struct GiveBirth : public Behavior {
     const auto* sparam = param->Get<SimParam>();
     auto* mother = bdm_static_cast<Person*>(agent);
 
+    // Skip soon to die agents
+    if (mother->will_be_removed_) {
+      return;
+    }
+
     // Each potential mother gives birth with a certain probability.
     if (random->Uniform() < sparam->give_birth_probability &&
         mother->age_ <= sparam->max_age_birth &&

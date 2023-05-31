@@ -26,6 +26,28 @@ class ResetInfectionStatus : public StandaloneOperationImpl {
   // Sets all agents to infected_this_time_step_ = false.
   void operator()() final;
 };
+
+class GetOlderOperation : public StandaloneOperationImpl {
+  BDM_OP_HEADER(GetOlderOperation);
+
+  // Wraps the ProcessAgent function in a ForEachAgentParallel call.
+  void operator()() final;
+
+ private:
+  // -- Helper functions -- //
+  // Implements the former GetOlder behavior.
+  void ProcessAgent(Agent* agent);
+
+  // AM : Get mortality rate by age
+  float GetMortalityRateAge(
+      float age, const std::vector<int>& mortality_rate_age_transition,
+      const std::vector<float>& mortality_rate_by_age);
+
+  // AM: Get HIV-related mortality rate
+  float GetMortalityRateHiv(int state,
+                            const std::vector<float>& hiv_mortality_rate);
+};
+
 }  // namespace hiv_malawi
 }  // namespace bdm
 

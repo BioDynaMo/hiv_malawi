@@ -72,6 +72,7 @@ inline int Simulate(int argc, const char** argv) {
   scheduler->UnscheduleOp(scheduler->GetOps("mechanical forces")[0]);
   // Don't run load balancing, not working with custom environment.
   scheduler->UnscheduleOp(scheduler->GetOps("load balancing")[0]);
+
   // Add prescheduled op for reseting the infection status
   OperationRegistry::GetInstance()->AddOperationImpl(
       "ResetInfectionStatus", OpComputeTarget::kCpu,
@@ -85,6 +86,12 @@ inline int Simulate(int argc, const char** argv) {
       "ResetCasualPartners", OpComputeTarget::kCpu, new ResetCasualPartners());
   auto* reset_casual_partners = NewOperation("ResetCasualPartners");
   scheduler->ScheduleOp(reset_casual_partners, OpType::kPreSchedule);
+
+  // Pre-schedule an operation that implements the previous GetOlder behavior
+  OperationRegistry::GetInstance()->AddOperationImpl(
+      "GetOlder", OpComputeTarget::kCpu, new GetOlderOperation());
+  auto* get_older = NewOperation("GetOlder");
+  scheduler->ScheduleOp(get_older, OpType::kPreSchedule);
 
   // Print Info
   scheduler->PrintInfo(std::cout);

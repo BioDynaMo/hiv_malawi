@@ -76,7 +76,7 @@ class Person : public Agent {
   // Protect a person against death. Currently only used for mothers in the year
   // in which they give birth and if sparam->protect_mothers_at_birth is true.
   // The associated member functions LockProtection, UnlockProtection, and
-  // IsProtected appear in the GiveBirth and GetOlder Behaviors.
+  // IsProtected appear in the GiveBirth Behavior and GetOlder Operation.
   bool protected_;
   // Single adult men can seek for a regular partnership. All male seeking
   // for regular partnership are then indexed, select the compound category of

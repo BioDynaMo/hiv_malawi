@@ -212,7 +212,6 @@ auto CreatePerson(Random* random_generator, const SimParam* sparam) {
     person->AddBehavior(new RegularMatingBehaviour());
     person->AddBehavior(new RegularPartnershipBehaviour());
   }
-  person->AddBehavior(new GetOlder());
   return person;
 };
 

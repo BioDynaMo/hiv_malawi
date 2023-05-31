@@ -22,6 +22,7 @@
 #include "analyze.h"
 #include "categorical-environment.h"
 #include "custom-operations.h"
+#include "hiv-ops.h"
 #include "population-initialization.h"
 #include "sim-param.h"
 
@@ -38,7 +39,7 @@ inline int Simulate(int argc, const char** argv) {
   // Initialize the Simulation
   gAgentPointerMode = AgentPointerMode::kDirect;
   auto set_param = [&](Param* param) {
-    param->show_simulation_step = 1;
+    param->use_progress_bar = true;
     param->remove_output_dir_contents = false;
     param->statistics = true;
   };
@@ -71,6 +72,12 @@ inline int Simulate(int argc, const char** argv) {
   scheduler->UnscheduleOp(scheduler->GetOps("mechanical forces")[0]);
   // Don't run load balancing, not working with custom environment.
   scheduler->UnscheduleOp(scheduler->GetOps("load balancing")[0]);
+  // Add prescheduled op for reseting the infection status
+  OperationRegistry::GetInstance()->AddOperationImpl(
+      "ResetInfectionStatus", OpComputeTarget::kCpu,
+      new ResetInfectionStatus());
+  auto* reset_infection_status = NewOperation("ResetInfectionStatus");
+  scheduler->ScheduleOp(reset_infection_status, OpType::kPreSchedule);
 
   // Add a operation that resets the number of casual partners at the beginning
   // of each iteration
@@ -78,6 +85,9 @@ inline int Simulate(int argc, const char** argv) {
       "ResetCasualPartners", OpComputeTarget::kCpu, new ResetCasualPartners());
   auto* reset_casual_partners = NewOperation("ResetCasualPartners");
   scheduler->ScheduleOp(reset_casual_partners, OpType::kPreSchedule);
+
+  // Print Info
+  scheduler->PrintInfo(std::cout);
 
   // Run simulation for <number_of_iterations> timesteps
   {

@@ -85,6 +85,8 @@ class Person : public Agent {
   bool seek_regular_partnership_;
   // Number of casual partners
   int no_casual_partners_;
+  // Infected this year
+  bool infected_this_time_step_{false};
 
   ///! The aguments below are currently either not used or repetitive.
   // // Stores if an agent is infected or not
@@ -192,6 +194,11 @@ class Person : public Agent {
   bool IsMale() { return sex_ == Sex::kMale; }
   // Returns True if the agent is a female
   bool IsFemale() { return sex_ == Sex::kFemale; }
+
+  // Changes the agent's attribute infected_this_time_step_ to true
+  void MarkAsInfectedThisTimeStep() { infected_this_time_step_ = true; }
+  // Check if the agent was infected this time step
+  bool WasInfectedThisTimeStep() { return infected_this_time_step_; }
 
   // JE: whether has regular partner
   bool HasRegularPartner() { return partner_ != nullptr; }

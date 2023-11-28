@@ -61,6 +61,23 @@ void DefineAndRegisterCollectors() {
   };
   ts->AddCollector("infected_agents", new Counter<double>(infected), get_year);
 
+  // Some are  infected but not acute or chronic
+
+  auto noac = [](Agent* a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return (!(person->IsHealthy()) && !(person->IsAcute()) && !(person->IsChronic()));
+  };
+  ts->AddCollector("noac", new Counter<double>(noac), get_year);
+
+
+
+
+  auto totalpop  = [](Agent *a) {
+    auto* person = bdm_static_cast<Person*>(a);
+    return(true);
+  };
+  ts->AddCollector("all agents", new Counter<double>(totalpop), get_year);
+
   // AM: Define how to count the infected acute individuals
   auto acute = [](Agent* a) {
     auto* person = bdm_static_cast<Person*>(a);

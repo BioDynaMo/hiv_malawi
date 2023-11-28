@@ -119,24 +119,24 @@ void GetOlderOperation::ProcessAgent(Agent* agent) {
   // year_population_category =
   // sim->GetParam()->Get<SimParam>()->ComputeYearPopulationCategory(year,
   // person->age_, person->sex_);
-  if (year < (2003 - 1975) * 12) {  // 2003) {  // Prior to 2003
+  if (year < 2003) {  // Prior to 2003
     year_population_category =
         0;  // All (No difference in ART between people. ART not available.)
-  } else if (year < (2011 - 2003) * 12) {  // 2011) {  // Between 2003 and
+  } else if (year < 2011) {  // Between 2003 and
                                            // 2010
-    if (person->sex_ == Sex::kFemale && person->age_ >= 15 * 12 and
+    if (person->sex_ == Sex::kFemale && person->age_ >= 15  and
         person->age_ <= 40) {
       year_population_category = 1;  // Female between 15 and 40
-    } else if (person->age_ < 15 * 12) {
+    } else if (person->age_ < 15) {
       year_population_category = 2;  // Child
     } else {
       year_population_category = 3;  // Others (Male over 15 and Female over 40)
     }
   } else {                           // After 2011
-    if (person->sex_ == Sex::kFemale && person->age_ >= 15 * 12 and
+    if (person->sex_ == Sex::kFemale && person->age_ >= 15  and
         person->age_ <= 40) {
       year_population_category = 4;  // Female between 15 and 40
-    } else if (person->age_ < 15 * 12) {
+    } else if (person->age_ < 15 ) {
       year_population_category = 5;  // Child
     } else {
       year_population_category =

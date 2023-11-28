@@ -63,18 +63,18 @@ class SimParam : public ParamGroup {
   // Mortality rate by age. Size(mortality_rate_by_age) must be equal to
   // 1+size(mortality_rate_age_transition).
   std::vector<int> mortality_rate_age_transition{15, 50, 90};
-  std::vector<float> mortality_rate_by_age{0.01, 0.005, 0.05, 1.0};
+  std::vector<float> mortality_rate_by_age{0.0, 0.0, 0.0, 0.0}; //0.01, 0.005, 0.05, 1.0};
   // Test - No death
   // std::vector<float> mortality_rate_by_age{0.0, 0.0, 0.0, 0.0};
 
   // HIV-related mortality. For Healthy, Acute, Chronic, Treated, Failing states
-  std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.05, 0.01, 0.1};
+  //std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.05, 0.01, 0.1};
   // Test - No death
-  // std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.0, 0.0, 0.0};
+  std::vector<float> hiv_mortality_rate{0.0, 0.0, 0.0, 0.0, 0.0};
 
   // AM: Probability to migrate
   // TO DO AM: Make this probability dependent on the origin location?
-  float migration_probability = 0.01;  // 0.0; // No Mogration //0.01;
+  float migration_probability = 0.0; //0.01;  // 0.0; // No Mogration //0.01;
   // AM: Migration year index
   const std::vector<int> migration_year_transition{1960};
   // AM: Migration Matrix. Year index x Location x Location
@@ -135,13 +135,14 @@ class SimParam : public ParamGroup {
 
   // Mean number of sexual acts with regular partner per year.
   // const float no_regular_acts_mean = 50.0;  // 150;
-  const std::vector<float> no_regular_acts_mean{50, 47, 44, 41, 38, 34, 31,
-                                                28, 25, 22, 19, 16, 12};
+  const std::vector<float> no_regular_acts_mean{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                            //50, 47, 44, 41, 38, 34, 31,
+                                             //   28, 25, 22, 19, 16, 12};
   //{90, 84, 79, 73, 68, 62, 56, 51, 45, 39, 34, 28, 22};
 
   // AM: Probability of getting infected depends on
   // 1) disease state, 2) sex of partners Male-to-female
-  float coef_infection_probability = 2;
+  float coef_infection_probability = 0;
   float infection_probability_acute_mf = 9.3e-3 * coef_infection_probability;
   float infection_probability_chronic_mf = 1.9e-3 * coef_infection_probability;
   float infection_probability_treated_mf = 1.3e-4 * coef_infection_probability;
@@ -177,7 +178,7 @@ class SimParam : public ParamGroup {
       }};
 
   // Number of locations
-  int nb_locations = Location::kLocLast;  // 1; //Location::kLocLast;
+  int nb_locations = 1; //Location::kLocLast;  // 1; //Location::kLocLast;
 
   // AM: Location Mixing Matrix used for casual partner selection.
   // Location->Location
@@ -223,9 +224,10 @@ class SimParam : public ParamGroup {
 
   // Districts where HIV infected agents are initially located
   const std::vector<bool> seed_districts{
-      false, true,  false, false, false, false, false, false, false, false,
-      true,  false, true,  false, true,  true,  true,  true,  true,  true,
-      true,  true,  true,  true,  true,  true,  true,  true,  false};
+    true};
+    //  false, true,  false, false, false, false, false, false, false, false,
+    //  true,  false, true,  false, true,  true,  true,  true,  true,  true,
+    //  true,  true,  true,  true,  true,  true,  true,  true,  false};
 
   // One Location
   /*const std::vector<bool> seed_districts{
@@ -237,7 +239,7 @@ class SimParam : public ParamGroup {
   // typical birth rate in the region. We substracted 0.06 to account for child
   // motability and reach a realistic demographic development from 1960-2020.
   // Parameter 0.21 is used in Janne's R implementation.
-  float give_birth_probability = 0.188;  // 0.18
+  float give_birth_probability = 0.0; //0.188;  // 0.18
 
   // AM : Probability for agent to be infected at birth, if its mother is
   // infected and treated
@@ -260,9 +262,10 @@ class SimParam : public ParamGroup {
   // depending on year (see sociobehavioural_risk_year_transition) and health
   // state (Healthy, Acute, Chronic, Treated, Failing)
   const std::vector<std::vector<float>> sociobehavioural_risk_probability{
-      {0.05, 0.5, 0.5, 0.5, 0.5}, {0.05, 0.05, 0.05, 0.05, 0.05}};
+      {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}};
+      //{0.05, 0.5, 0.5, 0.5, 0.5}, {0.05, 0.05, 0.05, 0.05, 0.05}};
 
-  float biomedical_risk_probability = 0.05;
+  float biomedical_risk_probability = 0.0; //0.05;
 
   // Age distribution for population initialization. Given in a summed up form.
   // Each vector component corresponds to a age bin of 5 years, e.g. x1 (0-5),
@@ -278,9 +281,10 @@ class SimParam : public ParamGroup {
   // Location distribution for population initialization, same logic as for age
   // distribution.
   const std::vector<float> location_distribution{
-      0.012, 0.03,  0.031, 0.088, 0.104, 0.116, 0.175, 0.228, 0.273, 0.4,
-      0.431, 0.453, 0.498, 0.517, 0.54,  0.569, 0.645, 0.679, 0.701, 0.736,
-      0.794, 0.834, 0.842, 0.86,  0.903, 0.925, 0.995, 1,     1};
+    1};
+    //  0.012, 0.03,  0.031, 0.088, 0.104, 0.116, 0.175, 0.228, 0.273, 0.4,
+    //  0.431, 0.453, 0.498, 0.517, 0.54,  0.569, 0.645, 0.679, 0.701, 0.736,
+    //  0.794, 0.834, 0.842, 0.86,  0.903, 0.925, 0.995, 1,     1};
   // One Location
   /*const std::vector<float> location_distribution{
       1.0, 1.0};*/
